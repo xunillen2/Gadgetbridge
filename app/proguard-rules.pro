@@ -60,3 +60,6 @@
 -keepclassmembers,allowobfuscation class * {
   @com.google.gson.annotations.SerializedName <fields>;
 }
+
+# Huawei packet classes
+-keep class nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.*

@@ -115,6 +115,13 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_DO_NOT_DISTURB_OFF = "off";
     public static final String PREF_DO_NOT_DISTURB_AUTOMATIC = "automatic";
     public static final String PREF_DO_NOT_DISTURB_SCHEDULED = "scheduled";
+    public static final String PREF_DO_NOT_DISTURB_MO = "pref_do_not_disturb_mo";
+    public static final String PREF_DO_NOT_DISTURB_TU = "pref_do_not_disturb_tu";
+    public static final String PREF_DO_NOT_DISTURB_WE = "pref_do_not_disturb_we";
+    public static final String PREF_DO_NOT_DISTURB_TH = "pref_do_not_disturb_th";
+    public static final String PREF_DO_NOT_DISTURB_FR = "pref_do_not_disturb_fr";
+    public static final String PREF_DO_NOT_DISTURB_SA = "pref_do_not_disturb_sa";
+    public static final String PREF_DO_NOT_DISTURB_SU = "pref_do_not_disturb_su";
 
     public static final String PREF_FIND_PHONE = "prefs_find_phone";
     public static final String PREF_FIND_PHONE_DURATION = "prefs_find_phone_duration";

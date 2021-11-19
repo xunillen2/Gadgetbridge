@@ -84,6 +84,8 @@ import static nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst.PR
 import static nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst.PREF_NIGHT_MODE_SCHEDULED;
 import static nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst.PREF_NIGHT_MODE_START;
 import static nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst.PREF_SWIPE_UNLOCK;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants.PREF_HUAWEI_WORKMODE;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants.PREF_HUAWEI_TRUSLEEP;
 
 public class DeviceSpecificSettingsFragment extends PreferenceFragmentCompat implements DeviceSpecificSettingsHandler {
 
@@ -455,6 +457,13 @@ public class DeviceSpecificSettingsFragment extends PreferenceFragmentCompat imp
         addPreferenceHandlerFor(PREF_DO_NOT_DISTURB);
         addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_START);
         addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_END);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_MO);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_TU);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_WE);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_TH);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_FR);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_SA);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_SU);
         addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_LIFT_WRIST);
         addPreferenceHandlerFor(PREF_FIND_PHONE);
         addPreferenceHandlerFor(PREF_FIND_PHONE_DURATION);
@@ -546,6 +555,9 @@ public class DeviceSpecificSettingsFragment extends PreferenceFragmentCompat imp
 
         addPreferenceHandlerFor(PREF_UM25_SHOW_THRESHOLD_NOTIFICATION);
         addPreferenceHandlerFor(PREF_UM25_SHOW_THRESHOLD);
+
+        addPreferenceHandlerFor(PREF_HUAWEI_WORKMODE);
+        addPreferenceHandlerFor(PREF_HUAWEI_TRUSLEEP);
 
         String sleepTimeState = prefs.getString(PREF_SLEEP_TIME, PREF_DO_NOT_DISTURB_OFF);
         boolean sleepTimeScheduled = sleepTimeState.equals(PREF_DO_NOT_DISTURB_SCHEDULED);

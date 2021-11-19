@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceScreen
+        android:icon="@drawable/ic_block"
+        android:key="screen_do_not_disturb"
+        android:persistent="false"
+        android:summary="@string/mi2_prefs_do_not_disturb_summary"
+        android:title="@string/mi2_prefs_do_not_disturb">
+
+        <!-- workaround for missing toolbar -->
+        <PreferenceCategory
+            android:title="@string/mi2_prefs_do_not_disturb"
+            android:summary="@string/mi2_prefs_do_not_disturb_summary"/>
+
+        <ListPreference
+            android:defaultValue="@string/p_off"
+            android:entries="@array/do_not_disturb_allday"
+            android:entryValues="@array/mi2_do_not_disturb_values"
+            android:key="do_not_disturb"
+            android:summary="%s"
+            android:title="@string/mi2_prefs_do_not_disturb" />
+
+        <nodomain.freeyourgadget.gadgetbridge.util.XTimePreference
+            android:defaultValue="00:00"
+            android:key="do_not_disturb_start"
+            android:title="@string/mi2_prefs_do_not_disturb_start" />
+
+        <nodomain.freeyourgadget.gadgetbridge.util.XTimePreference
+            android:defaultValue="23:59"
+            android:key="do_not_disturb_end"
+            android:title="@string/mi2_prefs_do_not_disturb_end" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:icon="@drawable/ic_arrow_upward"
+            android:key="do_not_disturb_lift_wrist"
+            android:title="@string/mi2_prefs_do_not_disturb_lift_wrist"
+            android:summary="@string/do_not_disturb_lift_wrist_summary"/>
+
+        <!-- workaround for missing toolbar -->
+        <PreferenceCategory android:title="@string/pref_repetitions">
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="pref_do_not_disturb_mo"
+                android:title="@string/pref_monday" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="pref_do_not_disturb_tu"
+                android:title="@string/pref_tuesday" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="pref_do_not_disturb_we"
+                android:title="@string/pref_wednesday" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="pref_do_not_disturb_th"
+                android:title="@string/pref_thursday" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="pref_do_not_disturb_fr"
+                android:title="@string/pref_friday" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="pref_do_not_disturb_sa"
+                android:title="@string/pref_saturday" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="pref_do_not_disturb_su"
+                android:title="@string/pref_sunday" />
+        </PreferenceCategory>
+
+    </PreferenceScreen>
+
+
+</androidx.preference.PreferenceScreen>

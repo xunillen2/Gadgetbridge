@@ -246,6 +246,11 @@
         <item>@string/mi2_dnd_automatic</item>
         <item>@string/mi2_dnd_scheduled</item>
     </string-array>
+    <string-array name="do_not_disturb_allday">
+        <item>@string/mi2_dnd_off</item>
+        <item>@string/dnd_all_day</item>
+        <item>@string/mi2_dnd_scheduled</item>
+    </string-array>
     <string-array name="mi2_do_not_disturb_values">
         <item>@string/p_off</item>
         <item>@string/p_automatic</item>
@@ -2265,6 +2270,16 @@
         <item>de.dennisguse.opentracks.playStore</item>
         <item>de.dennisguse.opentracks.debug</item>
         <item>de.dennisguse.opentracks.nightly</item>
+    </string-array>
+
+    <string-array name="workmode">
+        <item>auto</item>
+        <item>manual</item>
+    </string-array>
+
+    <string-array name="workmode_values">
+        <item>auto</item>
+        <item>manual</item>
     </string-array>
 
 </resources>

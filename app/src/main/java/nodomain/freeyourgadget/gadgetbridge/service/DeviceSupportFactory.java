@@ -70,6 +70,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband4.MiBand
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband5.MiBand5Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband6.MiBand6Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppe.ZeppESupport;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.id115.ID115Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.itag.ITagSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.jyou.BFH16DeviceSupport;
@@ -385,6 +386,30 @@ public class DeviceSupportFactory {
                         break;
                     case SONY_WH_1000XM3:
                         deviceSupport = new ServiceDeviceSupport(new SonyHeadphonesSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
+                    case HONORBAND3:
+                    case HONORBAND4:
+                    case HONORBAND5:
+                    case HUAWEIBAND6:
+                    case HUAWEIWATCHGT2E:
+                    case HUAWEIWATCHGT:
+                    case HUAWEIBANDAW70:
+                        deviceSupport = new ServiceDeviceSupport(new HuaweiSupport(), EnumSet.noneOf(ServiceDeviceSupport.Flags.class));
+                        break;
+                    case SONY_WH_1000XM4:
+                        deviceSupport = new ServiceDeviceSupport(new SonyHeadphonesSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
+                        break;
+                    case SONY_WF_SP800N:
+                        deviceSupport = new ServiceDeviceSupport(new SonyHeadphonesSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
+                        break;
+                    case SONY_WF_1000XM3:
+                        deviceSupport = new ServiceDeviceSupport(new SonyHeadphonesSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
+                        break;
+                    case VESC_NRF:
+                    case VESC_HM10:
+                        deviceSupport = new ServiceDeviceSupport(new VescDeviceSupport(gbDevice.getType()), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
+                        break;
+                    case BOSE_QC35:
+                        deviceSupport = new ServiceDeviceSupport(new QC35BaseSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
                         break;
                     case SONY_WH_1000XM4:
                         deviceSupport = new ServiceDeviceSupport(new SonyHeadphonesSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
