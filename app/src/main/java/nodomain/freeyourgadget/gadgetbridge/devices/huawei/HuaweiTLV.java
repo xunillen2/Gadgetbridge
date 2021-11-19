@@ -67,6 +67,7 @@ public class HuaweiTLV {
             put(tag, value);
             parsed += size;
         }
+        LOG.debug("Parsed TLV: " + this.toString());
         return this;
     }
 
@@ -92,6 +93,7 @@ public class HuaweiTLV {
             buffer.put(varIntValue);
             buffer.put(value);
         }
+        LOG.debug("Serialized TLV: " + this.toString());
         return buffer.array();
     }
 

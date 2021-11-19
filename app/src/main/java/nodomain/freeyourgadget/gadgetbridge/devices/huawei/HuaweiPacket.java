@@ -89,6 +89,14 @@ public class HuaweiPacket {
         buffer.get(newPayload, 0, buffer.remaining() - 2);
         short expectedChecksum = buffer.getShort();
         buffer.rewind();
+        LOG.debug("Parsed packet values :\n"
+                    + "Service ID: " + newPayload[0] + " - Command ID: " + newPayload[1] + "\n"
+                    // + "Magic: " + Integer.toHexString(magic) + "\n"
+                    // + "expectedSize: " + String.valueOf(expectedSize) + "\n"
+                    // + "isSLiced: " + String.valueOf(isSLiced) + "\n"
+                    + "newPayload: " + StringUtils.bytesToHex(newPayload) + "\n"
+                    // + "expectedChecksum: " + Integer.toHexString(0xFFFF & expectedChecksum)
+        );
 
         if ( magic != HUAWEI_MAGIC) {
             throw new GBException("Magic mismatch : "
