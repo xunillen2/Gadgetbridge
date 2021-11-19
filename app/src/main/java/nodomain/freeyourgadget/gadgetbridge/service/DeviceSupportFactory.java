@@ -68,6 +68,8 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband4.MiBand
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband5.MiBand5Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband6.MiBand6Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppe.ZeppESupport;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.OldHuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.id115.ID115Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.itag.ITagSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.jyou.BFH16DeviceSupport;
@@ -372,6 +374,13 @@ public class DeviceSupportFactory {
                         break;
                     case SONY_WH_1000XM3:
                         deviceSupport = new ServiceDeviceSupport(new SonyHeadphonesSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
+                    case HONORBAND4:
+                    case HONORBAND5:
+                    case HUAWEIBAND6:
+                        deviceSupport = new ServiceDeviceSupport(new HuaweiSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
+                        break;
+                    case HUAWEIBAND3E:
+                        deviceSupport = new ServiceDeviceSupport(new OldHuaweiSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
                         break;
                 }
                 if (deviceSupport != null) {

@@ -900,6 +900,10 @@
     <string name="devicetype_fitpro">FitPro</string>
     <string name="devicetype_domyos_t540"/>
     <string name="devicetype_sony_wh_1000xm3">Sony WH-1000XM3</string>
+    <string name="devicetype_honor_band4">Honor Band 4</string>
+    <string name="devicetype_honor_band5">Honor Band 5</string>
+    <string name="devicetype_huawei_band3e">Huawei Band 3e</string>
+    <string name="devicetype_huawei_band6">Huawei Band 6</string>
     <string name="choose_auto_export_location">Choose export location</string>
     <string name="notification_channel_name">General</string>
     <string name="notification_channel_high_priority_name">High-priority</string>

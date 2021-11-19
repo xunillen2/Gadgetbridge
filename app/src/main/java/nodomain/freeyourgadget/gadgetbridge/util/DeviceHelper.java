@@ -85,6 +85,10 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huami.miband2.MiBand2HRXCoor
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.miband3.MiBand3Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.miband4.MiBand4Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.miband5.MiBand5Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.honorband4.HonorBand4Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.honorband5.HonorBand5Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.huaweiband3e.HuaweiBand3eCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.huaweiband6.HuaweiBand6Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.id115.ID115Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.itag.ITagCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.jyou.BFH16DeviceCoordinator;
@@ -315,7 +319,10 @@ public class DeviceHelper {
         result.add(new GalaxyBudsDeviceCoordinator());
 	    result.add(new GalaxyBudsLiveDeviceCoordinator());
         result.add(new SonyWh1000Xm3Coordinator());
-
+        result.add(new HonorBand4Coordinator());
+        result.add(new HonorBand5Coordinator());
+        result.add(new HuaweiBand3eCoordinator());
+        result.add(new HuaweiBand6Coordinator());
         return result;
     }
 
