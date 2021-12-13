@@ -18,33 +18,34 @@
 /* TLV parsing and serialisation thanks to https://github.com/yihleego/tlv */
 package nodomain.freeyourgadget.gadgetbridge.devices.huawei;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants.CryptoTags;
+
+import android.util.Pair;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.BLETypeConversions;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
-import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants.CryptoTags;
+import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 public class HuaweiTLV {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiTLV.class);
 
-    protected Map<Byte, byte[]> valueMap;
+    protected List<Pair<Byte, byte[]>> valueMap;
 
     public HuaweiTLV() {
-        this.valueMap = new HashMap<>();
+        this.valueMap = new ArrayList<>();
     }
 
     public int length() {
         int length = 0;
-        for (Map.Entry<Byte, byte[]> entry : valueMap.entrySet()) {
-            int value_length = entry.getValue().length;
-            length += 1 + VarInt.getVarIntSize(value_length) + value_length;
+        for (Pair<Byte, byte[]> item : valueMap) {
+            int value_lenght = item.second.length;
+            length += 1 + VarInt.getVarIntSize(value_lenght) + value_lenght;
         }
         return length;
     }
@@ -85,9 +86,9 @@ public class HuaweiTLV {
             return new byte[0];
         }
         ByteBuffer buffer = ByteBuffer.allocate(length);
-        for (Map.Entry<Byte, byte[]> entry : valueMap.entrySet()) {
-            byte tag = entry.getKey();
-            byte[] value = entry.getValue();
+        for (Pair<Byte, byte[]> entry : valueMap) {
+            byte tag = entry.first;
+            byte[] value = entry.second;
             byte[] varIntValue = VarInt.putVarIntValue(value.length);
             buffer.put(tag);
             buffer.put(varIntValue);
@@ -99,7 +100,7 @@ public class HuaweiTLV {
 
     public HuaweiTLV put(int tag) {
         byte[] value = new byte[0];
-        valueMap.put((byte)tag, value);
+        valueMap.add(new Pair<>((byte)tag, value));
         return this;
     }
 
@@ -107,7 +108,7 @@ public class HuaweiTLV {
         if (value == null) {
             return this;
         }
-        valueMap.put((byte)tag, value);
+        valueMap.add(new Pair<>((byte)tag, value));
         return this;
     }
 
@@ -138,7 +139,12 @@ public class HuaweiTLV {
     }
 
     public byte[] getBytes(int tag) {
-        return valueMap.get((byte)tag);
+        for (Pair<Byte, byte[]> item : valueMap) {
+            if (item.first.equals((byte) tag)) {
+                return item.second;
+            }
+        }
+        return null;
     }
 
     public Byte getByte(int tag) {
@@ -182,27 +188,42 @@ public class HuaweiTLV {
     }
 
     public boolean contains(int tag) {
-        return valueMap.containsKey((byte)tag);
+        for (Pair<Byte, byte[]> item : valueMap) {
+            if (item.first.equals((byte) tag)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public byte[] remove(byte tag) {
-        return valueMap.remove((byte)tag);
+        Pair<Byte, byte[]> foundItem = null;
+        for (Pair<Byte, byte[]> item : valueMap) {
+            if (item.first.equals((byte) tag)) {
+                foundItem = item;
+            }
+        }
+        if (foundItem != null) {
+            valueMap.remove(foundItem);
+            return foundItem.second;
+        } else {
+            return null;
+        }
     }
 
     public String toString() {
-        String msg = "";
-        for (Map.Entry<Byte, byte[]> entry : valueMap.entrySet()) {
-            msg += "{tag: " + (entry.getKey() & 0xFF);
-            msg += " - Value: " + StringUtils.bytesToHex(entry.getValue());
-            msg += "} - ";
+        StringBuilder msg = new StringBuilder();
+        for (Pair<Byte, byte[]> entry : valueMap) {
+            msg.append("{tag: ").append(entry.first & 0xFF).append(" - Value: ")
+                    .append(StringUtils.bytesToHex(entry.second)).append("} - ");
         }
-        return msg.substring(0, msg.length()-3);
+        return msg.substring(0, msg.length() - 3);
     }
 
     public void encrypt(byte[] key, byte[] iv) {
         byte[] serializedTLV = serialize();
         byte[] encryptedTLV = HuaweiCrypto.encrypt(serializedTLV, key, iv);
-        this.valueMap = new HashMap<>();
+        this.valueMap = new ArrayList<>();
         put(CryptoTags.encryption, (byte)1);
         put(CryptoTags.initVector, iv);
         put(CryptoTags.cipherText, encryptedTLV);
@@ -210,7 +231,7 @@ public class HuaweiTLV {
 
     public void decrypt(byte[] key) {
         byte[] decryptedTLV = HuaweiCrypto.decrypt(getBytes(CryptoTags.cipherText), key, getBytes(CryptoTags.initVector));
-        this.valueMap = new HashMap<>();
+        this.valueMap = new ArrayList<>();
         parse(decryptedTLV);
 
     }
