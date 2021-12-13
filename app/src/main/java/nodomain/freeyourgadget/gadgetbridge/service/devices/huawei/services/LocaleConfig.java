@@ -14,16 +14,28 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei;
+package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class OldHuaweiSupport extends HuaweiSupport{
-    private static final Logger LOG = LoggerFactory.getLogger(OldHuaweiSupport.class);
+public class LocaleConfig {
+    public static final int id = 12;
 
-    public OldHuaweiSupport() {
+    public static class SetLocale {
+        public static final int id = 1;
+        public static final int LanguageTag  = 1;
+        public static final int MeasurementSystem  = 2;
+    }
+
+    public LocaleConfig() {
         super();
-        mtu = 20;
+    }
+
+    public static enum MeasurementSystem {
+        METRIC(0),
+        IMPERIAL(1);
+        public final int get;
+        private MeasurementSystem(int get) {this.get = get;}
     }
 }

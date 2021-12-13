@@ -108,7 +108,7 @@ public class DeviceConfig {
         public static final int SetStatus = 1;
     }
 
-    public static class LeftRightWrist {
+    public static class WearLocation {
         public static final int id = 26;
         public static final int SetStatus = 1;
     }
@@ -117,18 +117,18 @@ public class DeviceConfig {
         super();
     }
 
-    public static enum DateFormat {
+    public static enum Date {
         YEARFIRST(1),
         MONTHFIRST(2),
         DAYFIRST(3);
-        public final int format;
-        private DateFormat(int format) {this.format = format;}
+        public final int get;
+        private Date(int get) {this.get = get;}
     }
 
-    public static enum TimeFormat {
+    public static enum Time {
         HOURS12(1),
         HOURS24(2);
-        public final int format;
-        private TimeFormat(int format) {this.format = format;}
+        public final int get;
+        private Time(int get) {this.get = get;}
     }
 }

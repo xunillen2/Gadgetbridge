@@ -25,13 +25,19 @@ import androidx.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 
 public class HonorBand4Coordinator extends HuaweiCoordinator{
     private static final Logger LOG = LoggerFactory.getLogger(HonorBand4Coordinator.class);
+
+    public HonorBand4Coordinator() {
+        super();
+    }
 
     @Override
     public String getManufacturer() {
@@ -56,7 +62,17 @@ public class HonorBand4Coordinator extends HuaweiCoordinator{
             LOG.error("unable to check device support", ex);
         }
         return DeviceType.UNKNOWN;
+    }
 
+    @Override
+    public int[] getSupportedDeviceSpecificSettings(GBDevice device) {
+        int[] mainCoordinatorSettings = super.getSupportedDeviceSpecificSettings(device);
+        int[] coordinatorSettings = new int[]{
+                R.xml.devicesettings_dateformat,
+                R.xml.devicesettings_wearlocation,
+                // R.xml.devicesettings_huawei_band3e,
+        };
+        return concatSettings(mainCoordinatorSettings, coordinatorSettings);
     }
 
 }

@@ -40,8 +40,8 @@ public class GetAuthRequest extends Request {
     protected byte[] serverNonce = new byte[16];
     protected byte[] authVersion = new byte[2];
 
-    public GetAuthRequest(HuaweiSupport support, TransactionBuilder builder) {
-        super(support, builder);
+    public GetAuthRequest(HuaweiSupport support) {
+        super(support);
         this.serviceId = DeviceConfig.id;
         this.commandId = Auth.id;
         this.clientNonce = HuaweiCrypto.generateNonce();

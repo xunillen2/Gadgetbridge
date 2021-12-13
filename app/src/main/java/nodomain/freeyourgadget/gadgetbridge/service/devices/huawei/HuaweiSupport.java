@@ -36,9 +36,13 @@ import java.util.UUID;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.activities.SettingsActivity;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
+import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
+import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice.State;
 import nodomain.freeyourgadget.gadgetbridge.model.Alarm;
@@ -62,10 +66,17 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetB
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetBondRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetLinkParamsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetProductInformationRequest;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSetDateFormatRequest;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSetTimeRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetActivateOnRotateRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetDateFormatRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetLocaleRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetNavigateOnRotateRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetTimeRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearLocationRequest;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
+
+// TO TEST
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWorkModeRequest;
 
 public class HuaweiSupport extends AbstractBTLEDeviceSupport{
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiSupport.class);
@@ -79,7 +90,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     public static long encryptionCounter = 0;
 
-    private final List<Request> inProgressRequests = Collections.synchronizedList(new ArrayList<Request>());
+    protected final List<Request> inProgressRequests = Collections.synchronizedList(new ArrayList<Request>());
 
     public HuaweiSupport() {
         super(LOG);
@@ -99,9 +110,9 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
         builder.add(new SetDeviceStateAction(getDevice(), GBDevice.State.AUTHENTICATING, getContext()));
         try {
             GetLinkParamsRequest linkParamsReq = new GetLinkParamsRequest(this, builder);
-            GetAuthRequest authReq = new GetAuthRequest(this, builder);
-            GetBondParamsRequest bondParamsReq = new GetBondParamsRequest(this, builder);
-            GetBondRequest bondReq = new GetBondRequest(this, builder);
+            GetAuthRequest authReq = new GetAuthRequest(this);
+            GetBondParamsRequest bondParamsReq = new GetBondParamsRequest(this);
+            GetBondRequest bondReq = new GetBondRequest(this);
             linkParamsReq.nextRequest(authReq);
             authReq.pastRequest(linkParamsReq);
             authReq.nextRequest(bondParamsReq);
@@ -139,20 +150,25 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
         builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), true);
         builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZING, getContext()));
         try {
-            GetSetDateFormatRequest setDateFormatReq = new GetSetDateFormatRequest(this, builder);
+            SetDateFormatRequest setDateFormatReq = new SetDateFormatRequest(this);
             inProgressRequests.add(setDateFormatReq);
             setDateFormatReq.perform();
-            GetSetTimeRequest setTimeReq = new GetSetTimeRequest(this, builder);
+            SetTimeRequest setTimeReq = new SetTimeRequest(this);
             inProgressRequests.add(setTimeReq);
             setTimeReq.perform();
-            GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this, builder);
+            GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
             inProgressRequests.add(productInformationReq);
             productInformationReq.perform();
-            GetBatteryLevelRequest batteryLevelReq = new GetBatteryLevelRequest(this, builder);
+            GetBatteryLevelRequest batteryLevelReq = new GetBatteryLevelRequest(this);
             inProgressRequests.add(batteryLevelReq);
             batteryLevelReq.perform();
             builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZED, getContext()));
             performConnected(builder.getTransaction());
+            // Workaround to enable PREF_HUAWEI_ROTATE_WRIST_TO_SWITCH_INFO preference
+            SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
+            SharedPreferences.Editor editor = sharedPrefs.edit();
+            editor.putString(HuamiConst.PREF_ACTIVATE_DISPLAY_ON_LIFT, "p_on");
+            editor.apply();
         } catch (IOException e) {
             GB.toast(getContext(), "Initializing Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
@@ -298,6 +314,71 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     @Override
     public void onSendConfiguration(String config) {
+        try {
+            // SharedPreferences prefs = GBApplication.getDeviceSpecificSharedPrefs(getDevice().getAddress());
+            switch (config) {
+                case DeviceSettingsPreferenceConst.PREF_DATEFORMAT:
+                case DeviceSettingsPreferenceConst.PREF_TIMEFORMAT: {
+                    SetDateFormatRequest setDateFormatReq = new SetDateFormatRequest(this);
+                    inProgressRequests.add(setDateFormatReq);
+                    setDateFormatReq.perform();
+                    break;
+                }
+                case SettingsActivity.PREF_MEASUREMENT_SYSTEM:
+                case DeviceSettingsPreferenceConst.PREF_LANGUAGE: {
+                    SetLocaleRequest setLocaleReq = new SetLocaleRequest(this);
+                    inProgressRequests.add(setLocaleReq);
+                    setLocaleReq.perform();
+                    break;
+                }
+                case DeviceSettingsPreferenceConst.PREF_WEARLOCATION: {
+                    SetWearLocationRequest setWearLocationReq = new SetWearLocationRequest(this);
+                    inProgressRequests.add(setWearLocationReq);
+                    setWearLocationReq.perform();
+                    break;
+                }
+                case DeviceSettingsPreferenceConst.PREF_LIFTWRIST_NOSHED: {
+                    SetActivateOnRotateRequest setActivateOnRotateReq = new SetActivateOnRotateRequest(this);
+                    inProgressRequests.add(setActivateOnRotateReq);
+                    setActivateOnRotateReq.perform();
+                    break;
+                }
+                case MiBandConst.PREF_MI2_ROTATE_WRIST_TO_SWITCH_INFO: {
+                    SetNavigateOnRotateRequest setNavigateOnRotateReq = new SetNavigateOnRotateRequest(this);
+                    inProgressRequests.add(setNavigateOnRotateReq);
+                    setNavigateOnRotateReq.perform();
+                    break;
+                }
+                /*case DeviceSettingsPreferenceConst.PREF_ANTILOST_ENABLED: {
+                    boolean enabled = prefs.getBoolean(DeviceSettingsPreferenceConst.PREF_ANTILOST_ENABLED, true);
+                    FeaturesCommand features = getCurrentEnabledFeatures();
+                    features.setFeature(FeaturesCommand.FEATURE_ANTI_LOST, enabled);
+                    sendEnabledFeaturesSetting(features);
+                    break;
+                }
+                case DeviceSettingsPreferenceConst.PREF_LONGSIT_SWITCH: {
+                    boolean enabled = prefs.getBoolean(DeviceSettingsPreferenceConst.PREF_LONGSIT_SWITCH, false);
+                    FeaturesCommand features = getCurrentEnabledFeatures();
+                    features.setFeature(FeaturesCommand.FEATURE_SEDENTARY_REMINDER, enabled);
+                    sendEnabledFeaturesSetting(features);
+                    break;
+                }
+                case DeviceSettingsPreferenceConst.PREF_LONGSIT_PERIOD: {
+                    String periodStr = prefs.getString(DeviceSettingsPreferenceConst.PREF_LONGSIT_PERIOD, "60");
+                    try {
+                        int period = Integer.parseInt(periodStr);
+                        sendSedentaryReminderIntervalSetting(period);
+                    } catch (NumberFormatException e) {
+                        GB.toast(getContext(), "Invalid sedentary reminder interval value", Toast.LENGTH_SHORT,
+                                GB.ERROR, e);
+                    }
+                    break;
+                }*/
+            }
+        } catch (IOException e) {
+            GB.toast(getContext(), "Configuration of Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
 
     }
 

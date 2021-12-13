@@ -30,10 +30,12 @@ import androidx.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractDeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.InstallHandler;
@@ -45,6 +47,8 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 
 public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiCoordinator.class);
+
+    public HuaweiCoordinator() {}
 
     @NonNull
     @Override
@@ -150,6 +154,20 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
     @Override
     public SampleProvider<? extends AbstractActivitySample> getSampleProvider(GBDevice device, DaoSession session) {
         return null;
+    }
+
+    public int[] getSupportedDeviceSpecificSettings(GBDevice device) {
+        return new int[]{
+                R.xml.devicesettings_timeformat,
+                R.xml.devicesettings_liftwrist_display_noshed,
+                R.xml.devicesettings_rotatewrist_cycleinfo,
+        };
+    }
+
+    public int[] concatSettings(int[] main, int[] specific) {
+        int[] settings = Arrays.copyOf(main, main.length + specific.length);
+        System.arraycopy(specific, 0, settings, main.length, specific.length);
+        return settings;
     }
 
 }

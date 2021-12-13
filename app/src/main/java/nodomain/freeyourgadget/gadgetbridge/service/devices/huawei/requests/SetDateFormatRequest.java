@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
+import android.text.format.DateFormat;
+
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
@@ -34,40 +37,47 @@ import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.SetDateFormat;
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.TimeFormat;
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.DateFormat;
+import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.Time;
+import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.Date;
 
-public class GetSetDateFormatRequest extends Request {
-    private static final Logger LOG = LoggerFactory.getLogger(GetSetDateFormatRequest.class);
+public class SetDateFormatRequest extends Request {
+    private static final Logger LOG = LoggerFactory.getLogger(SetDateFormatRequest.class);
 
-    public GetSetDateFormatRequest(HuaweiSupport support, TransactionBuilder builder) {
-        super(support, builder);
+    public SetDateFormatRequest(HuaweiSupport support) {
+        super(support);
         this.serviceId = DeviceConfig.id;
         this.commandId = SetDateFormat.id;
     }
 
     @Override
     protected byte[] createRequest() {
-        int time;
+        int time = Time.HOURS12.get;;
         int date;
-        GBPrefs gbPrefs = new GBPrefs(new Prefs(GBApplication.getDeviceSpecificSharedPrefs(support.getDevice().getAddress())));
-        String timeFormat = gbPrefs.getTimeFormat();
-        if (timeFormat.equals("24h")) {
-        time = TimeFormat.HOURS24.format;
-        } else {
-                    time = TimeFormat.HOURS12.format;
+        String timeFormat = GBApplication
+            .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
+            .getString(DeviceSettingsPreferenceConst.PREF_TIMEFORMAT, "auto");
+        if (timeFormat.equals("auto")) {
+            if (DateFormat.is24HourFormat(GBApplication.getContext())) {
+                time = Time.HOURS24.get;
+            } else {
+                time = Time.HOURS12.get;
             }
-            String dateFormat = GBApplication.getDeviceSpecificSharedPrefs(support.getDevice().getAddress()).getString("dateFormat", "MM/dd/yyyy");
+        } else if (timeFormat.equals("24h")) {
+            time = Time.HOURS24.get;
+        }
+        String dateFormat = GBApplication
+            .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
+            .getString(DeviceSettingsPreferenceConst.PREF_DATEFORMAT, "MM/dd/yyyy");
         switch (dateFormat) {
-                case "MM/dd/yyyy":
-                    date = DateFormat.MONTHFIRST.format;
-            break;
-                case "dd.MM.yyyy":
-                case "dd/MM/yyyy":
-                    date = DateFormat.DAYFIRST.format;
-                    break;
+            case "MM/dd/yyyy":
+                date = Date.MONTHFIRST.get;
+                break;
+            case "dd.MM.yyyy":
+            case "dd/MM/yyyy":
+                date = Date.DAYFIRST.get;
+                break;
             default:
-                date = DateFormat.YEARFIRST.format;
+                date = Date.YEARFIRST.get;
         }
         HuaweiTLV dateFormatTLVs = new HuaweiTLV()
             .put(SetDateFormat.DateFormat, (byte)date)

@@ -25,8 +25,10 @@ import androidx.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
 
@@ -51,7 +53,16 @@ public class HuaweiBand3eCoordinator extends HuaweiCoordinator{
             LOG.error("unable to check device support", ex);
         }
         return DeviceType.UNKNOWN;
+    }
 
+    @Override
+    public int[] getSupportedDeviceSpecificSettings(GBDevice device) {
+        int[] mainCoordinatorSettings = super.getSupportedDeviceSpecificSettings(device);
+        int[] coordinatorSettings = new int[]{
+                R.xml.devicesettings_dateformat,
+                R.xml.devicesettings_huawei_band3e,
+        };
+        return concatSettings(mainCoordinatorSettings, coordinatorSettings);
     }
 
 }

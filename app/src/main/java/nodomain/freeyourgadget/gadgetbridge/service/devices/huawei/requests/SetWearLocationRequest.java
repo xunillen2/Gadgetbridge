@@ -19,48 +19,45 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nodomain.freeyourgadget.gadgetbridge.GBApplication;
+import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.BondParams;
+import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.WearLocation;
 
-public class GetBondParamsRequest extends Request {
-    private static final Logger LOG = LoggerFactory.getLogger(GetBondParamsRequest.class);
+public class SetWearLocationRequest extends Request {
+    private static final Logger LOG = LoggerFactory.getLogger(SetWearLocationRequest.class);
 
-    public GetBondParamsRequest(HuaweiSupport support) {
+    public SetWearLocationRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = BondParams.id;
+        this.commandId = WearLocation.id;
     }
 
     @Override
     protected byte[] createRequest() {
-        requestedPacket = new HuaweiPacket(serviceId,
+        String locationString = GBApplication
+            .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
+            .getString(DeviceSettingsPreferenceConst.PREF_WEARLOCATION, "left");
+        int location = locationString.equals("left") ? 1 : 0;
+        requestedPacket = new HuaweiPacket(
+            serviceId,
             commandId,
             new HuaweiTLV()
-                .put(BondParams.Status)
-                .put(BondParams.ClientSerial, support.getSerial())
-                .put(BondParams.BTVersion, (byte)0x02)
-                .put(BondParams.MaxFrameSize)
-                .put(BondParams.ClientMacAddress, support.getMacAddress())
-                .put(BondParams.EncryptionCounter)
-        );
+                .put(WearLocation.SetStatus, (byte)location)
+        ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request BondParams: " + StringUtils.bytesToHex(serializedPacket));
+        LOG.debug("Request Set Wear Location: " + StringUtils.bytesToHex(serializedPacket));
         return serializedPacket;
     }
 
     @Override
-    protected void processResponse() {
-        LOG.debug("handle BondParams");
-        support.encryptionCounter = receivedPacket.tlv.getInteger(BondParams.EncryptionCounter) & 0xFFFFFFFFL;
-        int status = receivedPacket.tlv.getByte(BondParams.Status);
-        if (status == 1) {
-            stopChain(this);
-        }
+    protected void processResponse() throws GBException {
+        LOG.debug("handle Set Wear Location");
     }
 }

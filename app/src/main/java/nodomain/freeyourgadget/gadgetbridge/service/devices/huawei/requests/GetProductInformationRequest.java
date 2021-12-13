@@ -32,8 +32,8 @@ import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.servic
 public class GetProductInformationRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetProductInformationRequest.class);
 
-    public GetProductInformationRequest(HuaweiSupport support, TransactionBuilder builder) {
-        super(support, builder);
+    public GetProductInformationRequest(HuaweiSupport support) {
+        super(support);
         this.serviceId = DeviceConfig.id;
         this.commandId = ProductInfo.id;
     }

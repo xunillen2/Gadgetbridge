@@ -19,48 +19,45 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nodomain.freeyourgadget.gadgetbridge.GBApplication;
+import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.BondParams;
+import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.NavigateOnRotate;
 
-public class GetBondParamsRequest extends Request {
-    private static final Logger LOG = LoggerFactory.getLogger(GetBondParamsRequest.class);
+public class SetNavigateOnRotateRequest extends Request {
+    private static final Logger LOG = LoggerFactory.getLogger(SetNavigateOnRotateRequest.class);
 
-    public GetBondParamsRequest(HuaweiSupport support) {
+    public SetNavigateOnRotateRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = BondParams.id;
+        this.commandId = NavigateOnRotate.id;
     }
 
     @Override
     protected byte[] createRequest() {
-        requestedPacket = new HuaweiPacket(serviceId,
+        boolean navigate = GBApplication
+            .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
+            .getBoolean(MiBandConst.PREF_MI2_ROTATE_WRIST_TO_SWITCH_INFO, false);
+        requestedPacket = new HuaweiPacket(
+            serviceId,
             commandId,
             new HuaweiTLV()
-                .put(BondParams.Status)
-                .put(BondParams.ClientSerial, support.getSerial())
-                .put(BondParams.BTVersion, (byte)0x02)
-                .put(BondParams.MaxFrameSize)
-                .put(BondParams.ClientMacAddress, support.getMacAddress())
-                .put(BondParams.EncryptionCounter)
-        );
+                .put(NavigateOnRotate.SetStatus, navigate)
+        ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request BondParams: " + StringUtils.bytesToHex(serializedPacket));
+        LOG.debug("Request Set Navigate On Rotate: " + StringUtils.bytesToHex(serializedPacket));
         return serializedPacket;
     }
 
     @Override
-    protected void processResponse() {
-        LOG.debug("handle BondParams");
-        support.encryptionCounter = receivedPacket.tlv.getInteger(BondParams.EncryptionCounter) & 0xFFFFFFFFL;
-        int status = receivedPacket.tlv.getByte(BondParams.Status);
-        if (status == 1) {
-            stopChain(this);
-        }
+    protected void processResponse() throws GBException {
+        LOG.debug("handle Set Navigate On Rotate");
     }
 }

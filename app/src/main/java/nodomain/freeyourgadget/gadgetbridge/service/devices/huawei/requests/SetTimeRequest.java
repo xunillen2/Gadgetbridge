@@ -16,9 +16,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
+import java.nio.ByteBuffer;
+import java.util.Calendar;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
@@ -26,41 +30,43 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.BondParams;
+import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.SetTime;
 
-public class GetBondParamsRequest extends Request {
-    private static final Logger LOG = LoggerFactory.getLogger(GetBondParamsRequest.class);
+public class SetTimeRequest extends Request {
+    private static final Logger LOG = LoggerFactory.getLogger(SetTimeRequest.class);
 
-    public GetBondParamsRequest(HuaweiSupport support) {
+    public SetTimeRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = BondParams.id;
+        this.commandId = SetTime.id;
     }
 
     @Override
     protected byte[] createRequest() {
-        requestedPacket = new HuaweiPacket(serviceId,
+        Calendar now = Calendar.getInstance();
+        int timestampSec = (int)(now.getTimeInMillis() / 1000);
+        float zoneOffsetMillis = now.get(Calendar.ZONE_OFFSET);
+        float zoneOffsetHour = (zoneOffsetMillis / 1000 / 60 / 60);
+        int offsetMinutes = (int)Math.abs(((zoneOffsetHour % 1) * 60.0));
+        int offsetHour = zoneOffsetHour < 0 ? (int)Math.abs(zoneOffsetHour / 1.0) + 128 : (int)(zoneOffsetHour / 1.0);
+        byte[] zoneOffset = ByteBuffer.allocate(2)
+                                .put((byte)offsetHour)
+                                .put((byte)offsetMinutes)
+                                .array();
+        requestedPacket = new HuaweiPacket(
+            serviceId,
             commandId,
             new HuaweiTLV()
-                .put(BondParams.Status)
-                .put(BondParams.ClientSerial, support.getSerial())
-                .put(BondParams.BTVersion, (byte)0x02)
-                .put(BondParams.MaxFrameSize)
-                .put(BondParams.ClientMacAddress, support.getMacAddress())
-                .put(BondParams.EncryptionCounter)
-        );
+                .put(SetTime.Timestamp, timestampSec)
+                .put(SetTime.ZoneOffset, zoneOffset)
+        ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request BondParams: " + StringUtils.bytesToHex(serializedPacket));
+        LOG.debug("Request Set Time: " + StringUtils.bytesToHex(serializedPacket));
         return serializedPacket;
     }
 
     @Override
-    protected void processResponse() {
-        LOG.debug("handle BondParams");
-        support.encryptionCounter = receivedPacket.tlv.getInteger(BondParams.EncryptionCounter) & 0xFFFFFFFFL;
-        int status = receivedPacket.tlv.getByte(BondParams.Status);
-        if (status == 1) {
-            stopChain(this);
-        }
+    protected void processResponse() throws GBException {
+        LOG.debug("handle Set Time");
     }
 }

@@ -45,5 +45,6 @@ public final class HuaweiConstants {
     public static final String HU_BAND6_NAME = "huawei band 6-";
 
     public static final String PREF_HUAWEI_ADDRESS = "huawei_address";
+    public static final String PREF_HUAWEI_WORKMODE = "workmode";
 
 }

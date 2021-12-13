@@ -36,8 +36,8 @@ public class GetBondRequest extends Request {
 
     protected String macAddress;
 
-    public GetBondRequest(HuaweiSupport support, TransactionBuilder builder) {
-        super(support, builder);
+    public GetBondRequest(HuaweiSupport support) {
+        super(support);
         this.serviceId = DeviceConfig.id;
         this.commandId = Bond.id;
     }

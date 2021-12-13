@@ -32,8 +32,8 @@ import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.servic
 public class GetBatteryLevelRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetBatteryLevelRequest.class);
 
-    public GetBatteryLevelRequest(HuaweiSupport support, TransactionBuilder builder) {
-        super(support, builder);
+    public GetBatteryLevelRequest(HuaweiSupport support) {
+        super(support);
         this.serviceId = DeviceConfig.id;
         this.commandId = BatteryLevel.id;
     }
