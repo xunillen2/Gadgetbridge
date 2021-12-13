@@ -478,7 +478,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
     public void onNotification(NotificationSpec notificationSpec) {
         SendNotificationRequest sendNotificationRequest = new SendNotificationRequest(this);
         try {
-            sendNotificationRequest.buildNotificationTLVFromSpec(notificationSpec);
+            sendNotificationRequest.buildNotificationTLVFromNotificationSpec(notificationSpec);
             sendNotificationRequest.perform();
         } catch (IOException e) {
             e.printStackTrace();
@@ -502,7 +502,15 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     @Override
     public void onSetCallState(CallSpec callSpec) {
-
+        if (callSpec.command == CallSpec.CALL_INCOMING) {
+            SendNotificationRequest sendNotificationRequest = new SendNotificationRequest(this);
+            try {
+                sendNotificationRequest.buildNotificationTLVFromCallSpec(callSpec);
+                sendNotificationRequest.perform();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

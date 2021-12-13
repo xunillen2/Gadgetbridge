@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
+import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Notifications;
@@ -23,7 +24,7 @@ public class SendNotificationRequest extends Request {
         this.commandId = Notifications.NotificationAction.send;
     }
 
-    public void buildNotificationTLVFromSpec(NotificationSpec notificationSpec) {
+    public void buildNotificationTLVFromNotificationSpec(NotificationSpec notificationSpec) {
         HuaweiTLV notificationTitle = new HuaweiTLV()
                 .put(Notifications.Tags.textType, (byte) Notifications.TextType.title)
                 .put(Notifications.Tags.textEncoding, (byte) Notifications.TextEncoding.standard)
@@ -48,6 +49,36 @@ public class SendNotificationRequest extends Request {
                         .put(Notifications.Tags.textItem, notificationTitle)
                         .put(Notifications.Tags.textItem, notificationText)
                         .put(Notifications.Tags.textItem, notificationSender)
+                ));
+
+        this.notificationTLV = notificationTLV;
+    }
+
+    public void buildNotificationTLVFromCallSpec(CallSpec callSpec) {
+        HuaweiTLV notificationTitle = new HuaweiTLV()
+                .put(Notifications.Tags.textType, (byte) Notifications.TextType.title)
+                .put(Notifications.Tags.textEncoding, (byte) Notifications.TextEncoding.standard)
+                .put(Notifications.Tags.textContent, callSpec.name);
+
+        HuaweiTLV notificationSender = new HuaweiTLV()
+                .put(Notifications.Tags.textType, (byte) Notifications.TextType.sender)
+                .put(Notifications.Tags.textEncoding, (byte) Notifications.TextEncoding.standard)
+                .put(Notifications.Tags.textContent, callSpec.name);
+
+
+        HuaweiTLV notificationText = new HuaweiTLV()
+                .put(Notifications.Tags.textType, (byte) Notifications.TextType.text)
+                .put(Notifications.Tags.textEncoding, (byte) Notifications.TextEncoding.standard)
+                .put(Notifications.Tags.textContent, callSpec.name);
+
+        HuaweiTLV notificationTLV = new HuaweiTLV()
+                .put(Notifications.Tags.notificationId, (int) 1)
+                .put(Notifications.Tags.notificationType, (byte) Notifications.NotificationType.call)
+                .put(Notifications.Tags.vibrate, (byte) 1)
+                .put(Notifications.Tags.payloadText, new HuaweiTLV().put(Notifications.Tags.textList, new HuaweiTLV()
+                        .put(Notifications.Tags.textItem, notificationSender)
+                        .put(Notifications.Tags.textItem, notificationTitle)
+                        .put(Notifications.Tags.textItem, notificationText)
                 ));
 
         this.notificationTLV = notificationTLV;
