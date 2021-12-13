@@ -57,6 +57,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLEDeviceSuppo
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateAction;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.GattService;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Request;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Request.RequestCallback;
@@ -475,7 +476,13 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-
+        SendNotificationRequest sendNotificationRequest = new SendNotificationRequest(this);
+        try {
+            sendNotificationRequest.buildNotificationTLVFromSpec(notificationSpec);
+            sendNotificationRequest.perform();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
