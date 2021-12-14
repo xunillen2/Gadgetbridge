@@ -90,6 +90,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
     protected boolean isAsynchronous = false;
 
     public static long encryptionCounter = 0;
+    protected int msgId = 0;
 
     protected final List<Request> inProgressRequests = Collections.synchronizedList(new ArrayList<Request>());
 
@@ -472,6 +473,14 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
     }
 
 
+    public int getNotificationId() {
+        if (msgId < 256) {
+            msgId += 1;
+        } else {
+            msgId = 0;
+        }
+        return msgId;
+    }
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
         SendNotificationRequest sendNotificationReq = new SendNotificationRequest(this);

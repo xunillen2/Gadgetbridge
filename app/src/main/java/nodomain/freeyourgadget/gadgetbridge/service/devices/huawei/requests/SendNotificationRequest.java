@@ -10,12 +10,12 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
+import nodomain.freeyourgadget.gadgetbridge.model.NotificationType;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Notifications;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Notifications.NotificationAction;
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Notifications.NotificationType;
 import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Notifications.TextType;
 import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Notifications.TextEncoding;
 
@@ -35,6 +35,21 @@ public class SendNotificationRequest extends Request {
             .getBoolean(DeviceSettingsPreferenceConst.PREF_VIBRATION_ENABLE, false);
     }
 
+    public static int getNotificationType(NotificationType type) {
+        switch (type.getGenericType()) {
+            case "generic_social":
+            case "generic_chat":
+                return Notifications.NotificationType.weChat;
+            case "generic_email":
+                return Notifications.NotificationType.email;
+            case "generic":
+                return Notifications.NotificationType.generic;
+            default:
+                return Notifications.NotificationType.sms;
+        }
+    }
+
+
     public void buildNotificationTLVFromNotificationSpec(NotificationSpec notificationSpec) {
         HuaweiTLV notificationTitle = new HuaweiTLV()
                 .put(NotificationAction.textType, (byte) TextType.title)
@@ -51,15 +66,18 @@ public class SendNotificationRequest extends Request {
                 .put(NotificationAction.textEncoding, (byte) TextEncoding.standard)
                 .put(NotificationAction.textContent, notificationSpec.body);
 
+        HuaweiTLV textList = new HuaweiTLV();
+        if (notificationSpec.title != null) {
+                textList.put(NotificationAction.textItem, notificationTitle);
+        }
+        textList.put(NotificationAction.textItem, notificationText)
+                .put(NotificationAction.textItem, notificationSender);
+        
         HuaweiTLV notificationTLV = new HuaweiTLV()
-                .put(NotificationAction.notificationId, (int) notificationSpec.getId())
-                .put(NotificationAction.notificationType, (byte) NotificationType.generic)
+                .put(NotificationAction.notificationId, (short) support.getNotificationId())
+                .put(NotificationAction.notificationType, (byte) getNotificationType(notificationSpec.type))
                 .put(NotificationAction.vibrate, vibrate)
-                .put(NotificationAction.payloadText, new HuaweiTLV().put(NotificationAction.textList, new HuaweiTLV()
-                        .put(NotificationAction.textItem, notificationTitle)
-                        .put(NotificationAction.textItem, notificationText)
-                        .put(NotificationAction.textItem, notificationSender)
-                ));
+                .put(NotificationAction.payloadText, new HuaweiTLV().put(NotificationAction.textList, textList));
 
         this.notificationTLV = notificationTLV;
     }
@@ -81,8 +99,8 @@ public class SendNotificationRequest extends Request {
                 .put(NotificationAction.textContent, callSpec.name);
 
         HuaweiTLV notificationTLV = new HuaweiTLV()
-                .put(NotificationAction.notificationId, (int) 1)
-                .put(NotificationAction.notificationType, (byte) NotificationType.call)
+                .put(NotificationAction.notificationId, (short) support.getNotificationId())
+                .put(NotificationAction.notificationType, (byte) Notifications.NotificationType.call)
                 .put(NotificationAction.vibrate, vibrate)
                 .put(NotificationAction.payloadText, new HuaweiTLV().put(NotificationAction.textList, new HuaweiTLV()
                         .put(NotificationAction.textItem, notificationSender)

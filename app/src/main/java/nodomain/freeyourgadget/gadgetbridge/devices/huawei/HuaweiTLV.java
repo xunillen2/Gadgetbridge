@@ -124,6 +124,10 @@ public class HuaweiTLV {
         return put(tag, ByteBuffer.allocate(4).putInt(value).array());
     }
 
+    public HuaweiTLV put(int tag, short value) {
+        return put(tag, ByteBuffer.allocate(2).putShort(value).array());
+    }
+
     public HuaweiTLV put(int tag, String value) {
         if (value == null) {
             return this;
