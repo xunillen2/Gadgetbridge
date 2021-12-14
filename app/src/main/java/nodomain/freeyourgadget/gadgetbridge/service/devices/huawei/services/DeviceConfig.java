@@ -117,18 +117,14 @@ public class DeviceConfig {
         super();
     }
 
-    public static enum Date {
-        YEARFIRST(1),
-        MONTHFIRST(2),
-        DAYFIRST(3);
-        public final int get;
-        private Date(int get) {this.get = get;}
+    public static class Date {
+        public static final int yearFirst = 1;
+        public static final int monthFirst = 2;
+        public static final int dayFirst = 3;
     }
 
-    public static enum Time {
-        HOURS12(1),
-        HOURS24(2);
-        public final int get;
-        private Time(int get) {this.get = get;}
+    public static class Time {
+        public static final int hours12 = 1;
+        public static final int hours24 = 2;
     }
 }

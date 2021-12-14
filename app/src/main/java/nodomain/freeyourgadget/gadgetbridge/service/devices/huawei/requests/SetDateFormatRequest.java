@@ -51,33 +51,33 @@ public class SetDateFormatRequest extends Request {
 
     @Override
     protected byte[] createRequest() {
-        int time = Time.HOURS12.get;
+        int time = Time.hours12;
         int date;
         String timeFormat = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getString(DeviceSettingsPreferenceConst.PREF_TIMEFORMAT, "auto");
         if (timeFormat.equals("auto")) {
             if (DateFormat.is24HourFormat(GBApplication.getContext())) {
-                time = Time.HOURS24.get;
+                time = Time.hours24;
             } else {
-                time = Time.HOURS12.get;
+                time = Time.hours12;
             }
         } else if (timeFormat.equals("24h")) {
-            time = Time.HOURS24.get;
+            time = Time.hours24;
         }
         String dateFormat = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getString(DeviceSettingsPreferenceConst.PREF_DATEFORMAT, "MM/dd/yyyy");
         switch (dateFormat) {
             case "MM/dd/yyyy":
-                date = Date.MONTHFIRST.get;
+                date = Date.monthFirst;
                 break;
             case "dd.MM.yyyy":
             case "dd/MM/yyyy":
-                date = Date.DAYFIRST.get;
+                date = Date.dayFirst;
                 break;
             default:
-                date = Date.YEARFIRST.get;
+                date = Date.yearFirst;
         }
         HuaweiTLV dateFormatTLVs = new HuaweiTLV()
             .put(SetDateFormat.DateFormat, (byte)date)
