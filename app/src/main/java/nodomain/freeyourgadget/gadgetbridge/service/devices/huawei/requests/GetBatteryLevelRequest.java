@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventBatteryInfo;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
@@ -54,6 +55,11 @@ public class GetBatteryLevelRequest extends Request {
     @Override
     protected void processResponse() throws GBException {
         LOG.debug("handle Battery Level");
-        getDevice().setBatteryLevel(receivedPacket.tlv.getByte(BatteryLevel.GetStatus));
+        byte batteryLevel = receivedPacket.tlv.getByte(BatteryLevel.GetStatus);
+        getDevice().setBatteryLevel(batteryLevel);
+
+        GBDeviceEventBatteryInfo batteryInfo = new GBDeviceEventBatteryInfo();
+        batteryInfo.level = (int)batteryLevel & 0xff;
+        getSupport().evaluateGBDeviceEvent(batteryInfo);
     }
 }
