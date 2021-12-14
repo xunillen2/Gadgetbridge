@@ -51,7 +51,7 @@ public class SetDateFormatRequest extends Request {
 
     @Override
     protected byte[] createRequest() {
-        int time = Time.HOURS12.get;;
+        int time = Time.HOURS12.get;
         int date;
         String timeFormat = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())

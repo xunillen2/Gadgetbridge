@@ -218,10 +218,6 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
         }
     }
 
-    public boolean isPacketComplet() {
-        return receivedPacket.complete;
-    }
-
     public String getName() {
         Class thisClass = getClass();
         while (thisClass.isAnonymousClass()) thisClass = thisClass.getSuperclass();

@@ -35,7 +35,6 @@ public class SendNotificationRequest extends Request {
                 .put(Notifications.Tags.textEncoding, (byte) Notifications.TextEncoding.standard)
                 .put(Notifications.Tags.textContent, notificationSpec.sender);
 
-
         HuaweiTLV notificationText = new HuaweiTLV()
                 .put(Notifications.Tags.textType, (byte) Notifications.TextType.text)
                 .put(Notifications.Tags.textEncoding, (byte) Notifications.TextEncoding.standard)
@@ -65,7 +64,6 @@ public class SendNotificationRequest extends Request {
                 .put(Notifications.Tags.textEncoding, (byte) Notifications.TextEncoding.standard)
                 .put(Notifications.Tags.textContent, callSpec.name);
 
-
         HuaweiTLV notificationText = new HuaweiTLV()
                 .put(Notifications.Tags.textType, (byte) Notifications.TextType.text)
                 .put(Notifications.Tags.textEncoding, (byte) Notifications.TextEncoding.standard)
@@ -94,12 +92,12 @@ public class SendNotificationRequest extends Request {
             ).encrypt(support.getSecretKey(), support.getIV());
         }
         byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Notification Request: " + StringUtils.bytesToHex(serializedPacket));
+        LOG.debug("Send Notification Request: " + StringUtils.bytesToHex(serializedPacket));
         return serializedPacket;
     }
 
     @Override
     protected void processResponse() throws GBException {
-        LOG.debug("handle Set Locale");
+        LOG.debug("handle Notification");
     }
 }
