@@ -474,10 +474,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
-        SendNotificationRequest sendNotificationRequest = new SendNotificationRequest(this);
+        SendNotificationRequest sendNotificationReq = new SendNotificationRequest(this);
         try {
-            sendNotificationRequest.buildNotificationTLVFromNotificationSpec(notificationSpec);
-            sendNotificationRequest.perform();
+            sendNotificationReq.buildNotificationTLVFromNotificationSpec(notificationSpec);
+            inProgressRequests.add(sendNotificationReq);
+            sendNotificationReq.perform();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -490,9 +491,14 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     @Override
     public void onSetTime() {
-        SetTimeRequest setTimeReq = new SetTimeRequest(this);
-        inProgressRequests.add(setTimeReq);
-        setTimeReq.perform();
+        try {
+            SetTimeRequest setTimeReq = new SetTimeRequest(this);
+            inProgressRequests.add(setTimeReq);
+            setTimeReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Faile to configure time", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
 
     }
 
@@ -504,10 +510,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
     @Override
     public void onSetCallState(CallSpec callSpec) {
         if (callSpec.command == CallSpec.CALL_INCOMING) {
-            SendNotificationRequest sendNotificationRequest = new SendNotificationRequest(this);
+            SendNotificationRequest sendNotificationReq = new SendNotificationRequest(this);
             try {
-                sendNotificationRequest.buildNotificationTLVFromCallSpec(callSpec);
-                sendNotificationRequest.perform();
+                sendNotificationReq.buildNotificationTLVFromCallSpec(callSpec);
+                inProgressRequests.add(sendNotificationReq);
+                sendNotificationReq.perform();
             } catch (IOException e) {
                 e.printStackTrace();
             }

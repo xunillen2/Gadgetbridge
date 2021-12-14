@@ -1,14 +1,10 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services;
 
 public class Notifications {
-
     public static final int id = 2;
 
     public static class NotificationAction {
         public static final int send = 1;
-    }
-
-    public static class Tags {
         public static final int notificationId = 1;
         public static final int notificationType = 2;
         public static final int vibrate = 3;

@@ -161,7 +161,6 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
 
     public Request nextRequest(Request req) {
         nextRequest = req;
-        // nextRequest.setBuilder(createTransactionBuilder(nextRequest.getName()));
         nextRequest.setSelfQueue();
         return this;
     }
@@ -223,11 +222,6 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
         while (thisClass.isAnonymousClass()) thisClass = thisClass.getSuperclass();
         return thisClass.getSimpleName();
     }
-
-    /*public void setBuilder(TransactionBuilder builder) {
-        this.builder = builder;
-        builder.setGattCallback(support);
-    }*/
 
     public void setFinalizeReq(RequestCallback finalizeReq) {
         this.finalizeReq = finalizeReq;

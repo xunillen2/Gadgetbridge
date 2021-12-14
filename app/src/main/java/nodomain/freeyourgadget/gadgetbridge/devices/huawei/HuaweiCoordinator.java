@@ -161,6 +161,7 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
                 R.xml.devicesettings_timeformat,
                 R.xml.devicesettings_liftwrist_display_noshed,
                 R.xml.devicesettings_rotatewrist_cycleinfo,
+                R.xml.devicesettings_vibrations_enable,
         };
     }
 
