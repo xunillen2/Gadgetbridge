@@ -154,9 +154,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
             SetDateFormatRequest setDateFormatReq = new SetDateFormatRequest(this);
             inProgressRequests.add(setDateFormatReq);
             setDateFormatReq.perform();
-            SetTimeRequest setTimeReq = new SetTimeRequest(this);
-            inProgressRequests.add(setTimeReq);
-            setTimeReq.perform();
+            onSetTime();
             GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
             inProgressRequests.add(productInformationReq);
             productInformationReq.perform();
@@ -492,6 +490,9 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     @Override
     public void onSetTime() {
+        SetTimeRequest setTimeReq = new SetTimeRequest(this);
+        inProgressRequests.add(setTimeReq);
+        setTimeReq.perform();
 
     }
 
