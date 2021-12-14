@@ -32,10 +32,8 @@ public class LocaleConfig {
         super();
     }
 
-    public static enum MeasurementSystem {
-        METRIC(0),
-        IMPERIAL(1);
-        public final int get;
-        private MeasurementSystem(int get) {this.get = get;}
+    public static class MeasurementSystem {
+        public static final int metric = 0;
+        public static final int imperial = 1;
     }
 }

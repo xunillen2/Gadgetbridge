@@ -51,7 +51,7 @@ public class SetLocaleRequest extends Request {
     @Override
     protected byte[] createRequest() {
         String localeString = GBApplication
-            .getPrefs()
+            .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getString(DeviceSettingsPreferenceConst.PREF_LANGUAGE, "auto");
         if (localeString == null || localeString.equals("auto")) {
             String language = Locale.getDefault().getLanguage();
@@ -66,12 +66,13 @@ public class SetLocaleRequest extends Request {
             .getPrefs()
             .getString(SettingsActivity.PREF_MEASUREMENT_SYSTEM, getContext().getString(R.string.p_unit_metric));
         LOG.debug("measurementString: " + measurementString);
+        int measurement = measurementString.equals("metric") ? MeasurementSystem.metric : MeasurementSystem.imperial;
         requestedPacket = new HuaweiPacket(
             serviceId,
             commandId,
             new HuaweiTLV()
                 .put(SetLocale.LanguageTag, localeString.getBytes(StandardCharsets.UTF_8))
-                .put(SetLocale.MeasurementSystem, (byte)0)
+                .put(SetLocale.MeasurementSystem, (byte)measurement)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set Locale: " + StringUtils.bytesToHex(serializedPacket));

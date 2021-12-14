@@ -28,9 +28,9 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
+import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
-import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 
 public class HonorBand4Coordinator extends HuaweiCoordinator{
     private static final Logger LOG = LoggerFactory.getLogger(HonorBand4Coordinator.class);
@@ -70,7 +70,7 @@ public class HonorBand4Coordinator extends HuaweiCoordinator{
         int[] coordinatorSettings = new int[]{
                 R.xml.devicesettings_dateformat,
                 R.xml.devicesettings_wearlocation,
-                // R.xml.devicesettings_huawei_band3e,
+                R.xml.devicesettings_huawei,
         };
         return concatSettings(mainCoordinatorSettings, coordinatorSettings);
     }
