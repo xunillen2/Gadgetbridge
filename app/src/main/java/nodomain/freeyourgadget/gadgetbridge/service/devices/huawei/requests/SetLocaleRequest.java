@@ -59,7 +59,9 @@ public class SetLocaleRequest extends Request {
             if (country == "") {
                 country = language;
             }
-            localeString = language + "_" + country.toUpperCase();
+            localeString = language + "-" + country.toUpperCase();
+        } else {
+            localeString = localeString.replace("_", "-");
         }
         LOG.debug("localeString: " + localeString);
         String measurementString = GBApplication
