@@ -56,6 +56,11 @@ public class SendNotificationRequest extends Request {
                 .put(NotificationAction.textEncoding, (byte) TextEncoding.standard)
                 .put(NotificationAction.textContent, notificationSpec.title);
 
+        HuaweiTLV notificationSourceName = new HuaweiTLV()
+                .put(NotificationAction.textType, (byte) TextType.title)
+                .put(NotificationAction.textEncoding, (byte) TextEncoding.standard)
+                .put(NotificationAction.textContent, notificationSpec.sourceName);
+
         HuaweiTLV notificationSender = new HuaweiTLV()
                 .put(NotificationAction.textType, (byte) TextType.sender)
                 .put(NotificationAction.textEncoding, (byte) TextEncoding.standard)
@@ -68,7 +73,9 @@ public class SendNotificationRequest extends Request {
 
         HuaweiTLV textList = new HuaweiTLV();
         if (notificationSpec.title != null) {
-                textList.put(NotificationAction.textItem, notificationTitle);
+            textList.put(NotificationAction.textItem, notificationTitle);
+        } else {
+            textList.put(NotificationAction.textItem, notificationSourceName);
         }
         textList.put(NotificationAction.textItem, notificationText)
                 .put(NotificationAction.textItem, notificationSender);
