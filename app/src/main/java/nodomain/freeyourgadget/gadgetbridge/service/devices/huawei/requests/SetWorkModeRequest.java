@@ -28,7 +28,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.WorkMode;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.WorkMode.AutoDetectAndWorkMode;
+import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.WorkMode.SwitchStatus;
 
 public class SetWorkModeRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetWorkModeRequest.class);
@@ -36,7 +36,7 @@ public class SetWorkModeRequest extends Request {
     public SetWorkModeRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = WorkMode.id;
-        this.commandId = AutoDetectAndWorkMode.id;
+        this.commandId = SwitchStatus.id;
     }
 
     @Override
@@ -44,86 +44,12 @@ public class SetWorkModeRequest extends Request {
         String workModeString = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getString(HuaweiConstants.PREF_HUAWEI_WORKMODE, "auto");
-        /*boolean workMode = workModeString.equals("auto") ? true : false;
-        LOG.debug("workModeString: " + workModeString);
-        LOG.debug("workMode: " + (workMode ? "true" : "false"));*/
-        int auto = 0;
-        int foot = 0;
-        switch (workModeString) {
-            case "0":
-                auto = 0;
-                foot = 0;
-                break;
-            case "1":
-                auto = 0;
-                foot = 1;
-                break;
-            case "2":
-                auto = 0;
-                foot = 2;
-                break;
-            case "3":
-                auto = 0;
-                foot = 3;
-                break;
-            case "4":
-                auto = 1;
-                foot = 0;
-                break;
-            case "5":
-                auto = 1;
-                foot = 1;
-                break;
-            case "6":
-                auto = 1;
-                foot = 2;
-                break;
-            case "7":
-                auto = 1;
-                foot = 3;
-                break;
-            case "8":
-                auto = 2;
-                foot = 0;
-                break;
-            case "9":
-                auto = 2;
-                foot = 1;
-                break;
-            case "10":
-                auto = 2;
-                foot = 2;
-                break;
-            case "11":
-                auto = 2;
-                foot = 3;
-                break;
-            case "12":
-                auto = 3;
-                foot = 0;
-                break;
-            case "13":
-                auto = 3;
-                foot = 1;
-                break;
-            case "14":
-                auto = 3;
-                foot = 2;
-                break;
-            case "15":
-                auto = 3;
-                foot = 3;
-                break;
-        }
-        LOG.debug("workModeString: " + workModeString);
+        boolean workMode = workModeString.equals("auto") ? true : false;
         requestedPacket = new HuaweiPacket(
             serviceId,
             commandId,
             new HuaweiTLV()
-                // .put(AutoDetectAndWorkMode.AutoDetectMode, workMode)
-                // .put(AutoDetectAndWorkMode.FootWear, workMode)
-                .put(1, (byte)auto)
-                .put(2, (byte)foot)
+                .put(SwitchStatus.SetStatus, workMode)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set WorkMode: " + StringUtils.bytesToHex(serializedPacket));

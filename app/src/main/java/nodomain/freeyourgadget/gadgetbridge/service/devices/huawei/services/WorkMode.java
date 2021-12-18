@@ -22,11 +22,22 @@ import org.slf4j.LoggerFactory;
 public class WorkMode {
     public static final int id = 38;
 
-    public static class AutoDetectAndWorkMode {
+    public static class ModeStatus {
         public static final int id = 1;
         public static final int AutoDetectMode  = 1;
         public static final int FootWear  = 2;
     }
+
+    public static class SwitchStatus {
+        public static final int id = 2;
+        public static final int SetStatus  = 1;
+    }
+
+    /*public static class FootWear {
+        public static final int id = 3;
+        public static final int AutoDetectMode  = 1;
+        public static final int FootWear  = 2;
+    }*/
 
     public WorkMode() {
         super();
