@@ -193,15 +193,7 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
         if (requestedPacket != null) { // Request as been defined
             if ( receivedPacket.serviceId == requestedPacket.serviceId && receivedPacket.commandId == requestedPacket.commandId) {
                 if ( receivedPacket.complete) {
-                    if (receivedPacket.tlv.contains(HuaweiConstants.TAG_RESULT)) {
-                        byte[] result = receivedPacket.tlv.getBytes(HuaweiConstants.TAG_RESULT);
-                        if (!Arrays.equals(result, HuaweiConstants.RESULT_SUCCESS)) {
-                            throw new GBException("Packet returned ErrorCode: " + StringUtils.bytesToHex(result));
-                        }
-                    } else if (receivedPacket.tlv.contains(HuaweiConstants.CryptoTags.encryption)) {
-                            receivedPacket.decrypt(support.getSecretKey());
-                    }
-                    return RequestState.COMPLETE;
+                    return onCompletePacket();
                 }
                 return RequestState.INCOMPLETE;
             }
@@ -209,12 +201,24 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
         } else { // Request is not defined - AsynchronousRequest
             if ( receivedPacket.complete) {
                 LOG.debug("AsynchronousResponse complete");
-                return  RequestState.COMPLETE;
+                return onCompletePacket();
             } else {
                 LOG.debug("AsynchronousResponse incomplete");
                 return RequestState.INCOMPLETE;
             }
         }
+    }
+
+    private RequestState onCompletePacket() throws GBException {
+        if (receivedPacket.tlv.contains(HuaweiConstants.TAG_RESULT)) {
+            byte[] result = receivedPacket.tlv.getBytes(HuaweiConstants.TAG_RESULT);
+            if (!Arrays.equals(result, HuaweiConstants.RESULT_SUCCESS)) {
+                throw new GBException("Packet returned ErrorCode: " + StringUtils.bytesToHex(result));
+            }
+        } else if (receivedPacket.tlv.contains(HuaweiConstants.CryptoTags.encryption)) {
+                receivedPacket.decrypt(support.getSecretKey());
+        }
+        return RequestState.COMPLETE;
     }
 
     public String getName() {
