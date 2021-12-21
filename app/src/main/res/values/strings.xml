@@ -1399,5 +1399,7 @@
     <string name="qhybrid_title_on_device_confirmation">Enable on-device pairing confirmation</string>
     <string name="qhybrid_summary_on_device_confirmation">On-device pairing confirmations can get annoying. Disabling them might lose you functionality.</string>
     <string name="prefs_band3e_workmode">Work Mode</string>
+    <string name="huawei_alarm_smart_description">Do not uncheck smart wakeup checkbox.</string>
+    <string name="huawei_alarm_event_description">Do not check smart wakeup checkbox.</string>
 
 </resources>

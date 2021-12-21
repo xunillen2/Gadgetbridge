@@ -22,6 +22,8 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +38,12 @@ import java.util.UUID;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.SettingsActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
+import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
+import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
+import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
@@ -45,7 +51,10 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice.State;
-import nodomain.freeyourgadget.gadgetbridge.model.Alarm;
+import nodomain.freeyourgadget.gadgetbridge.entities.Alarm;
+import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
+import nodomain.freeyourgadget.gadgetbridge.entities.Device;
+import nodomain.freeyourgadget.gadgetbridge.entities.User;
 import nodomain.freeyourgadget.gadgetbridge.model.CalendarEventSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
@@ -59,6 +68,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateA
 import nodomain.freeyourgadget.gadgetbridge.service.btle.GattService;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AlarmsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Request;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Request.RequestCallback;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetAuthRequest;
@@ -73,6 +83,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetL
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetNavigateOnRotateRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetTimeRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearLocationRequest;
+import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
@@ -169,6 +180,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
             SharedPreferences.Editor editor = sharedPrefs.edit();
             editor.putString(HuamiConst.PREF_ACTIVATE_DISPLAY_ON_LIFT, "p_on");
             editor.apply();
+            initializeAlarms();
+            // getAlarms();
         } catch (IOException e) {
             GB.toast(getContext(), "Initializing Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
@@ -226,6 +239,50 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     public String getDeviceMac() {
         return deviceMac;
+    }
+
+    // Do not work on some band, have to check
+    /*public void getAlarms() throws IOException {
+        AlarmsRequest alarmReq = new AlarmsRequest(this, false);
+        alarmReq.listEventAlarm();
+        inProgressRequests.add(alarmReq);
+        alarmReq.perform();
+        alarmReq = new AlarmsRequest(this, true);
+        alarmReq.listSmartAlarm();
+        inProgressRequests.add(alarmReq);
+        alarmReq.perform();
+    }*/
+
+    private void initializeAlarms() {
+        // Populate alarms in order to specify important data
+        List<Alarm> alarms = DBHelper.getAlarms(gbDevice);
+        DeviceCoordinator coordinator = DeviceHelper.getInstance().getCoordinator(gbDevice);
+        int supportedNumAlarms = coordinator.getAlarmSlotCount();
+        if (alarms.size() == 0) {
+            try (DBHandler db = GBApplication.acquireDB()) {
+                DaoSession daoSession = db.getDaoSession();
+                Device device = DBHelper.getDevice(gbDevice, daoSession);
+                User user = DBHelper.getUser(daoSession);
+                for (int position = 0; position < supportedNumAlarms; position++) {
+                    LOG.info("adding missing alarm at position " + position);
+                    DBHelper.store(createDefaultAlarm(device, user, position));
+                }
+            } catch (Exception e) {
+                LOG.error("Error accessing database", e);
+            }
+        }
+    }
+
+    private Alarm createDefaultAlarm(@NonNull Device device, @NonNull User user, int position) {
+        boolean smartWakeup = false;
+        String title = getContext().getString(R.string.menuitem_alarm);
+        String description = getContext().getString(R.string.huawei_alarm_event_description);;
+        if (position == 0) {
+            smartWakeup = true;
+            title = getContext().getString(R.string.alarm_smart_wakeup);
+            description = getContext().getString(R.string.huawei_alarm_smart_description);
+        }
+        return new Alarm(device.getId(), user.getId(), position, false, smartWakeup, false, 0, 6, 30, false, title, description);
     }
 
     public HuaweiSupport enableNotifications(TransactionBuilder builder, boolean enable) {
@@ -349,31 +406,6 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
                     setNavigateOnRotateReq.perform();
                     break;
                 }
-                /*case DeviceSettingsPreferenceConst.PREF_ANTILOST_ENABLED: {
-                    boolean enabled = prefs.getBoolean(DeviceSettingsPreferenceConst.PREF_ANTILOST_ENABLED, true);
-                    FeaturesCommand features = getCurrentEnabledFeatures();
-                    features.setFeature(FeaturesCommand.FEATURE_ANTI_LOST, enabled);
-                    sendEnabledFeaturesSetting(features);
-                    break;
-                }
-                case DeviceSettingsPreferenceConst.PREF_LONGSIT_SWITCH: {
-                    boolean enabled = prefs.getBoolean(DeviceSettingsPreferenceConst.PREF_LONGSIT_SWITCH, false);
-                    FeaturesCommand features = getCurrentEnabledFeatures();
-                    features.setFeature(FeaturesCommand.FEATURE_SEDENTARY_REMINDER, enabled);
-                    sendEnabledFeaturesSetting(features);
-                    break;
-                }
-                case DeviceSettingsPreferenceConst.PREF_LONGSIT_PERIOD: {
-                    String periodStr = prefs.getString(DeviceSettingsPreferenceConst.PREF_LONGSIT_PERIOD, "60");
-                    try {
-                        int period = Integer.parseInt(periodStr);
-                        sendSedentaryReminderIntervalSetting(period);
-                    } catch (NumberFormatException e) {
-                        GB.toast(getContext(), "Invalid sedentary reminder interval value", Toast.LENGTH_SHORT,
-                                GB.ERROR, e);
-                    }
-                    break;
-                }*/
             }
         } catch (IOException e) {
             GB.toast(getContext(), "Configuration of Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
@@ -481,6 +513,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
         }
         return msgId;
     }
+
     @Override
     public void onNotification(NotificationSpec notificationSpec) {
         SendNotificationRequest sendNotificationReq = new SendNotificationRequest(this);
@@ -512,8 +545,25 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
     }
 
     @Override
-    public void onSetAlarms(ArrayList<? extends Alarm> alarms) {
-
+    public void onSetAlarms(ArrayList<? extends nodomain.freeyourgadget.gadgetbridge.model.Alarm> alarms) {
+        AlarmsRequest smartAlarmReq = new AlarmsRequest(this, true);
+        inProgressRequests.add(smartAlarmReq);
+        AlarmsRequest eventAlarmReq = new AlarmsRequest(this, false);
+        inProgressRequests.add(eventAlarmReq);
+        for (nodomain.freeyourgadget.gadgetbridge.model.Alarm alarm : alarms) {
+            if (alarm.getPosition() == 0) {
+                smartAlarmReq.buildSmartAlarm(alarm);
+            } else {
+                eventAlarmReq.addEventAlarm(alarm);
+            }
+        }
+        try {
+            smartAlarmReq.perform();
+            eventAlarmReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Faile to configure alarms", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
     }
 
     @Override

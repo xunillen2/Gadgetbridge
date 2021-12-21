@@ -87,7 +87,7 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
 
     @Override
     public boolean supportsSmartWakeup(GBDevice device) {
-        return false;
+        return true;
     }
 
     @Override
@@ -98,6 +98,10 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
     @Override
     public boolean supportsAlarmSnoozing() {
         return false;
+    }
+
+    public boolean supportsAlarmDescription(GBDevice device) {
+        return true;
     }
 
     @Override
@@ -127,7 +131,7 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
 
     @Override
     public int getAlarmSlotCount() {
-        return 0;
+        return 5;
     }
 
     @Override
