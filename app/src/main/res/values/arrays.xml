@@ -1951,12 +1951,12 @@
         <item>after_3_hour</item>
     </string-array>
 
-    <string-array name="band3e_workmode">
+    <string-array name="band_aw70_workmode">
         <item>auto</item>
         <item>manual</item>
     </string-array>
 
-    <string-array name="band3e_workmode_values">
+    <string-array name="band_aw70_workmode_values">
         <item>auto</item>
         <item>manual</item>
     </string-array>

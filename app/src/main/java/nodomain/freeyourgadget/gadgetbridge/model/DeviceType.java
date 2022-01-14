@@ -106,7 +106,7 @@ public enum DeviceType {
     SONY_WH_1000XM3(430, R.drawable.ic_device_headphones, R.drawable.ic_device_headphones_disabled, R.string.devicetype_sony_wh_1000xm3),
     HONORBAND4(440, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_honor_band4),
     HONORBAND5(441, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_honor_band5),
-    HUAWEIBAND3E(442, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_band3e),
+    HUAWEIBANDAW70(442, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_band_aw70),
     HUAWEIBAND6(443, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_band6),
     TEST(1000, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_test);
 

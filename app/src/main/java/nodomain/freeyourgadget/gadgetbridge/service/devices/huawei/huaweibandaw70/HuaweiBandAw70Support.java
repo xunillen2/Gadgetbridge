@@ -14,7 +14,7 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.huaweiband3e;
+package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.huaweibandaw70;
 
 import android.widget.Toast;
 
@@ -23,16 +23,15 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWorkModeRequest;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 
-public class HuaweiBand3eSupport extends HuaweiSupport{
-    private static final Logger LOG = LoggerFactory.getLogger(HuaweiBand3eSupport.class);
+public class HuaweiBandAw70Support extends HuaweiSupport{
+    private static final Logger LOG = LoggerFactory.getLogger(HuaweiBandAw70Support.class);
 
-    public HuaweiBand3eSupport() {
+    public HuaweiBandAw70Support() {
         super();
         mtu = 20;
     }
