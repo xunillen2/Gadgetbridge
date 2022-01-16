@@ -66,6 +66,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLEDeviceSuppo
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateAction;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.GattService;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AsynchronousResponse;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AlarmsRequest;
@@ -320,9 +321,10 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
                 req.handleResponse();
                 if (req.cleanHasBeenHandled())
                     inProgressRequests.remove(req);
-                if (isAsynchronous)
+                if (isAsynchronous) {
                     isAsynchronous = false;
                     asynchronousRequest = null;
+                }
             case INCOMPLETE:
                 return true;
             case BAD:
@@ -336,7 +338,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
         isAsynchronous = true;
         try {
             if (asynchronousRequest == null)
-                asynchronousRequest = new Request(this);
+                asynchronousRequest = new AsynchronousResponse(this);
             return handleRequest(data, asynchronousRequest);
         } catch (GBException e) {
             LOG.debug(e.getMessage());
