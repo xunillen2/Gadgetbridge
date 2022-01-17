@@ -4,10 +4,10 @@
     <ListPreference
         android:defaultValue="auto"
         android:icon="@drawable/ic_switch_left"
-        android:entries="@array/band3e_workmode"
-        android:entryValues="@array/band3e_workmode_values"
+        android:entries="@array/band_aw70_workmode"
+        android:entryValues="@array/band_aw70_workmode_values"
         android:key="workmode"
         android:summary="%s"
-        android:title="@string/prefs_band3e_workmode" />
+        android:title="@string/prefs_band_aw70_workmode" />
 
 </androidx.preference.PreferenceScreen>

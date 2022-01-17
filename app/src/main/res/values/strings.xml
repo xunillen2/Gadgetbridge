@@ -902,7 +902,7 @@
     <string name="devicetype_sony_wh_1000xm3">Sony WH-1000XM3</string>
     <string name="devicetype_honor_band4">Honor Band 4</string>
     <string name="devicetype_honor_band5">Honor Band 5</string>
-    <string name="devicetype_huawei_band3e">Huawei Band 3e</string>
+    <string name="devicetype_huawei_band_aw70">Huawei Band (AW70)</string>
     <string name="devicetype_huawei_band6">Huawei Band 6</string>
     <string name="choose_auto_export_location">Choose export location</string>
     <string name="notification_channel_name">General</string>
@@ -1398,7 +1398,7 @@
     <string name="watchface_dialog_widget_timeout_show_circle">Show circle on timeout:</string>
     <string name="qhybrid_title_on_device_confirmation">Enable on-device pairing confirmation</string>
     <string name="qhybrid_summary_on_device_confirmation">On-device pairing confirmations can get annoying. Disabling them might lose you functionality.</string>
-    <string name="prefs_band3e_workmode">Work Mode</string>
+    <string name="prefs_band_aw70_workmode">Work Mode</string>
     <string name="huawei_alarm_smart_description">Do not uncheck smart wakeup checkbox.</string>
     <string name="huawei_alarm_event_description">Do not check smart wakeup checkbox.</string>
 

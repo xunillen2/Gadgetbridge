@@ -69,7 +69,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband5.MiBand
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband6.MiBand6Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppe.ZeppESupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.huaweiband3e.HuaweiBand3eSupport;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.huaweibandaw70.HuaweiBandAw70Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.id115.ID115Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.itag.ITagSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.jyou.BFH16DeviceSupport;
@@ -379,8 +379,8 @@ public class DeviceSupportFactory {
                     case HUAWEIBAND6:
                         deviceSupport = new ServiceDeviceSupport(new HuaweiSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
                         break;
-                    case HUAWEIBAND3E:
-                        deviceSupport = new ServiceDeviceSupport(new HuaweiBand3eSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
+                    case HUAWEIBANDAW70:
+                        deviceSupport = new ServiceDeviceSupport(new HuaweiBandAw70Support(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
                         break;
                 }
                 if (deviceSupport != null) {

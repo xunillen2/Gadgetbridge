@@ -14,13 +14,11 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.devices.huawei.huaweiband3e;
+package nodomain.freeyourgadget.gadgetbridge.devices.huawei.huaweibandaw70;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +30,12 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
 
-public class HuaweiBand3eCoordinator extends HuaweiCoordinator{
-    private static final Logger LOG = LoggerFactory.getLogger(HuaweiBand3eCoordinator.class);
+public class HuaweiBandAw70Coordinator extends HuaweiCoordinator{
+    private static final Logger LOG = LoggerFactory.getLogger(HuaweiBandAw70Coordinator.class);
 
     @Override
     public DeviceType getDeviceType() {
-        return DeviceType.HUAWEIBAND3E;
+        return DeviceType.HUAWEIBANDAW70;
     }
 
     @NonNull
@@ -46,7 +44,7 @@ public class HuaweiBand3eCoordinator extends HuaweiCoordinator{
         try {
             BluetoothDevice device = candidate.getDevice();
             String name = device.getName();
-            if (name != null && name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME)) {
+            if (name != null && (name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME) || name.toLowerCase().startsWith(HuaweiConstants.HU_BAND4E_NAME))) {
                 return getDeviceType();
             }
         } catch (Exception ex) {
@@ -60,7 +58,7 @@ public class HuaweiBand3eCoordinator extends HuaweiCoordinator{
         int[] mainCoordinatorSettings = super.getSupportedDeviceSpecificSettings(device);
         int[] coordinatorSettings = new int[]{
                 R.xml.devicesettings_dateformat,
-                R.xml.devicesettings_huawei_band3e,
+                R.xml.devicesettings_huawei_band_aw70,
         };
         return concatSettings(mainCoordinatorSettings, coordinatorSettings);
     }
