@@ -175,6 +175,13 @@ public class HuaweiTLV {
         return ByteBuffer.wrap(bytes).getInt();
     }
 
+    public short getShort(int tag) {
+        byte[] bytes = getBytes(tag);
+        if (bytes == null)
+            return 0;
+        return ByteBuffer.wrap(bytes).getShort();
+    }
+
     public String getString(int tag) {
         byte[] bytes = getBytes(tag);
         if (bytes == null) {

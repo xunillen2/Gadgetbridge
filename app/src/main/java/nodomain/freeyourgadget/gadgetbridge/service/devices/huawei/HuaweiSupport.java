@@ -63,6 +63,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLEDeviceSuppo
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateAction;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.GattService;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSleepDataCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AlarmsRequest;
@@ -435,7 +436,13 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     @Override
     public void onFetchRecordedData(int dataTypes) {
-
+        GetSleepDataCountRequest getSleepDataCountRequest = new GetSleepDataCountRequest(this);
+        try {
+            responseManager.addHandler(getSleepDataCountRequest);
+            getSleepDataCountRequest.perform();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -558,4 +565,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     }
 
+    public void addInProgressRequest(Request request) {
+        responseManager.addHandler(request);
+    }
 }
