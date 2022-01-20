@@ -3,18 +3,15 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
-
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.SleepData;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 public class GetSleepDataRequest extends Request {
-private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataRequest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataRequest.class);
 
     short maxCount = 0;
     short count = 0;
@@ -40,17 +37,11 @@ private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataRequest.cl
                                 .put(SleepData.MessageData.request_container_number_tag, this.count)
                     )
         ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request fitness time data: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return requestedPacket.serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
-        // TODO: proper debugging print?
-
-        LOG.debug("Received packet: " + receivedPacket.tlv.toString());
-
         HuaweiTLV container = receivedPacket.tlv.getObject(SleepData.MessageData.response_container_tag);
         short receivedCount = container.getShort(SleepData.MessageData.response_container_number_tag);
 
@@ -60,34 +51,30 @@ private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataRequest.cl
 
         container = container.getObject(SleepData.MessageData.response_container_container_tag);
 
-        byte data = container.getByte(SleepData.MessageData.response_container_container_data_tag);
+        byte type = container.getByte(SleepData.MessageData.response_container_container_data_tag);
 
         byte[] timestampBytes = container.getBytes(SleepData.MessageData.response_container_container_timestamp_tag);
-        long[] timestampLongs = new long[6];
+        int[] timestampInts = new int[6];
 
         for (int i = 0; i < 6; i++) {
             if (timestampBytes[i] >= 0)
-                timestampLongs[i] = timestampBytes[i];
+                timestampInts[i] = timestampBytes[i];
             else
-                timestampLongs[i] = timestampBytes[i] & 0xFF;
+                timestampInts[i] = timestampBytes[i] & 0xFF;
         }
 
-        long timestampLong =
-              (timestampLongs[0] << 24L) +
-              (timestampLongs[1] << 16L) +
-              (timestampLongs[2] << 8L) +
-              (timestampLongs[3]);
-        long durationLong =
-                (timestampLongs[4] << 8L) +
-                (timestampLongs[5]);
-        durationLong = durationLong * 60;
+        int timestamp =
+                (timestampInts[0] << 24) +
+                        (timestampInts[1] << 16) +
+                        (timestampInts[2] << 8) +
+                        (timestampInts[3]);
 
-        Date startTime = new Date(timestampLong * 1000);
-        Date stopTime = new Date((timestampLong + durationLong) * 1000);
+        int durationInt =
+                (timestampInts[4] << 8L) +
+                        (timestampInts[5]);
+        short duration = (short)(durationInt * 60);
 
-        LOG.debug("Start: " + startTime + ", stop: " + stopTime + ", data: " + data);
-
-        // TODO: save the data
+        this.support.addActivity(timestamp, duration, type);
 
         if (count + 1 < maxCount) {
             GetSleepDataRequest nextRequest = new GetSleepDataRequest(this.support, this.builder, this.maxCount, (short) (this.count + 1));

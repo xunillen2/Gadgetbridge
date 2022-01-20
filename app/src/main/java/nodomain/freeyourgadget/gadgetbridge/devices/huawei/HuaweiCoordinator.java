@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
+import de.greenrobot.dao.query.QueryBuilder;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractDeviceCoordinator;
@@ -43,6 +44,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.SampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.AbstractActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.Device;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 
 public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
@@ -72,7 +74,9 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
 
     @Override
     protected void deleteDevice(@NonNull GBDevice gbDevice, @NonNull Device device, @NonNull DaoSession session) throws GBException {
-    
+        long deviceId = device.getId();
+        QueryBuilder<?> qb = session.getHuaweiActivitySampleDao().queryBuilder();
+        qb.where(HuaweiActivitySampleDao.Properties.DeviceId.eq(deviceId)).buildDelete().executeDeleteWithoutDetachingEntities();
     }
 
     @Override
@@ -141,7 +145,7 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
 
     @Override
     public boolean supportsActivityTracking() {
-        return false;
+        return true;
     }
 
     @Override
@@ -157,7 +161,7 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
 
     @Override
     public SampleProvider<? extends AbstractActivitySample> getSampleProvider(GBDevice device, DaoSession session) {
-        return null;
+        return new HuaweiSampleProvider(device, session);
     }
 
     public int[] getSupportedDeviceSpecificSettings(GBDevice device) {

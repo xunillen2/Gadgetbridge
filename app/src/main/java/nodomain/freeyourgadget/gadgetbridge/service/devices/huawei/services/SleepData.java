@@ -26,9 +26,4 @@ public class SleepData {
         public static final int response_container_container_data_tag = 0x04;
         public static final int response_container_container_timestamp_tag = 0x05;
     }
-
-    public static class Type {
-        public static final int light_sleep = 0x06;
-        public static final int deep_sleep = 0x07;
-    }
 }
