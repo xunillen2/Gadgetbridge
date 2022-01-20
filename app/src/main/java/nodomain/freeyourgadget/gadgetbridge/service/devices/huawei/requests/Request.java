@@ -72,10 +72,6 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
         public void call();
     }
 
-    public enum RequestState {
-        COMPLETE, INCOMPLETE, BAD
-    }
-
     public Request(HuaweiSupport support, TransactionBuilder builder) {
         super(support);
         this.support = support;
@@ -142,18 +138,6 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
         isSelfQueue = true;
     }
 
-    public boolean expectsResponse() {
-        return true;
-    }
-
-    public void hasBeenHandled(){
-        cleanHandled = true;
-    }
-
-    public boolean cleanHasBeenHandled() {
-        return cleanHandled;
-    }
-
     public Request pastRequest(Request req) {
         pastRequest = req;
         return this;
@@ -182,43 +166,29 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
         stopChain = true;
     }
 
-    public RequestState checkReceivedPacket(byte[] data) throws GBException {
-        if (receivedPacket != null) {
-            if ( receivedPacket.serviceId == requestedPacket.serviceId && receivedPacket.commandId == requestedPacket.commandId) {
-                receivedPacket.parse(data);
-            }
-        } else {
-            receivedPacket = new  HuaweiPacket().parse(data);
-        }
-        if (requestedPacket != null) { // Request as been defined
-            if ( receivedPacket.serviceId == requestedPacket.serviceId && receivedPacket.commandId == requestedPacket.commandId) {
-                if ( receivedPacket.complete) {
-                    return onCompletePacket();
-                }
-                return RequestState.INCOMPLETE;
-            }
-            return RequestState.BAD;
-        } else { // Request is not defined - AsynchronousRequest
-            if ( receivedPacket.complete) {
-                LOG.debug("AsynchronousResponse complete");
-                return onCompletePacket();
-            } else {
-                LOG.debug("AsynchronousResponse incomplete");
-                return RequestState.INCOMPLETE;
-            }
-        }
-    }
+    /**
+     * Handler for responses from the device
+     * @param response The response packet
+     * @return True if this request handles this response, false otherwise
+     * @throws GBException Thrown if the data cannot be parsed
+     */
+    public boolean handleResponse(HuaweiPacket response) throws GBException {
+        if (requestedPacket != null) {
+            if (response.serviceId == requestedPacket.serviceId && response.commandId == requestedPacket.commandId) {
+                receivedPacket = response;
 
-    private RequestState onCompletePacket() throws GBException {
-        if (receivedPacket.tlv.contains(HuaweiConstants.TAG_RESULT)) {
-            byte[] result = receivedPacket.tlv.getBytes(HuaweiConstants.TAG_RESULT);
-            if (!Arrays.equals(result, HuaweiConstants.RESULT_SUCCESS)) {
-                throw new GBException("Packet returned ErrorCode: " + StringUtils.bytesToHex(result));
+                if (receivedPacket.tlv.contains(HuaweiConstants.TAG_RESULT)) {
+                    byte[] result = receivedPacket.tlv.getBytes(HuaweiConstants.TAG_RESULT);
+                    if (!Arrays.equals(result, HuaweiConstants.RESULT_SUCCESS))
+                        throw new GBException("Packet returned ErrorCode: " + StringUtils.bytesToHex(result));
+                } else if (receivedPacket.tlv.contains(HuaweiConstants.CryptoTags.encryption)) {
+                    receivedPacket.decrypt(support.getSecretKey());
+                }
+
+                return true;
             }
-        } else if (receivedPacket.tlv.contains(HuaweiConstants.CryptoTags.encryption)) {
-                receivedPacket.decrypt(support.getSecretKey());
         }
-        return RequestState.COMPLETE;
+        return false;
     }
 
     public String getName() {
@@ -230,5 +200,4 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
     public void setFinalizeReq(RequestCallback finalizeReq) {
         this.finalizeReq = finalizeReq;
     }
-
 }
