@@ -43,7 +43,7 @@ public class HuaweiBandAw70Support extends HuaweiSupport{
                 case HuaweiConstants.PREF_HUAWEI_WORKMODE:
                     LOG.debug("Workmode");
                     SetWorkModeRequest setWorkModeReq = new SetWorkModeRequest(this);
-                    inProgressRequests.add(setWorkModeReq);
+                    responseManager.addHandler(setWorkModeReq);
                     setWorkModeReq.perform();
                     break;
                 default:

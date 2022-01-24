@@ -30,8 +30,6 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -47,7 +45,6 @@ import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice.State;
@@ -66,7 +63,6 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLEDeviceSuppo
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateAction;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.GattService;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AsynchronousResponse;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AlarmsRequest;
@@ -98,13 +94,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
     private boolean needsAuth = false;
     protected static String deviceMac; //get it from GB
     protected String macAddress;
-    protected Request asynchronousRequest = null;
-    protected boolean isAsynchronous = false;
 
     public static long encryptionCounter = 0;
     protected int msgId = 0;
 
-    protected final List<Request> inProgressRequests = Collections.synchronizedList(new ArrayList<Request>());
+    protected ResponseManager responseManager = new ResponseManager(this);
 
     public HuaweiSupport() {
         super(LOG);
@@ -132,10 +126,10 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
             authReq.nextRequest(bondParamsReq);
             bondParamsReq.nextRequest(bondReq);
             bondReq.pastRequest(linkParamsReq);
-            inProgressRequests.add(linkParamsReq);
-            inProgressRequests.add(authReq);
-            inProgressRequests.add(bondParamsReq);
-            inProgressRequests.add(bondReq);
+            responseManager.addHandler(linkParamsReq);
+            responseManager.addHandler(authReq);
+            responseManager.addHandler(bondParamsReq);
+            responseManager.addHandler(bondReq);
             RequestCallback finalizeReq = new RequestCallback() {
                 @Override
                 public void call() {
@@ -165,14 +159,14 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
         builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZING, getContext()));
         try {
             SetDateFormatRequest setDateFormatReq = new SetDateFormatRequest(this);
-            inProgressRequests.add(setDateFormatReq);
+            responseManager.addHandler(setDateFormatReq);
             setDateFormatReq.perform();
             onSetTime();
             GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
-            inProgressRequests.add(productInformationReq);
+            responseManager.addHandler(productInformationReq);
             productInformationReq.perform();
             GetBatteryLevelRequest batteryLevelReq = new GetBatteryLevelRequest(this);
-            inProgressRequests.add(batteryLevelReq);
+            responseManager.addHandler(batteryLevelReq);
             batteryLevelReq.perform();
             builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZED, getContext()));
             performConnected(builder.getTransaction());
@@ -299,15 +293,10 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
     public boolean onCharacteristicChanged(BluetoothGatt gatt,
                                            BluetoothGattCharacteristic characteristic) {
         byte[] data = characteristic.getValue();
+
         try {
-            synchronized (inProgressRequests) {
-                for (Request req : inProgressRequests) {
-                    if (handleRequest(data, req)) {
-                        return true;
-                    }
-                }
-            }
-            return handleAsynchronousResponse(data);
+            responseManager.handleData(data);
+            return true;
         } catch (GBException e) {
             LOG.error("Invalid response received: " + e.getMessage());
             e.printStackTrace();
@@ -315,40 +304,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
         }
     }
 
-    private boolean handleRequest(byte[] data, Request req) throws GBException {
-        switch (req.checkReceivedPacket(data)) {
-            case COMPLETE:
-                req.handleResponse();
-                if (req.cleanHasBeenHandled())
-                    inProgressRequests.remove(req);
-                if (isAsynchronous) {
-                    isAsynchronous = false;
-                    asynchronousRequest = null;
-                }
-            case INCOMPLETE:
-                return true;
-            case BAD:
-            default:
-                return false;
-        }
-    }
-
-    private boolean handleAsynchronousResponse(byte[] data) {
-        LOG.debug("handleAsynchronousResponse");
-        isAsynchronous = true;
-        try {
-            if (asynchronousRequest == null)
-                asynchronousRequest = new AsynchronousResponse(this);
-            return handleRequest(data, asynchronousRequest);
-        } catch (GBException e) {
-            LOG.debug(e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
-    }
-
     public void removeInProgressRequests(Request req) {
-        inProgressRequests.remove(req);
+        responseManager.removeHandler(req);
     }
 
     @Override
@@ -379,32 +336,32 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
                 case DeviceSettingsPreferenceConst.PREF_DATEFORMAT:
                 case DeviceSettingsPreferenceConst.PREF_TIMEFORMAT: {
                     SetDateFormatRequest setDateFormatReq = new SetDateFormatRequest(this);
-                    inProgressRequests.add(setDateFormatReq);
+                    responseManager.addHandler(setDateFormatReq);
                     setDateFormatReq.perform();
                     break;
                 }
                 case SettingsActivity.PREF_MEASUREMENT_SYSTEM:
                 case DeviceSettingsPreferenceConst.PREF_LANGUAGE: {
                     SetLocaleRequest setLocaleReq = new SetLocaleRequest(this);
-                    inProgressRequests.add(setLocaleReq);
+                    responseManager.addHandler(setLocaleReq);
                     setLocaleReq.perform();
                     break;
                 }
                 case DeviceSettingsPreferenceConst.PREF_WEARLOCATION: {
                     SetWearLocationRequest setWearLocationReq = new SetWearLocationRequest(this);
-                    inProgressRequests.add(setWearLocationReq);
+                    responseManager.addHandler(setWearLocationReq);
                     setWearLocationReq.perform();
                     break;
                 }
                 case DeviceSettingsPreferenceConst.PREF_LIFTWRIST_NOSHED: {
                     SetActivateOnRotateRequest setActivateOnRotateReq = new SetActivateOnRotateRequest(this);
-                    inProgressRequests.add(setActivateOnRotateReq);
+                    responseManager.addHandler(setActivateOnRotateReq);
                     setActivateOnRotateReq.perform();
                     break;
                 }
                 case MiBandConst.PREF_MI2_ROTATE_WRIST_TO_SWITCH_INFO: {
                     SetNavigateOnRotateRequest setNavigateOnRotateReq = new SetNavigateOnRotateRequest(this);
-                    inProgressRequests.add(setNavigateOnRotateReq);
+                    responseManager.addHandler(setNavigateOnRotateReq);
                     setNavigateOnRotateReq.perform();
                     break;
                 }
@@ -521,7 +478,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
         SendNotificationRequest sendNotificationReq = new SendNotificationRequest(this);
         try {
             sendNotificationReq.buildNotificationTLVFromNotificationSpec(notificationSpec);
-            inProgressRequests.add(sendNotificationReq);
+            responseManager.addHandler(sendNotificationReq);
             sendNotificationReq.perform();
         } catch (IOException e) {
             e.printStackTrace();
@@ -537,7 +494,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
     public void onSetTime() {
         try {
             SetTimeRequest setTimeReq = new SetTimeRequest(this);
-            inProgressRequests.add(setTimeReq);
+            responseManager.addHandler(setTimeReq);
             setTimeReq.perform();
         } catch (IOException e) {
             GB.toast(getContext(), "Faile to configure time", Toast.LENGTH_SHORT, GB.ERROR, e);
@@ -549,9 +506,9 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
     @Override
     public void onSetAlarms(ArrayList<? extends nodomain.freeyourgadget.gadgetbridge.model.Alarm> alarms) {
         AlarmsRequest smartAlarmReq = new AlarmsRequest(this, true);
-        inProgressRequests.add(smartAlarmReq);
+        responseManager.addHandler(smartAlarmReq);
         AlarmsRequest eventAlarmReq = new AlarmsRequest(this, false);
-        inProgressRequests.add(eventAlarmReq);
+        responseManager.addHandler(eventAlarmReq);
         for (nodomain.freeyourgadget.gadgetbridge.model.Alarm alarm : alarms) {
             if (alarm.getPosition() == 0) {
                 smartAlarmReq.buildSmartAlarm(alarm);
@@ -574,7 +531,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
             SendNotificationRequest sendNotificationReq = new SendNotificationRequest(this);
             try {
                 sendNotificationReq.buildNotificationTLVFromCallSpec(callSpec);
-                inProgressRequests.add(sendNotificationReq);
+                responseManager.addHandler(sendNotificationReq);
                 sendNotificationReq.perform();
             } catch (IOException e) {
                 e.printStackTrace();
