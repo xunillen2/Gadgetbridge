@@ -444,6 +444,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     @Override
     public void onFetchRecordedData(int dataTypes) {
+        if (getDevice().isBusy()) {
+            LOG.warn("Device is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.");
+            return;
+        }
+
         handledActivityTimestamps = new ArrayList<>();
 
         int start = 0;

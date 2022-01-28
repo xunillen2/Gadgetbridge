@@ -23,7 +23,6 @@ public class GetSleepDataCountRequest extends Request {
         this.start = start;
         this.end = end;
 
-        // TODO: sleep data specific?
         this.builder.add(new SetDeviceBusyAction(getDevice(), getContext().getString(R.string.busy_task_fetch_activity_data), getContext()));
     }
 
