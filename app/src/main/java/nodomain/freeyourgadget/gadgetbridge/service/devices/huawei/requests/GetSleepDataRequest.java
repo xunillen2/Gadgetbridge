@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
 
@@ -18,11 +17,11 @@ public class GetSleepDataRequest extends Request {
     short maxCount = 0;
     short count = 0;
 
-    public GetSleepDataRequest(HuaweiSupport support, TransactionBuilder builder, short maxCount, short count) {
-        // super(support, builder);
+    public GetSleepDataRequest(HuaweiSupport support, short maxCount, short count) {
         super(support);
         this.serviceId = FitnessData.id;
-        this.commandId = MessageData.id;
+        this.commandId = FitnessData.MessageData.seepId;
+
         this.maxCount = maxCount;
         this.count = count;
     }
@@ -34,9 +33,9 @@ public class GetSleepDataRequest extends Request {
                 this.commandId,
                 new HuaweiTLV()
                     .put(
-                            MessageData.container,
+                            MessageData.requestContainerTag,
                             new HuaweiTLV()
-                                .put(MessageData.containerNumber, this.count)
+                                .put(MessageData.requestContainerNumberTag, this.count)
                     )
         ).encrypt(support.getSecretKey(), support.getIV());
         return requestedPacket.serialize();
@@ -44,18 +43,19 @@ public class GetSleepDataRequest extends Request {
 
     @Override
     protected void processResponse() throws GBException {
-        HuaweiTLV container = receivedPacket.tlv.getObject(MessageData.container);
-        short receivedCount = container.getShort(MessageData.containerNumber);
+        HuaweiTLV container = receivedPacket.tlv.getObject(MessageData.responseContainerTag);
+        short receivedCount = container.getShort(MessageData.responseContainerNumberTag);
 
         if (receivedCount != this.count) {
             LOG.warn("Counts do not match");
         }
 
-        container = container.getObject(MessageData.containerContainer);
+        container = container.getObject(FitnessData.MessageData.sleepResponseContainerContainerTag);
 
-        byte type = container.getByte(MessageData.containerContainerData);
+        byte type = container.getByte(FitnessData.MessageData.sleepResponseContainerContainerDataTag);
 
-        byte[] timestampBytes = container.getBytes(MessageData.containerContainerTimestamp);
+        byte[] timestampBytes = container.getBytes(FitnessData.MessageData.sleepResponseContainerContainerTimestampTag);
+
         int[] timestampInts = new int[6];
 
         for (int i = 0; i < 6; i++) {
@@ -76,10 +76,10 @@ public class GetSleepDataRequest extends Request {
                         (timestampInts[5]);
         short duration = (short)(durationInt * 60);
 
-        this.support.addActivity(timestamp, duration, type);
+        this.support.addSleepActivity(timestamp, duration, type);
 
         if (count + 1 < maxCount) {
-            GetSleepDataRequest nextRequest = new GetSleepDataRequest(this.support, this.builder, this.maxCount, (short) (this.count + 1));
+            GetSleepDataRequest nextRequest = new GetSleepDataRequest(this.support, this.maxCount, (short) (this.count + 1));
             nextRequest.setFinalizeReq(this.finalizeReq);
             this.support.addInProgressRequest(nextRequest);
             this.nextRequest(nextRequest);

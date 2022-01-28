@@ -43,7 +43,7 @@ public class GBDaoGenerator {
 
 
     public static void main(String[] args) throws Exception {
-        final Schema schema = new Schema(38, MAIN_PACKAGE + ".entities");
+        final Schema schema = new Schema(39, MAIN_PACKAGE + ".entities");
 
         Entity userAttributes = addUserAttributes(schema);
         Entity user = addUserInfo(schema, userAttributes);
@@ -668,8 +668,13 @@ public class GBDaoGenerator {
     private static Entity addHuaweiActivitySample(Schema schema, Entity user, Entity device) {
         Entity activitySample = addEntity(schema, "HuaweiActivitySample");
         addCommonActivitySampleProperties("AbstractActivitySample", activitySample, user, device);
+        activitySample.addIntProperty("otherTimestamp").notNull().primaryKey();
+        activitySample.addByteProperty("source").notNull().primaryKey();
         activitySample.addIntProperty(SAMPLE_RAW_KIND).notNull().codeBeforeGetterAndSetter(OVERRIDE);
         activitySample.addIntProperty(SAMPLE_RAW_INTENSITY).notNull().codeBeforeGetterAndSetter(OVERRIDE);
+        activitySample.addIntProperty(SAMPLE_STEPS).notNull().codeBeforeGetterAndSetter(OVERRIDE);
+        activitySample.addIntProperty("calories").notNull();
+        activitySample.addIntProperty("distance").notNull();
         return activitySample;
     }
 }

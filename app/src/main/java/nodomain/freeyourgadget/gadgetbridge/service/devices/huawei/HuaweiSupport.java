@@ -24,7 +24,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +32,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
@@ -47,14 +44,12 @@ import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.zetime.ZeTimeConstants;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
-import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice.State;
 import nodomain.freeyourgadget.gadgetbridge.entities.Alarm;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.Device;
@@ -69,9 +64,12 @@ import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLEDeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
+import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceBusyAction;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateAction;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.GattService;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetFitnessTotalsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSleepDataCountRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetStepDataCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
@@ -97,13 +95,14 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetT
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetTruSleepRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearLocationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearMessagePushRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
 import nodomain.freeyourgadget.gadgetbridge.service.serial.GBDeviceProtocol;
 import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 // TO TEST
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWorkModeRequest;
+
 
 public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiSupport.class);
@@ -118,8 +117,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     protected ResponseManager responseManager = new ResponseManager(this);
 
-    // This is a bit of a hack, but it works
-    private ArrayList<Integer> handledActivityTimestamps = null;
+    private boolean sleepSyncActive = false;
+    private boolean stepSyncActive = false;
 
     private MusicStateSpec musicStateSpec = null;
     private MusicSpec musicSpec = null;
@@ -486,32 +485,86 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     @Override
     public void onFetchRecordedData(int dataTypes) {
+        // TODO: All requests run at the same time, which may not work properly on some bands
+
         if (getDevice().isBusy()) {
             LOG.warn("Device is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.");
             return;
         }
 
-        handledActivityTimestamps = new ArrayList<>();
-
-        int start = 0;
+        int sleepStart = 0;
+        int stepStart = 0;
         int end = (int) (System.currentTimeMillis() / 1000);
 
         try (DBHandler db = GBApplication.acquireDB()) {
             HuaweiSampleProvider sampleProvider = new HuaweiSampleProvider(getDevice(), db.getDaoSession());
-            start = sampleProvider.getLastFetchTimestamp();
+            sleepStart = sampleProvider.getLastSleepFetchTimestamp();
+            stepStart = sampleProvider.getLastStepFetchTimestamp();
         } catch (Exception e) {
-            LOG.warn("Exception for start time, using 01/01/2000 - 00:00:00.");
+            LOG.warn("Exception for getting start times, using 01/01/2000 - 00:00:00.");
         }
 
-        if (start == 0)
-            start = 946684800; // Some bands don't work with zero timestamp, so starting later
+        // Some bands don't work with zero timestamp, so starting later
+        if (sleepStart == 0)
+            sleepStart = 946684800;
+        if (stepStart == 0)
+            stepStart = 946684800;
 
-        GetSleepDataCountRequest getSleepDataCountRequest = new GetSleepDataCountRequest(this, start, end);
+        TransactionBuilder transactionBuilder = createTransactionBuilder("FetchRecordedData");
+        transactionBuilder.add(new SetDeviceBusyAction(getDevice(), getContext().getString(R.string.busy_task_fetch_activity_data), getContext()));
+
+        GetSleepDataCountRequest getSleepDataCountRequest = new GetSleepDataCountRequest(this, sleepStart, end);
+        GetStepDataCountRequest getStepDataCountRequest = new GetStepDataCountRequest(this, transactionBuilder, stepStart, end);
+        GetFitnessTotalsRequest getFitnessTotalsRequest = new GetFitnessTotalsRequest(this);
         try {
+            sleepSyncActive = true;
             responseManager.addHandler(getSleepDataCountRequest);
+            getSleepDataCountRequest.setFinalizeReq(new RequestCallback() {
+                @Override
+                public void call() {
+                    sleepSyncActive = false;
+                    handleSyncPartFinished();
+                }
+            });
             getSleepDataCountRequest.perform();
         } catch (IOException e) {
+            sleepSyncActive = false;
+            handleSyncPartFinished();
             e.printStackTrace();
+        }
+
+        try {
+            stepSyncActive = true;
+            responseManager.addHandler(getStepDataCountRequest);
+            getStepDataCountRequest.setFinalizeReq(new RequestCallback() {
+                @Override
+                public void call() {
+                    stepSyncActive = false;
+                    handleSyncPartFinished();
+                }
+            });
+            getStepDataCountRequest.perform();
+        } catch (IOException e) {
+            stepSyncActive = false;
+            handleSyncPartFinished();
+            e.printStackTrace();
+        }
+
+        try {
+            responseManager.addHandler(getFitnessTotalsRequest);
+            getFitnessTotalsRequest.perform();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleSyncPartFinished() {
+        if (!sleepSyncActive && !stepSyncActive) {
+            if (getDevice().isBusy()) {
+                getDevice().unsetBusyTask();
+                getDevice().sendDeviceUpdateIntent(getContext());
+            }
+            GB.signalActivityDataFinish();
         }
     }
 
@@ -685,60 +738,65 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         responseManager.addHandler(request);
     }
 
-    public void addActivity(int timestamp, short duration, byte type) {
+    public void addSleepActivity(int timestamp, short duration, byte type) {
         try (DBHandler db = GBApplication.acquireDB()) {
             Long userId = DBHelper.getUser(db.getDaoSession()).getId();
             Long deviceId = DBHelper.getDevice(getDevice(), db.getDaoSession()).getId();
+            HuaweiSampleProvider sampleProvider = new HuaweiSampleProvider(getDevice(), db.getDaoSession());
 
-            // This sample is so that GB has a starting point of the activity
-            HuaweiActivitySample activitySample_pre = new HuaweiActivitySample(
-                    timestamp - 1,
-                    deviceId,
-                    userId,
-                    ActivitySample.NOT_MEASURED,
-                    0
-            );
-            // This sample is really for the data
-            HuaweiActivitySample activitySample_start = new HuaweiActivitySample(
+            HuaweiActivitySample activitySample = new HuaweiActivitySample(
                     timestamp,
                     deviceId,
                     userId,
-                    type,
-                    1
-            );
-            // This sample is so the graphs are easier to read
-            HuaweiActivitySample activitySample_end = new HuaweiActivitySample(
-                    timestamp + duration - 1,
-                    deviceId,
-                    userId,
-                    type,
-                    1
-            );
-            // This sample is to make GB know there is an end to the activity here
-            HuaweiActivitySample activitySample_post = new HuaweiActivitySample(
                     timestamp + duration,
-                    deviceId,
-                    userId,
+                    (byte) FitnessData.MessageData.seepId,
+                    type,
+                    1,
                     ActivitySample.NOT_MEASURED,
-                    0
+                    ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED
             );
+            activitySample.setProvider(sampleProvider);
 
-            HuaweiSampleProvider sampleProvider = new HuaweiSampleProvider(getDevice(), db.getDaoSession());
-
-            if (!handledActivityTimestamps.contains(timestamp - 1))
-                sampleProvider.addGBActivitySample(activitySample_pre);
-            sampleProvider.addGBActivitySample(activitySample_start);
-            sampleProvider.addGBActivitySample(activitySample_end);
-            if (!handledActivityTimestamps.contains(timestamp + duration))
-                sampleProvider.addGBActivitySample(activitySample_post);
-
-            handledActivityTimestamps.add(timestamp);
-            handledActivityTimestamps.add(timestamp + duration - 1);
+            sampleProvider.addGBActivitySample(activitySample);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    public void addStepData(int timestamp, short steps, short calories, short distance) {
+        try (DBHandler db = GBApplication.acquireDB()) {
+            Long userId = DBHelper.getUser(db.getDaoSession()).getId();
+            Long deviceId = DBHelper.getDevice(getDevice(), db.getDaoSession()).getId();
+            HuaweiSampleProvider sampleProvider = new HuaweiSampleProvider(getDevice(), db.getDaoSession());
+
+            HuaweiActivitySample activitySample = new HuaweiActivitySample(
+                    timestamp,
+                    deviceId,
+                    userId,
+                    timestamp + 60,
+                    (byte) FitnessData.MessageData.stepId,
+                    ActivitySample.NOT_MEASURED,
+                    1,
+                    steps,
+                    calories,
+                    distance
+            );
+            activitySample.setProvider(sampleProvider);
+
+            sampleProvider.addGBActivitySample(activitySample);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addTotalFitnessData(int steps, int calories, int distance) {
+        LOG.debug("FITNESS total steps: " + steps);
+        LOG.debug("FITNESS total calories: " + calories); // TODO: May actually be kilocalories
+        LOG.debug("FITNESS total distance: " + distance + " m");
+
+        // TODO: potentially do more with this, maybe through realtime data?
+    }
 
     public void setWearLocation() {
         try {
