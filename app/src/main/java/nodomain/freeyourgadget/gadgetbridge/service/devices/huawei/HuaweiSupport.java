@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
@@ -45,13 +47,16 @@ import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice.State;
 import nodomain.freeyourgadget.gadgetbridge.entities.Alarm;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.Device;
 import nodomain.freeyourgadget.gadgetbridge.entities.User;
+import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.CalendarEventSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
@@ -63,6 +68,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLEDeviceSuppo
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateAction;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.GattService;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSleepDataCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AlarmsRequest;
@@ -87,7 +93,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 // TO TEST
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWorkModeRequest;
 
-public class HuaweiSupport extends AbstractBTLEDeviceSupport{
+public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiSupport.class);
 
     protected int mtu = 65535;
@@ -99,6 +105,9 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
     protected int msgId = 0;
 
     protected ResponseManager responseManager = new ResponseManager(this);
+
+    // This is a bit of a hack, but it works
+    private ArrayList<Integer> handledActivityTimestamps = null;
 
     public HuaweiSupport() {
         super(LOG);
@@ -435,7 +444,30 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     @Override
     public void onFetchRecordedData(int dataTypes) {
+        if (getDevice().isBusy()) {
+            LOG.warn("Device is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.");
+            return;
+        }
 
+        handledActivityTimestamps = new ArrayList<>();
+
+        int start = 0;
+        int end = (int) (System.currentTimeMillis() / 1000);
+
+        try (DBHandler db = GBApplication.acquireDB()) {
+            HuaweiSampleProvider sampleProvider = new HuaweiSampleProvider(getDevice(), db.getDaoSession());
+            start = sampleProvider.getLastFetchTimestamp();
+        } catch (Exception e) {
+            LOG.warn("Exception for start time, using zero.");
+        }
+
+        GetSleepDataCountRequest getSleepDataCountRequest = new GetSleepDataCountRequest(this, start, end);
+        try {
+            responseManager.addHandler(getSleepDataCountRequest);
+            getSleepDataCountRequest.perform();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -558,4 +590,61 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport{
 
     }
 
+    public void addInProgressRequest(Request request) {
+        responseManager.addHandler(request);
+    }
+
+    public void addActivity(int timestamp, short duration, byte type) {
+        try (DBHandler db = GBApplication.acquireDB()) {
+            Long userId = DBHelper.getUser(db.getDaoSession()).getId();
+            Long deviceId = DBHelper.getDevice(getDevice(), db.getDaoSession()).getId();
+
+            // This sample is so that GB has a starting point of the activity
+            HuaweiActivitySample activitySample_pre = new HuaweiActivitySample(
+                    timestamp - 1,
+                    deviceId,
+                    userId,
+                    ActivitySample.NOT_MEASURED,
+                    0
+            );
+            // This sample is really for the data
+            HuaweiActivitySample activitySample_start = new HuaweiActivitySample(
+                    timestamp,
+                    deviceId,
+                    userId,
+                    type,
+                    1
+            );
+            // This sample is so the graphs are easier to read
+            HuaweiActivitySample activitySample_end = new HuaweiActivitySample(
+                    timestamp + duration - 1,
+                    deviceId,
+                    userId,
+                    type,
+                    1
+            );
+            // This sample is to make GB know there is an end to the activity here
+            HuaweiActivitySample activitySample_post = new HuaweiActivitySample(
+                    timestamp + duration,
+                    deviceId,
+                    userId,
+                    ActivitySample.NOT_MEASURED,
+                    0
+            );
+
+            HuaweiSampleProvider sampleProvider = new HuaweiSampleProvider(getDevice(), db.getDaoSession());
+
+            if (!handledActivityTimestamps.contains(timestamp - 1))
+                sampleProvider.addGBActivitySample(activitySample_pre);
+            sampleProvider.addGBActivitySample(activitySample_start);
+            sampleProvider.addGBActivitySample(activitySample_end);
+            if (!handledActivityTimestamps.contains(timestamp + duration))
+                sampleProvider.addGBActivitySample(activitySample_post);
+
+            handledActivityTimestamps.add(timestamp);
+            handledActivityTimestamps.add(timestamp + duration - 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
