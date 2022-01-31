@@ -167,9 +167,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), true);
         builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZING, getContext()));
         try {
-            SetDateFormatRequest setDateFormatReq = new SetDateFormatRequest(this);
-            responseManager.addHandler(setDateFormatReq);
-            setDateFormatReq.perform();
+            String name = gbDevice.getName();
+            if (name != null && !name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME)) {
+                SetDateFormatRequest setDateFormatReq = new SetDateFormatRequest(this);
+                responseManager.addHandler(setDateFormatReq);
+                setDateFormatReq.perform();
+            }
             onSetTime();
             GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
             responseManager.addHandler(productInformationReq);
