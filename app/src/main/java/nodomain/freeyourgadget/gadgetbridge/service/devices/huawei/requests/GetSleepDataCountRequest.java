@@ -61,6 +61,14 @@ public class GetSleepDataCountRequest extends Request {
             });
             this.support.addInProgressRequest(nextRequest);
             this.nextRequest(nextRequest);
+        } else {
+            try {
+                operationFinished();
+                unsetBusy();
+                GB.signalActivityDataFinish();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
