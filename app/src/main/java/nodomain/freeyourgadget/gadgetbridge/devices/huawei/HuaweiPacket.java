@@ -45,7 +45,7 @@ public class HuaweiPacket {
         this.commandId = 0;
         this.tlv = null;
         this.partialPacket = null;
-        this.payload = null;
+        this.payload = new byte[0];
         this.complete = false;
     }
 
@@ -54,7 +54,7 @@ public class HuaweiPacket {
         this.commandId = (byte) commandId;
         this.tlv = tlv;
         this.partialPacket = null;
-        this.payload = null;
+        this.payload = new byte[0];
         this.complete = false;
     }
 
