@@ -289,18 +289,14 @@ final class VarInt {
     */
     public static int getVarIntValue(byte[] src, int offset) {
         int result = 0;
-        int shift = 0;
         int b;
-        do {
-            if (shift >= 32) {
-                // Out of range
-                throw new IndexOutOfBoundsException("varint too long");
-            }
-            // Get 7 bits from next byte
-            b = src[offset++];
-            result |= (b & 0x7F) << shift;
-            shift += 7;
-        } while ((b & 0x80) != 0);
+        while (true) {
+            b = src[offset];
+            result += (b & 0x7F);
+            if ((b & 0x80) == 0) { break; }
+            result <<= 7;
+            offset++;
+        }
         return result;
     }
 
