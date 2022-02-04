@@ -461,7 +461,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             HuaweiSampleProvider sampleProvider = new HuaweiSampleProvider(getDevice(), db.getDaoSession());
             start = sampleProvider.getLastFetchTimestamp();
         } catch (Exception e) {
-            LOG.warn("Exception for start time, using zero.");
+            LOG.warn("Exception for start time, using 01/01/2000 - 00:00:00.");
         }
 
         if (start ==  0) { start = (int) (946940400 / 1000);} // Force 01/01/2000 - 00:00:00 for some watches/bands
