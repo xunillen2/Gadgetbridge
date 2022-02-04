@@ -464,6 +464,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             LOG.warn("Exception for start time, using zero.");
         }
 
+        if (start ==  0) { start = (int) (946940400 / 1000);} // Force 01/01/2000 - 00:00:00 for some watches/bands
+
         GetSleepDataCountRequest getSleepDataCountRequest = new GetSleepDataCountRequest(this, start, end);
         try {
             responseManager.addHandler(getSleepDataCountRequest);
