@@ -2,6 +2,9 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
@@ -12,6 +15,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Slee
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 
 public class GetSleepDataCountRequest extends Request {
+    private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataCountRequest.class);
     private int start = 0;
     private int end = 0;
 
