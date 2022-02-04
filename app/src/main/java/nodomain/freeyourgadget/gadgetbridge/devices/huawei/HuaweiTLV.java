@@ -308,15 +308,13 @@ final class VarInt {
     * @return the encoded value in byte[]
     */
     public static byte[] putVarIntValue(int value) {
-        int offset = 0;
-        byte[] result = new byte[getVarIntSize(value)];
-        do {
-            // Encode next 7 bits + terminator bit
-            int bits = value & 0x7F;
+        int size = getVarIntSize(value);
+        byte[] result = new byte[size];
+        result[size - 1] = (byte)(value & 0x7F);
+        for (int offset = size - 2; offset >= 0; offset--) {
             value >>>= 7;
-            byte b = (byte) (bits + ((value != 0) ? 0x80 : 0));
-            result[offset++] = b;
-        } while (value != 0);
+            result[offset] = (byte)((value & 0x7F) | 0x80);
+        }
         return result;
     }
 }
