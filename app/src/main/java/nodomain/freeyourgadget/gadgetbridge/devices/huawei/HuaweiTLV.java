@@ -26,13 +26,14 @@ import org.slf4j.LoggerFactory;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 public class HuaweiTLV {
 
-    private static class TLV {
+    protected static class TLV {
         private final byte tag;
         private final byte[] value;
 
@@ -64,6 +65,14 @@ public class HuaweiTLV {
         public String toString() {
             return "{tag: " + (tag & 0xFF) + " - Value: " + StringUtils.bytesToHex(value) + "} - ";
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TLV tlv = (TLV) o;
+            return tag == tlv.tag && Arrays.equals(value, tlv.value);
+        }
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiTLV.class);
@@ -81,10 +90,11 @@ public class HuaweiTLV {
         return length;
     }
 
+    // TODO: multiple options to read out-of-bounds in this function
+    //       mainly when the offset and length are wrong
     public HuaweiTLV parse(byte[] buffer, int offset, int length) {
-        if (buffer == null) {
+        if (buffer == null)
             return null;
-        }
         int parsed = 0;
         while (parsed < length) {
             // Tag is 1 byte
@@ -196,10 +206,10 @@ public class HuaweiTLV {
         return ByteBuffer.wrap(bytes).getInt();
     }
 
-    public short getShort(int tag) {
+    public Short getShort(int tag) {
         byte[] bytes = getBytes(tag);
         if (bytes == null)
-            return 0;
+            return null;
         return ByteBuffer.wrap(bytes).getShort();
     }
 
@@ -226,6 +236,12 @@ public class HuaweiTLV {
         return false;
     }
 
+    /**
+     * Removes the last element that was added with the specified tag
+     * @param tag The tag of the element that should be removed
+     * @return The value contained in the removed tag
+     */
+    // TODO: This is the only time the type of tag is `byte` instead of `int`?
     public byte[] remove(byte tag) {
         TLV foundItem = null;
         for (TLV item : valueMap)
@@ -240,6 +256,9 @@ public class HuaweiTLV {
     }
 
     public String toString() {
+        if (valueMap.isEmpty())
+            return ""; // TODO: do we want more information in here?
+
         StringBuilder msg = new StringBuilder();
         for (TLV entry : valueMap)
             msg.append(entry.toString());
