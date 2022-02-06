@@ -90,9 +90,19 @@ public class HuaweiTLV {
         return length;
     }
 
-    // TODO: multiple options to read out-of-bounds in this function
-    //       mainly when the offset and length are wrong
-    public HuaweiTLV parse(byte[] buffer, int offset, int length) {
+    /**
+     * Parse byte buffer into this HuaweiTLV
+     * @param buffer The buffer to parse
+     * @param offset The offset to start parsing at
+     * @param length The length to parse
+     * @return The HuaweiTLV object itself
+     * @throws ArrayIndexOutOfBoundsException There are two general cases in which this exception
+     *  can be thrown:
+     *    1. offset + length is greater than the buffer length
+     *    2. The buffer is malformed which causes an element size to be larger than the remaining
+     *       buffer length
+     */
+    public HuaweiTLV parse(byte[] buffer, int offset, int length)  {
         if (buffer == null)
             return null;
         int parsed = 0;
@@ -241,8 +251,7 @@ public class HuaweiTLV {
      * @param tag The tag of the element that should be removed
      * @return The value contained in the removed tag
      */
-    // TODO: This is the only time the type of tag is `byte` instead of `int`?
-    public byte[] remove(byte tag) {
+    public byte[] remove(int tag) {
         TLV foundItem = null;
         for (TLV item : valueMap)
             if (item.getTag() == (byte) tag)
@@ -255,9 +264,13 @@ public class HuaweiTLV {
         }
     }
 
+    /**
+     * Get string representation of HuaweiTLV, "Empty" when no elements are present
+     * @return String
+     */
     public String toString() {
         if (valueMap.isEmpty())
-            return ""; // TODO: do we want more information in here?
+            return "Empty";
 
         StringBuilder msg = new StringBuilder();
         for (TLV entry : valueMap)

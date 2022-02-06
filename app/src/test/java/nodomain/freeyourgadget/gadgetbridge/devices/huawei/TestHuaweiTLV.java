@@ -1,10 +1,21 @@
 package nodomain.freeyourgadget.gadgetbridge.devices.huawei;
 
+import static org.powermock.api.mockito.PowerMockito.when;
+
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+
+import static org.mockito.Matchers.any;
 
 import java.util.ArrayList;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(HuaweiCrypto.class)
 public class TestHuaweiTLV {
 
     @Test
@@ -208,6 +219,14 @@ public class TestHuaweiTLV {
         Assert.assertEquals(expectedValueMap, huaweiTLV.valueMap);
     }
 
+    @Test(expected = ArrayIndexOutOfBoundsException.class)
+    public void testParseMalformed() {
+        byte[] input = {(byte) 0x01, (byte) 0x01};
+        new HuaweiTLV()
+                .parse(input);
+        Assert.fail();
+    }
+
     @Test
     public void testParseOffsetLength() {
         byte[] input = {(byte) 0x90, (byte) 0x90, (byte) 0x90, 0x01, 0x00};
@@ -222,17 +241,12 @@ public class TestHuaweiTLV {
         Assert.assertEquals(expectedValueMap, huaweiTLV.valueMap);
     }
 
-    // @Test
+    @Test(expected = ArrayIndexOutOfBoundsException.class)
     public void testParseWrongOffsetLength() {
-        // TODO: currently this fails
-
         byte[] input = {};
-        ArrayList<HuaweiTLV.TLV> expectedValueMap = new ArrayList<>();
-
-        HuaweiTLV huaweiTLV = new HuaweiTLV()
+        new HuaweiTLV()
                 .parse(input, 1, 1);
-
-        Assert.assertEquals(expectedValueMap, huaweiTLV.valueMap);
+        Assert.fail();
     }
 
     @Test
@@ -371,7 +385,7 @@ public class TestHuaweiTLV {
         HuaweiTLV huaweiTLV = new HuaweiTLV();
         huaweiTLV.valueMap = input;
 
-        Assert.assertArrayEquals(expectedOutput, huaweiTLV.remove((byte) tag));
+        Assert.assertArrayEquals(expectedOutput, huaweiTLV.remove(tag));
         Assert.assertEquals(expectedValueMap, huaweiTLV.valueMap);
     }
 
@@ -384,7 +398,7 @@ public class TestHuaweiTLV {
         HuaweiTLV huaweiTLV = new HuaweiTLV();
         huaweiTLV.valueMap = input;
 
-        Assert.assertNull(huaweiTLV.remove((byte) tag));
+        Assert.assertNull(huaweiTLV.remove(tag));
         Assert.assertEquals(input, huaweiTLV.valueMap);
     }
 
@@ -403,16 +417,16 @@ public class TestHuaweiTLV {
         HuaweiTLV huaweiTLV = new HuaweiTLV();
         huaweiTLV.valueMap = input;
 
-        Assert.assertArrayEquals(expectedOutput1, huaweiTLV.remove((byte) tag));
+        Assert.assertArrayEquals(expectedOutput1, huaweiTLV.remove(tag));
         Assert.assertEquals(expectedValueMap1, huaweiTLV.valueMap);
-        Assert.assertArrayEquals(expectedOutput2, huaweiTLV.remove((byte) tag));
+        Assert.assertArrayEquals(expectedOutput2, huaweiTLV.remove(tag));
         Assert.assertEquals(expectedValueMap2, huaweiTLV.valueMap);
     }
 
     @Test
     public void testToStringEmpty() {
         ArrayList<HuaweiTLV.TLV> input = new ArrayList<>();
-        String expectedOutput = "";
+        String expectedOutput = "Empty";
 
         HuaweiTLV huaweiTLV = new HuaweiTLV();
         huaweiTLV.valueMap = input;
@@ -433,5 +447,64 @@ public class TestHuaweiTLV {
         Assert.assertEquals(expectedOutput, huaweiTLV.toString());
     }
 
-    // TODO: test encrypt and decrypt
+    @Test
+    public void testEncrypt() {
+        byte[] data = {0x01, 0x02, (byte) 0xCA, (byte) 0xFE};
+        byte[] key = {(byte) 0xDE};
+        byte[] iv = {(byte) 0xAD};
+        byte[] encryptedPlaceholder = {(byte) 0xBE, (byte) 0xEF};
+
+        PowerMockito.mockStatic(HuaweiCrypto.class);
+
+        when(HuaweiCrypto.encrypt((byte[]) any(), (byte[]) any(), (byte[]) any()))
+                .thenReturn(encryptedPlaceholder);
+
+        ArrayList<HuaweiTLV.TLV> input = new ArrayList<>();
+        input.add(new HuaweiTLV.TLV((byte) 0x01, new byte[] {(byte) 0xCA, (byte) 0xFE}));
+
+        ArrayList<HuaweiTLV.TLV> expectedValueMap = new ArrayList<>();
+        expectedValueMap.add(new HuaweiTLV.TLV((byte) 0x7C, new byte[] {0x01}));
+        expectedValueMap.add(new HuaweiTLV.TLV((byte) 0x7D, iv));
+        expectedValueMap.add(new HuaweiTLV.TLV((byte) 0x7E, new byte[] {(byte) 0xBE, (byte) 0xEF}));
+
+        HuaweiTLV huaweiTLV = new HuaweiTLV();
+        huaweiTLV.valueMap = input;
+
+        huaweiTLV.encrypt(key, iv);
+
+        Assert.assertEquals(expectedValueMap, huaweiTLV.valueMap);
+
+        PowerMockito.verifyStatic(HuaweiCrypto.class, Mockito.times(1));
+        HuaweiCrypto.encrypt(data, key, iv);
+    }
+
+    @Test
+    public void testDecrypt() {
+        byte[] ciphertext = {(byte) 0xBE, (byte) 0xEF};
+        byte[] key = {(byte) 0xDE};
+        byte[] iv = {(byte) 0xAD};
+        byte[] plaintextPlaceholder = {0x01, 0x02, (byte) 0xCA, (byte) 0xFE};
+
+        PowerMockito.mockStatic(HuaweiCrypto.class);
+
+        when(HuaweiCrypto.decrypt((byte[]) any(), (byte[]) any(), (byte[]) any()))
+                .thenReturn(plaintextPlaceholder);
+
+        ArrayList<HuaweiTLV.TLV> input = new ArrayList<>();
+        input.add(new HuaweiTLV.TLV((byte) 0x7D, new byte[] {(byte) 0xAD}));
+        input.add(new HuaweiTLV.TLV((byte) 0x7E, new byte[] {(byte) 0xBE, (byte) 0xEF}));
+
+        ArrayList<HuaweiTLV.TLV> expectedValueMap = new ArrayList<>();
+        expectedValueMap.add(new HuaweiTLV.TLV((byte) 0x01, new byte[] {(byte) 0xCA, (byte) 0xFE}));
+
+        HuaweiTLV huaweiTLV = new HuaweiTLV();
+        huaweiTLV.valueMap = input;
+
+        huaweiTLV.decrypt(key);
+
+        Assert.assertEquals(expectedValueMap, huaweiTLV.valueMap);
+
+        PowerMockito.verifyStatic(HuaweiCrypto.class, Mockito.times(1));
+        HuaweiCrypto.decrypt(ciphertext, key, iv);
+    }
 }
