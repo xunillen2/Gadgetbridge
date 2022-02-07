@@ -16,7 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.devices.huawei;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +24,11 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
+import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.spec.IvParameterSpec;
@@ -80,7 +81,10 @@ public class HuaweiCrypto {
     }
 
     public static byte[] generateNonce() {
-        return GB.hexStringToByteArray(RandomStringUtils.random(32, true, true));
+        // While technically not a nonce, we need it to be random and rely on the length for the chance of repitition to be small
+        byte[] returnValue = new byte[16];
+        (new SecureRandom()).nextBytes(returnValue);
+        return returnValue;
     }
 
     private static byte[] calcHmacSha256(byte[] secretKey, byte[] message) {
