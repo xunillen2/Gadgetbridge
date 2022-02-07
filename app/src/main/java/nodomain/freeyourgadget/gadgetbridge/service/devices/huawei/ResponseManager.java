@@ -17,12 +17,12 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Requ
 public class ResponseManager {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiSupport.class);
 
-    private final HuaweiSupport support;
     private final List<Request> handlers = Collections.synchronizedList(new ArrayList<Request>());
     private HuaweiPacket receivedPacket;
+    private final AsynchronousResponse asynchronousResponse;
 
     public ResponseManager(HuaweiSupport support) {
-        this.support = support;
+        this.asynchronousResponse = new AsynchronousResponse(support);
     }
 
     /**
@@ -74,7 +74,7 @@ public class ResponseManager {
                 LOG.debug("Service: " + receivedPacket.serviceId + ", command: " + receivedPacket.commandId + ", asynchronous response.");
 
                 // Asynchronous response
-                new AsynchronousResponse(this.support).handleResponse(receivedPacket);
+                asynchronousResponse.handleResponse(receivedPacket);
             } else {
                 LOG.debug("Service: " + receivedPacket.serviceId + ", command: " + receivedPacket.commandId + ", handled by: " + handler.getClass());
 
