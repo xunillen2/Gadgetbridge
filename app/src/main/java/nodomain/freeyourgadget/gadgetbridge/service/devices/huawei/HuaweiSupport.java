@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -46,6 +47,7 @@ import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
@@ -80,6 +82,8 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetB
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetBondRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetLinkParamsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetProductInformationRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSupportedCommandsRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSupportedServicesRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetActivateOnRotateRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetDateFormatRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetLocaleRequest;
@@ -189,6 +193,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             editor.apply();
             initializeAlarms();
             // getAlarms();
+            getCommands();
         } catch (IOException e) {
             GB.toast(getContext(), "Initializing Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
@@ -290,6 +295,16 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             description = getContext().getString(R.string.huawei_alarm_smart_description);
         }
         return new Alarm(device.getId(), user.getId(), position, false, smartWakeup, false, 0, 6, 30, false, title, description);
+    }
+
+    protected void getCommands() throws IOException {
+        GetSupportedServicesRequest supportedServicesReq = new GetSupportedServicesRequest(this);
+        GetSupportedCommandsRequest supportedCommandsReq = new GetSupportedCommandsRequest(this);
+        supportedServicesReq.nextRequest(supportedCommandsReq);
+        supportedCommandsReq.pastRequest(supportedServicesReq);
+        responseManager.addHandler(supportedServicesReq);
+        responseManager.addHandler(supportedCommandsReq);
+        supportedServicesReq.perform();
     }
 
     public HuaweiSupport enableNotifications(TransactionBuilder builder, boolean enable) {

@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 
 import de.greenrobot.dao.query.QueryBuilder;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
@@ -50,7 +52,11 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiCoordinator.class);
 
-    public HuaweiCoordinator() {}
+    public static TreeMap<Integer, byte[]> commandsPerService;
+
+    public HuaweiCoordinator() {
+        this.commandsPerService = new TreeMap<Integer, byte[]>();
+    }
 
     @NonNull
     @Override
@@ -179,4 +185,19 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
         return settings;
     }
 
+    public TreeMap<Integer, byte[]> getCommandsPerService() {
+        return commandsPerService;
+    }
+
+    // Print all Services ID and Commands ID
+    public void printCommandsPerService() {
+        String msg;
+        for(Map.Entry<Integer, byte[]> entry : this.commandsPerService.entrySet()) {
+            msg = "ServiceID: " + entry.getKey() + " => Commands: ";
+            for (byte b: entry.getValue()) {
+                msg += Integer.toHexString(b) + " ";
+            }
+            LOG.debug(msg);
+        }
+    }
 }

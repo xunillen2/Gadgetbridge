@@ -32,6 +32,20 @@ public class DeviceConfig {
         public static final int PathExtendNumber = 6;
     }
 
+    public static class SupportedServices {
+        public static final int id = 2;
+        public static final int Services = 1;
+        public static final int ActiveServices = 2;
+    }
+
+    public static class SupportedCommands {
+        public static final int id = 3;
+        public static final int ServiceId = 2;
+        public static final int Commands = 3;
+        public static final int ActiveCommands = 4;
+        public static final int SupportedCommands = 129;
+    }
+
     public static class SetDateFormat {
         public static final int id = 4;
         public static final int DateFormat = 2;
