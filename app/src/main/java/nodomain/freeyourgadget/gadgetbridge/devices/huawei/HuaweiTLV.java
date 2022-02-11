@@ -20,22 +20,64 @@ package nodomain.freeyourgadget.gadgetbridge.devices.huawei;
 
 import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants.CryptoTags;
 
-import android.util.Pair;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 public class HuaweiTLV {
+
+    protected static class TLV {
+        private final byte tag;
+        private final byte[] value;
+
+        public TLV(byte tag, byte[] value) {
+            this.tag = tag;
+            this.value = value;
+        }
+
+        public byte getTag() {
+            return tag;
+        }
+
+        public byte[] getValue() {
+            return value;
+        }
+
+        public int length() {
+            return 1 + VarInt.getVarIntSize(value.length) + value.length;
+        }
+
+        public byte[] serialize() {
+            return ByteBuffer.allocate(this.length())
+                    .put(tag)
+                    .put(VarInt.putVarIntValue(value.length))
+                    .put(value)
+                    .array();
+        }
+
+        public String toString() {
+            return "{tag: " + (tag & 0xFF) + " - Value: " + StringUtils.bytesToHex(value) + "} - ";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TLV tlv = (TLV) o;
+            return tag == tlv.tag && Arrays.equals(value, tlv.value);
+        }
+    }
+
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiTLV.class);
 
-    protected List<Pair<Byte, byte[]>> valueMap;
+    protected List<TLV> valueMap;
 
     public HuaweiTLV() {
         this.valueMap = new ArrayList<>();
@@ -43,17 +85,26 @@ public class HuaweiTLV {
 
     public int length() {
         int length = 0;
-        for (Pair<Byte, byte[]> item : valueMap) {
-            int value_lenght = item.second.length;
-            length += 1 + VarInt.getVarIntSize(value_lenght) + value_lenght;
-        }
+        for (TLV tlv : valueMap)
+            length += tlv.length();
         return length;
     }
 
-    public HuaweiTLV parse(byte[] buffer, int offset, int length) {
-        if (buffer == null) {
+    /**
+     * Parse byte buffer into this HuaweiTLV
+     * @param buffer The buffer to parse
+     * @param offset The offset to start parsing at
+     * @param length The length to parse
+     * @return The HuaweiTLV object itself
+     * @throws ArrayIndexOutOfBoundsException There are two general cases in which this exception
+     *  can be thrown:
+     *    1. offset + length is greater than the buffer length
+     *    2. The buffer is malformed which causes an element size to be larger than the remaining
+     *       buffer length
+     */
+    public HuaweiTLV parse(byte[] buffer, int offset, int length)  {
+        if (buffer == null)
             return null;
-        }
         int parsed = 0;
         while (parsed < length) {
             // Tag is 1 byte
@@ -80,27 +131,19 @@ public class HuaweiTLV {
     }
 
     public byte[] serialize() {
-        int offset = 0;
         int length = this.length();
-        if (length == 0) {
+        if (length == 0)
             return new byte[0];
-        }
         ByteBuffer buffer = ByteBuffer.allocate(length);
-        for (Pair<Byte, byte[]> entry : valueMap) {
-            byte tag = entry.first;
-            byte[] value = entry.second;
-            byte[] varIntValue = VarInt.putVarIntValue(value.length);
-            buffer.put(tag);
-            buffer.put(varIntValue);
-            buffer.put(value);
-        }
+        for (TLV entry : valueMap)
+            buffer.put(entry.serialize());
         LOG.debug("Serialized TLV: " + this.toString());
         return buffer.array();
     }
 
     public HuaweiTLV put(int tag) {
         byte[] value = new byte[0];
-        valueMap.add(new Pair<>((byte)tag, value));
+        valueMap.add(new TLV((byte)tag, value));
         return this;
     }
 
@@ -108,7 +151,7 @@ public class HuaweiTLV {
         if (value == null) {
             return this;
         }
-        valueMap.add(new Pair<>((byte)tag, value));
+        valueMap.add(new TLV((byte)tag, value));
         return this;
     }
 
@@ -143,11 +186,9 @@ public class HuaweiTLV {
     }
 
     public byte[] getBytes(int tag) {
-        for (Pair<Byte, byte[]> item : valueMap) {
-            if (item.first.equals((byte) tag)) {
-                return item.second;
-            }
-        }
+        for (TLV item : valueMap)
+            if (item.getTag() == (byte) tag)
+                return item.getValue();
         return null;
     }
 
@@ -175,10 +216,10 @@ public class HuaweiTLV {
         return ByteBuffer.wrap(bytes).getInt();
     }
 
-    public short getShort(int tag) {
+    public Short getShort(int tag) {
         byte[] bytes = getBytes(tag);
         if (bytes == null)
-            return 0;
+            return null;
         return ByteBuffer.wrap(bytes).getShort();
     }
 
@@ -199,35 +240,41 @@ public class HuaweiTLV {
     }
 
     public boolean contains(int tag) {
-        for (Pair<Byte, byte[]> item : valueMap) {
-            if (item.first.equals((byte) tag)) {
+        for (TLV item : valueMap)
+            if (item.getTag() == (byte) tag)
                 return true;
-            }
-        }
         return false;
     }
 
-    public byte[] remove(byte tag) {
-        Pair<Byte, byte[]> foundItem = null;
-        for (Pair<Byte, byte[]> item : valueMap) {
-            if (item.first.equals((byte) tag)) {
+    /**
+     * Removes the last element that was added with the specified tag
+     * @param tag The tag of the element that should be removed
+     * @return The value contained in the removed tag
+     */
+    public byte[] remove(int tag) {
+        TLV foundItem = null;
+        for (TLV item : valueMap)
+            if (item.getTag() == (byte) tag)
                 foundItem = item;
-            }
-        }
         if (foundItem != null) {
             valueMap.remove(foundItem);
-            return foundItem.second;
+            return foundItem.getValue();
         } else {
             return null;
         }
     }
 
+    /**
+     * Get string representation of HuaweiTLV, "Empty" when no elements are present
+     * @return String
+     */
     public String toString() {
+        if (valueMap.isEmpty())
+            return "Empty";
+
         StringBuilder msg = new StringBuilder();
-        for (Pair<Byte, byte[]> entry : valueMap) {
-            msg.append("{tag: ").append(entry.first & 0xFF).append(" - Value: ")
-                    .append(StringUtils.bytesToHex(entry.second)).append("} - ");
-        }
+        for (TLV entry : valueMap)
+            msg.append(entry.toString());
         return msg.substring(0, msg.length() - 3);
     }
 
@@ -244,9 +291,7 @@ public class HuaweiTLV {
         byte[] decryptedTLV = HuaweiCrypto.decrypt(getBytes(CryptoTags.cipherText), key, getBytes(CryptoTags.initVector));
         this.valueMap = new ArrayList<>();
         parse(decryptedTLV);
-
     }
-
 }
 
 final class VarInt {
