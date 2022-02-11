@@ -33,7 +33,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 public class HuaweiTLV {
 
-    protected static class TLV {
+    public static class TLV {
         private final byte tag;
         private final byte[] value;
 
@@ -183,6 +183,10 @@ public class HuaweiTLV {
             return this;
         }
         return put(tag, value.serialize());
+    }
+
+    public List<TLV> get() {
+        return this.valueMap;
     }
 
     public byte[] getBytes(int tag) {
