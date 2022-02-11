@@ -73,6 +73,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateA
 import nodomain.freeyourgadget.gadgetbridge.service.btle.GattService;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSleepDataCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AlarmsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Request;
@@ -119,6 +120,9 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     // This is a bit of a hack, but it works
     private ArrayList<Integer> handledActivityTimestamps = null;
+
+    private MusicStateSpec musicStateSpec = null;
+    private MusicSpec musicSpec = null;
 
     public HuaweiSupport() {
         super(LOG);
@@ -651,12 +655,23 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     @Override
     public void onSetMusicState(MusicStateSpec stateSpec) {
-
+        this.musicStateSpec = stateSpec;
+        sendSetMusic();
     }
 
     @Override
     public void onSetMusicInfo(MusicSpec musicSpec) {
+        this.musicSpec = musicSpec;
+        sendSetMusic();
+    }
 
+    public void sendSetMusic() {
+        SetMusicRequest setMusicRequest = new SetMusicRequest(this, this.musicStateSpec, this.musicSpec);
+        try {
+            setMusicRequest.perform();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void transmitActivityStatus() {
