@@ -51,6 +51,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
+import nodomain.freeyourgadget.gadgetbridge.devices.zetime.ZeTimeConstants;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice.State;
@@ -85,6 +86,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetP
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSupportedCommandsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSupportedServicesRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetActivateOnRotateRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetActivityReminderRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetDateFormatRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetLocaleRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetNavigateOnRotateRequest;
@@ -390,6 +392,22 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     SetNavigateOnRotateRequest setNavigateOnRotateReq = new SetNavigateOnRotateRequest(this);
                     responseManager.addHandler(setNavigateOnRotateReq);
                     setNavigateOnRotateReq.perform();
+                    break;
+                }
+                case DeviceSettingsPreferenceConst.PREF_LONGSIT_SWITCH:
+                case DeviceSettingsPreferenceConst.PREF_LONGSIT_PERIOD:
+                case DeviceSettingsPreferenceConst.PREF_LONGSIT_START:
+                case DeviceSettingsPreferenceConst.PREF_LONGSIT_END:
+                case ZeTimeConstants.PREF_INACTIVITY_MO:
+                case ZeTimeConstants.PREF_INACTIVITY_TU:
+                case ZeTimeConstants.PREF_INACTIVITY_WE:
+                case ZeTimeConstants.PREF_INACTIVITY_TH:
+                case ZeTimeConstants.PREF_INACTIVITY_FR:
+                case ZeTimeConstants.PREF_INACTIVITY_SA:
+                case ZeTimeConstants.PREF_INACTIVITY_SU: {
+                    SetActivityReminderRequest setActivityReminderReq = new SetActivityReminderRequest(this);
+                    responseManager.addHandler(setActivityReminderReq);
+                    setActivityReminderReq.perform();
                     break;
                 }
             }

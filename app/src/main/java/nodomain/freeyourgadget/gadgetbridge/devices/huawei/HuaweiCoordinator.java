@@ -172,10 +172,12 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
 
     public int[] getSupportedDeviceSpecificSettings(GBDevice device) {
         return new int[]{
+                R.xml.devicesettings_dateformat,
                 R.xml.devicesettings_timeformat,
                 R.xml.devicesettings_liftwrist_display_noshed,
                 R.xml.devicesettings_rotatewrist_cycleinfo,
                 R.xml.devicesettings_vibrations_enable,
+                R.xml.devicesettings_longsit_sheduled,
         };
     }
 
