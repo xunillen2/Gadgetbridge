@@ -1,6 +1,6 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services;
 
-public class SleepData {
+public class FitnessData {
     public static final int id = 0x07;
 
     public static class MessageCount {

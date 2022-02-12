@@ -8,7 +8,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.SleepData;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
 
 public class GetSleepDataRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataRequest.class);
@@ -19,8 +19,8 @@ public class GetSleepDataRequest extends Request {
     public GetSleepDataRequest(HuaweiSupport support, TransactionBuilder builder, short maxCount, short count) {
         // super(support, builder);
         super(support);
-        this.serviceId = SleepData.id;
-        this.commandId = SleepData.MessageData.id;
+        this.serviceId = FitnessData.id;
+        this.commandId = FitnessData.MessageData.id;
         this.maxCount = maxCount;
         this.count = count;
     }
@@ -32,9 +32,9 @@ public class GetSleepDataRequest extends Request {
                 this.commandId,
                 new HuaweiTLV()
                     .put(
-                            SleepData.MessageData.request_container_tag,
+                            FitnessData.MessageData.request_container_tag,
                             new HuaweiTLV()
-                                .put(SleepData.MessageData.request_container_number_tag, this.count)
+                                .put(FitnessData.MessageData.request_container_number_tag, this.count)
                     )
         ).encrypt(support.getSecretKey(), support.getIV());
         return requestedPacket.serialize();
@@ -42,18 +42,18 @@ public class GetSleepDataRequest extends Request {
 
     @Override
     protected void processResponse() throws GBException {
-        HuaweiTLV container = receivedPacket.tlv.getObject(SleepData.MessageData.response_container_tag);
-        short receivedCount = container.getShort(SleepData.MessageData.response_container_number_tag);
+        HuaweiTLV container = receivedPacket.tlv.getObject(FitnessData.MessageData.response_container_tag);
+        short receivedCount = container.getShort(FitnessData.MessageData.response_container_number_tag);
 
         if (receivedCount != this.count) {
             LOG.warn("Counts do not match");
         }
 
-        container = container.getObject(SleepData.MessageData.response_container_container_tag);
+        container = container.getObject(FitnessData.MessageData.response_container_container_tag);
 
-        byte type = container.getByte(SleepData.MessageData.response_container_container_data_tag);
+        byte type = container.getByte(FitnessData.MessageData.response_container_container_data_tag);
 
-        byte[] timestampBytes = container.getBytes(SleepData.MessageData.response_container_container_timestamp_tag);
+        byte[] timestampBytes = container.getBytes(FitnessData.MessageData.response_container_container_timestamp_tag);
         int[] timestampInts = new int[6];
 
         for (int i = 0; i < 6; i++) {
