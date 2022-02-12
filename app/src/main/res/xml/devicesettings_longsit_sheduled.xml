@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceScreen
+        android:icon="@drawable/ic_chair"
+        android:key="screen_longsit"
+        android:persistent="false"
+        android:summary="@string/mi2_prefs_inactivity_warnings_summary"
+        android:title="@string/mi2_prefs_inactivity_warnings">
+
+        <!-- workaround for missing toolbar -->
+        <PreferenceCategory android:title="@string/mi2_prefs_inactivity_warnings" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="pref_longsit_switch"
+            android:title="@string/mi2_prefs_inactivity_warnings"
+            android:summary="@string/mi2_prefs_inactivity_warnings_summary" />
+
+        <EditTextPreference
+            android:defaultValue="60"
+            android:dependency="pref_longsit_switch"
+            android:key="pref_longsit_period"
+            android:inputType="numberSigned"
+            android:maxLength="3"
+            android:title="@string/mi2_prefs_inactivity_warnings_threshold"/>
+
+        <nodomain.freeyourgadget.gadgetbridge.util.XTimePreference
+            android:defaultValue="06:00"
+            android:dependency="pref_longsit_switch"
+            android:key="pref_longsit_start"
+            android:title="@string/mi2_prefs_do_not_disturb_start" />
+
+        <nodomain.freeyourgadget.gadgetbridge.util.XTimePreference
+            android:defaultValue="23:00"
+            android:dependency="pref_longsit_switch"
+            android:key="pref_longsit_end"
+            android:title="@string/mi2_prefs_do_not_disturb_end" />
+
+        <!-- workaround for missing toolbar -->
+        <PreferenceCategory android:title="@string/zetime_prefs_inactivity_repetitions"
+            android:dependency="pref_longsit_switch">
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="zetime_prefs_inactivity_repetitions_mo"
+                android:title="@string/zetime_prefs_inactivity_mo" />
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="zetime_prefs_inactivity_repetitions_tu"
+                android:title="@string/zetime_prefs_inactivity_tu" />
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="zetime_prefs_inactivity_repetitions_we"
+                android:title="@string/zetime_prefs_inactivity_we" />
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="zetime_prefs_inactivity_repetitions_th"
+                android:title="@string/zetime_prefs_inactivity_th" />
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="zetime_prefs_inactivity_repetitions_fr"
+                android:title="@string/zetime_prefs_inactivity_fr" />
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="zetime_prefs_inactivity_repetitions_sa"
+                android:title="@string/zetime_prefs_inactivity_sa" />
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="zetime_prefs_inactivity_repetitions_su"
+                android:title="@string/zetime_prefs_inactivity_su" />
+        </PreferenceCategory>
+    </PreferenceScreen>
+
+</androidx.preference.PreferenceScreen>
