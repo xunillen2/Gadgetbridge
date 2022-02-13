@@ -37,4 +37,10 @@ public class FitnessData {
         public static final int response_container_container_data_tag = 0x04;
         public static final int response_container_container_timestamp_tag = 0x05;
     }
+
+    public static class TruSleep {
+        public static final int id = 0x16;
+
+        public static final int TrusleepSwitch = 0x01;
+    }
 }

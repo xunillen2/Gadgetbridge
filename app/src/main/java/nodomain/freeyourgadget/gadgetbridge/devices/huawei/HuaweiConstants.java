@@ -47,5 +47,6 @@ public final class HuaweiConstants {
 
     public static final String PREF_HUAWEI_ADDRESS = "huawei_address";
     public static final String PREF_HUAWEI_WORKMODE = "workmode";
+    public static final String PREF_HUAWEI_TRUSLEEP = "trusleep";
 
 }

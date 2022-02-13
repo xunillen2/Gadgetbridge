@@ -65,6 +65,7 @@ public class HonorBand5Coordinator extends HuaweiCoordinator{
     public int[] getSupportedDeviceSpecificSettings(GBDevice device) {
         int[] mainCoordinatorSettings = super.getSupportedDeviceSpecificSettings(device);
         int[] coordinatorSettings = new int[]{
+                R.xml.devicesettings_trusleep,
                 R.xml.devicesettings_wearlocation,
                 R.xml.devicesettings_huawei,
         };

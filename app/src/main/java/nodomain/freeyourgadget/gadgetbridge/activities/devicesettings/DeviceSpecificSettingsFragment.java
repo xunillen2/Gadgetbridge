@@ -191,7 +191,7 @@ import static nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst.PR
 import static nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst.PREF_NIGHT_MODE_START;
 import static nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst.PREF_SWIPE_UNLOCK;
 import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants.PREF_HUAWEI_WORKMODE;
-// import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants.PREF_HUAWEI_ROTATE_WRIST_TO_SWITCH_INFO;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants.PREF_HUAWEI_TRUSLEEP;
 
 public class DeviceSpecificSettingsFragment extends PreferenceFragmentCompat {
 
@@ -558,7 +558,7 @@ public class DeviceSpecificSettingsFragment extends PreferenceFragmentCompat {
         addPreferenceHandlerFor(PREF_SONY_NOTIFICATION_VOICE_GUIDE);
 
         addPreferenceHandlerFor(PREF_HUAWEI_WORKMODE);
-        // addPreferenceHandlerFor(PREF_HUAWEI_ROTATE_WRIST_TO_SWITCH_INFO);
+        addPreferenceHandlerFor(PREF_HUAWEI_TRUSLEEP);
 
         String sleepTimeState = prefs.getString(PREF_SLEEP_TIME, PREF_DO_NOT_DISTURB_OFF);
         boolean sleepTimeScheduled = sleepTimeState.equals(PREF_DO_NOT_DISTURB_SCHEDULED);

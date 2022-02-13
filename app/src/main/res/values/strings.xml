@@ -1401,5 +1401,7 @@
     <string name="prefs_band_aw70_workmode">Work Mode</string>
     <string name="huawei_alarm_smart_description">Do not uncheck smart wakeup checkbox.</string>
     <string name="huawei_alarm_event_description">Do not check smart wakeup checkbox.</string>
+    <string name="huawei_trusleep_title">HUAWEI TruSleep &#8482;</string>
+    <string name="huawei_trusleep_summary">Monitor your sleep quality and breathing pattern in real time.\nAnalyze your sleep patterns and accurately diagnose 6 types of sleeping problems.</string>
 
 </resources>
