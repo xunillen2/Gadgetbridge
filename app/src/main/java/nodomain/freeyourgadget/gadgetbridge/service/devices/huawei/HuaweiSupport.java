@@ -91,6 +91,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetD
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetLocaleRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetNavigateOnRotateRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetTimeRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetTruSleepRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearLocationRequest;
 import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
@@ -408,6 +409,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     SetActivityReminderRequest setActivityReminderReq = new SetActivityReminderRequest(this);
                     responseManager.addHandler(setActivityReminderReq);
                     setActivityReminderReq.perform();
+                    break;
+                }
+                case HuaweiConstants.PREF_HUAWEI_TRUSLEEP: {
+                    SetTruSleepRequest setTruSleepReq = new SetTruSleepRequest(this);
+                    responseManager.addHandler(setTruSleepReq);
+                    setTruSleepReq.perform();
                     break;
                 }
             }

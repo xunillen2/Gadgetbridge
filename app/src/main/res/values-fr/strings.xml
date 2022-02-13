@@ -1461,4 +1461,8 @@ Temps de sommeil préféré en heures</string>
     <string name="watchface_dialog_widget_timeout_hide_text">Cacher le texte en cas de perte de communication :</string>
     <string name="watchface_dialog_widget_update_timeout">Mettre à jour le temps de déconnexion en minutes :</string>
     <string name="prefs_band_aw70_workmode">Mode de portage</string>
+    <string name="huawei_alarm_smart_description">Ne pas désactiver smart alarm.</string>
+    <string name="huawei_alarm_event_description">Ne pas activer smart alarm.</string>
+    <string name="huawei_trusleep_title">HUAWEI TruSleep &#8482;</string>
+    <string name="huawei_trusleep_summary">Contrôle de la qualité de votre sommeil et des rythmes de respiration en temps réel.\nAnalyse de la structure de votre sommeil et diagnostic précis de 6 types de problèmes associés au sommeil.</string>
 </resources>
