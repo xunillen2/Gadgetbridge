@@ -1,4 +1,4 @@
-/*  Copyright (C) 2021 Gaignon Damien
+/*  Copyright (C) 2021-2022 Gaignon Damien
 
     This file is part of Gadgetbridge.
 
@@ -114,7 +114,7 @@ public class DeviceConfig {
 
     public static class FactoryReset {
         public static final int id = 13;
-        public static final int SetStatus = 1;
+        public static final int Send = 1;
     }
 
     public static class NavigateOnRotate {
