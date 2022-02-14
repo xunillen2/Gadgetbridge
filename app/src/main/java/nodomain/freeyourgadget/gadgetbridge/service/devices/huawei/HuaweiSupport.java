@@ -85,6 +85,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetL
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetProductInformationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSupportedCommandsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSupportedServicesRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendFactoryResetRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetActivateOnRotateRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetActivityReminderRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetDateFormatRequest;
@@ -93,6 +94,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetN
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetTimeRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetTruSleepRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearLocationRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.serial.GBDeviceProtocol;
 import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
@@ -518,7 +520,16 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     @Override
     public void onReset(int flags) {
-
+        try {
+            if(flags== GBDeviceProtocol.RESET_FLAGS_FACTORY_RESET) {
+                SendFactoryResetRequest sendFactoryResetReq = new SendFactoryResetRequest(this);
+                responseManager.addHandler(sendFactoryResetReq);
+                sendFactoryResetReq.perform();
+            }
+        } catch (IOException e) {
+            GB.toast(getContext(), "Factory resetting Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
     }
 
     @Override
