@@ -20,12 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LocaleConfig {
-    public static final int id = 12;
+    public static final int id = 0x0C;
 
     public static class SetLocale {
-        public static final int id = 1;
-        public static final int LanguageTag  = 1;
-        public static final int MeasurementSystem  = 2;
+        public static final int id = 0x01;
+        public static final int LanguageTag  = 0x01;
+        public static final int MeasurementSystem  = 0x02;
     }
 
     public LocaleConfig() {
@@ -33,7 +33,7 @@ public class LocaleConfig {
     }
 
     public static class MeasurementSystem {
-        public static final int metric = 0;
-        public static final int imperial = 1;
+        public static final int metric = 0x00;
+        public static final int imperial = 0x01;
     }
 }

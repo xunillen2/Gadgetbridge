@@ -20,42 +20,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Alarms {
-    public static final int id = 8;
+    public static final int id = 0x08;
 
     public static class EventAlarms {
-        public static final int id = 1;
-        public static final int index = 3; // byte
-        public static final int setStatus = 4; // byte
-        public static final int setStartTime = 5; //short
-        public static final int repeat = 6; // byte
-        public static final int alarmName = 7; // byte
+        public static final int id = 0x01;
+        public static final int index = 0x03; // byte
+        public static final int setStatus = 0x04; // byte
+        public static final int setStartTime = 0x05; //short
+        public static final int repeat = 0x06; // byte
+        public static final int alarmName = 0x07; // byte
 
-        public static final int start = 129; // 0x81
-        public static final int separator = 130; // 0x82
+        public static final int start = 0x81;
+        public static final int separator = 0x82;
     }
 
     public static class SmartAlarms {
-        public static final int id = 2;
-        public static final int index = 3; // byte
-        public static final int setStatus = 4; // byte
-        public static final int setStartTime = 5; //short
-        public static final int repeat = 6; // byte
-        public static final int aheadTime = 7; // byte default value 5 min
+        public static final int id = 0x02;
+        public static final int index = 0x03; // byte
+        public static final int setStatus = 0x04; // byte
+        public static final int setStartTime = 0x05; //short
+        public static final int repeat = 0x06; // byte
+        public static final int aheadTime = 0x07; // byte default value 5 min
 
-        public static final int start = 129;
-        public static final int separator = 130;
+        public static final int start = 0x81;
+        public static final int separator = 0x82;
     }
 
     // getDeviceEventAlarm
     public static class EventAlarmsList {
-        public static final int id = 3; // byte default value 0
-        public static final int get = 1; // byte
+        public static final int id = 0x03; // byte default value 0
+        public static final int get = 0x01; // byte
     }
 
     // getDeviceSmartAlarm
     public static class SmartAlarmsList {
-        public static final int id = 4; // byte default value 0
-        public static final int get = 1; // byte
+        public static final int id = 0x04; // byte default value 0
+        public static final int get = 0x01; // byte
     }
 
     public Alarms() {

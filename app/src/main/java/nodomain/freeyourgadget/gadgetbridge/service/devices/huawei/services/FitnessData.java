@@ -15,7 +15,7 @@ public class FitnessData {
     }
 
     public static class MessageCount {
-        public static final int id = 0x0c;
+        public static final int id = 0x0C;
 
         public static final int request_unknown_tag = 0x81;
         public static final int request_start_tag = 0x03;
@@ -26,7 +26,7 @@ public class FitnessData {
     }
 
     public static class MessageData {
-        public static final int id = 0x0d;
+        public static final int id = 0x0D;
 
         public static final int request_container_tag = 0x81;
         public static final int request_container_number_tag = 0x02;

@@ -20,23 +20,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WorkMode {
-    public static final int id = 38;
+    public static final int id = 0x26;
 
     public static class ModeStatus {
-        public static final int id = 1;
-        public static final int AutoDetectMode  = 1;
-        public static final int FootWear  = 2;
+        public static final int id = 0x01;
+        public static final int AutoDetectMode  = 0x01;
+        public static final int FootWear  = 0x02;
     }
 
     public static class SwitchStatus {
-        public static final int id = 2;
-        public static final int SetStatus  = 1;
+        public static final int id = 0x02;
+        public static final int SetStatus  = 0x01;
     }
 
     /*public static class FootWear {
-        public static final int id = 3;
-        public static final int AutoDetectMode  = 1;
-        public static final int FootWear  = 2;
+        public static final int id = 0x03;
+        public static final int AutoDetectMode  = 0x01;
+        public static final int FootWear  = 0x02;
     }*/
 
     public WorkMode() {
