@@ -42,12 +42,12 @@ public class GetBondParamsRequest extends Request {
         requestedPacket = new HuaweiPacket(serviceId,
             commandId,
             new HuaweiTLV()
-                .put(BondParams.Status)
-                .put(BondParams.ClientSerial, support.getSerial())
+                .put(BondParams.status)
+                .put(BondParams.clientSerial, support.getSerial())
                 .put(BondParams.BTVersion, (byte)0x02)
-                .put(BondParams.MaxFrameSize)
-                .put(BondParams.ClientMacAddress, support.getMacAddress())
-                .put(BondParams.EncryptionCounter)
+                .put(BondParams.maxFrameSize)
+                .put(BondParams.clientMacAddress, support.getMacAddress())
+                .put(BondParams.encryptionCounter)
         );
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request BondParams: " + StringUtils.bytesToHex(serializedPacket));
@@ -57,8 +57,8 @@ public class GetBondParamsRequest extends Request {
     @Override
     protected void processResponse() {
         LOG.debug("handle BondParams");
-        support.encryptionCounter = receivedPacket.tlv.getInteger(BondParams.EncryptionCounter) & 0xFFFFFFFFL;
-        int status = receivedPacket.tlv.getByte(BondParams.Status);
+        support.encryptionCounter = receivedPacket.tlv.getInteger(BondParams.encryptionCounter) & 0xFFFFFFFFL;
+        int status = receivedPacket.tlv.getByte(BondParams.status);
         if (status == 1) {
             stopChain(this);
         }

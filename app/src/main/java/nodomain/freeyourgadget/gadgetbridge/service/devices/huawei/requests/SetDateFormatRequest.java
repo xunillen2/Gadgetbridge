@@ -80,13 +80,13 @@ public class SetDateFormatRequest extends Request {
                 date = Date.yearFirst;
         }
         HuaweiTLV dateFormatTLVs = new HuaweiTLV()
-            .put(SetDateFormat.DateFormat, (byte)date)
-            .put(SetDateFormat.TimeFormat, (byte)time);
+            .put(SetDateFormat.dateFormat, (byte)date)
+            .put(SetDateFormat.timeFormat, (byte)time);
         requestedPacket = new HuaweiPacket(
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(SetDateFormat.SetDateFormat, dateFormatTLVs)
+                .put(SetDateFormat.setDateFormat, dateFormatTLVs)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set Date Format: " + StringUtils.bytesToHex(serializedPacket));

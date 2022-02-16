@@ -44,7 +44,7 @@ public class SendFactoryResetRequest extends Request {
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(FactoryReset.Send, (byte)1) // Should send 2 if MultiSim or eSIM
+                .put(FactoryReset.send, (byte)1) // Should send 2 if MultiSim or eSIM
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Factory Reset: " + StringUtils.bytesToHex(serializedPacket));

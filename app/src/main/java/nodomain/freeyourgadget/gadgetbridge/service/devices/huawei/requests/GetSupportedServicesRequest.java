@@ -48,7 +48,7 @@ public class GetSupportedServicesRequest extends Request {
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(SupportedServices.Services, allSupportedServices)
+                .put(SupportedServices.services, allSupportedServices)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Supported Services: " + StringUtils.bytesToHex(serializedPacket));
@@ -58,7 +58,7 @@ public class GetSupportedServicesRequest extends Request {
     @Override
     protected void processResponse() throws GBException {
         LOG.debug("handle Supported Services");
-        byte[] supportedServices = receivedPacket.tlv.getBytes(SupportedServices.ActiveServices);
+        byte[] supportedServices = receivedPacket.tlv.getBytes(SupportedServices.activeServices);
         byte[] activatedServicesTmp = new byte[MAX_SERVICES];
         int j = 0;
         for (int i = 0; i < MAX_SERVICES; i++) {

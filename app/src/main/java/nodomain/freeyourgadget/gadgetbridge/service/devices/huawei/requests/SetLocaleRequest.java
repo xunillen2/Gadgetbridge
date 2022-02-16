@@ -73,8 +73,8 @@ public class SetLocaleRequest extends Request {
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(SetLocale.LanguageTag, localeString.getBytes(StandardCharsets.UTF_8))
-                .put(SetLocale.MeasurementSystem, (byte)measurement)
+                .put(SetLocale.languageTag, localeString.getBytes(StandardCharsets.UTF_8))
+                .put(SetLocale.measurementSystem, (byte)measurement)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set Locale: " + StringUtils.bytesToHex(serializedPacket));

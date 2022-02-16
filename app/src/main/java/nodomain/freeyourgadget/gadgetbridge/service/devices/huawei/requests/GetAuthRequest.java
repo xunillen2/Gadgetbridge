@@ -60,8 +60,8 @@ public class GetAuthRequest extends Request {
         requestedPacket = new HuaweiPacket(serviceId,
             commandId,
             new HuaweiTLV()
-                .put(Auth.Challenge, challenge)
-                .put(Auth.Nonce, nonce)
+                .put(Auth.challenge, challenge)
+                .put(Auth.nonce, nonce)
         );
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Auth: " + StringUtils.bytesToHex(serializedPacket));
@@ -72,7 +72,7 @@ public class GetAuthRequest extends Request {
     protected void processResponse() throws GBException {
         LOG.debug("handle Auth");
         byte[] expectedAnswer = huaweiCrypto.digestResponse(clientNonce, serverNonce);
-        byte[] actualAnswer = receivedPacket.tlv.getBytes(Auth.Challenge);
+        byte[] actualAnswer = receivedPacket.tlv.getBytes(Auth.challenge);
         if (!Arrays.equals(expectedAnswer, actualAnswer)) {
             throw new GBException("Challenge answer mismatch : "
                             + StringUtils.bytesToHex(actualAnswer)

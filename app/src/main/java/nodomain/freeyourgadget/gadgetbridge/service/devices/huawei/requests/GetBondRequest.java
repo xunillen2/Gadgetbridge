@@ -50,11 +50,11 @@ public class GetBondRequest extends Request {
         requestedPacket = new HuaweiPacket(serviceId,
             commandId,
             new HuaweiTLV()
-                .put(Bond.BondRequest)
-                .put(Bond.RequestCode, (byte)0x00)
-                .put(Bond.ClientSerial, support.getSerial())
-                .put(Bond.BondingKey, huaweiCrypto.createBondingKey(support.getDeviceMac(), support.getSecretKey(), iv))
-                .put(Bond.InitVector, iv)
+                .put(Bond.bondRequest)
+                .put(Bond.requestCode, (byte)0x00)
+                .put(Bond.clientSerial, support.getSerial())
+                .put(Bond.bondingKey, huaweiCrypto.createBondingKey(support.getDeviceMac(), support.getSecretKey(), iv))
+                .put(Bond.initVector, iv)
         );
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Bond: " + StringUtils.bytesToHex(serializedPacket));

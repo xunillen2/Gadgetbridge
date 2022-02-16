@@ -45,7 +45,7 @@ public class GetBatteryLevelRequest extends Request {
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(BatteryLevel.GetStatus)
+                .put(BatteryLevel.getStatus)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Battery Level: " + StringUtils.bytesToHex(serializedPacket));
@@ -55,7 +55,7 @@ public class GetBatteryLevelRequest extends Request {
     @Override
     protected void processResponse() throws GBException {
         LOG.debug("handle Battery Level");
-        byte batteryLevel = receivedPacket.tlv.getByte(BatteryLevel.GetStatus);
+        byte batteryLevel = receivedPacket.tlv.getByte(BatteryLevel.getStatus);
         getDevice().setBatteryLevel(batteryLevel);
 
         GBDeviceEventBatteryInfo batteryInfo = new GBDeviceEventBatteryInfo();

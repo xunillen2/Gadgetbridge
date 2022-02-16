@@ -48,7 +48,7 @@ public class SetActivateOnRotateRequest extends Request {
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(ActivateOnRotate.SetStatus, activate)
+                .put(ActivateOnRotate.setStatus, activate)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set Activate On Rotate: " + StringUtils.bytesToHex(serializedPacket));

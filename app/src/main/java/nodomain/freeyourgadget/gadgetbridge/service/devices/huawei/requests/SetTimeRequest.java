@@ -57,8 +57,8 @@ public class SetTimeRequest extends Request {
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(SetTime.Timestamp, timestampSec)
-                .put(SetTime.ZoneOffset, zoneOffset)
+                .put(SetTime.timestamp, timestampSec)
+                .put(SetTime.zoneOffset, zoneOffset)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set Time: " + StringUtils.bytesToHex(serializedPacket));

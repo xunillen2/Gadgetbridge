@@ -49,7 +49,7 @@ public class SetNavigateOnRotateRequest extends Request {
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(NavigateOnRotate.SetStatus, navigate)
+                .put(NavigateOnRotate.setStatus, navigate)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set Navigate On Rotate: " + StringUtils.bytesToHex(serializedPacket));

@@ -74,8 +74,8 @@ public class GetSupportedCommandsRequest extends Request {
                     commandsListArray.add(commandsList);
                     commandsList = new HuaweiTLV();
                 }
-                commandsList.put(SupportedCommands.ServiceId, (byte) activatedServices[i])
-                            .put(SupportedCommands.Commands, commandsOfService);
+                commandsList.put(SupportedCommands.serviceId, (byte) activatedServices[i])
+                            .put(SupportedCommands.commands, commandsOfService);
             }
             commandsListArray.add(commandsList);
         }
@@ -83,7 +83,7 @@ public class GetSupportedCommandsRequest extends Request {
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(SupportedCommands.SupportedCommands, commandsListArray.remove(0))
+                .put(SupportedCommands.supportedCommands, commandsListArray.remove(0))
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Supported Commands: " + StringUtils.bytesToHex(serializedPacket));
@@ -93,7 +93,7 @@ public class GetSupportedCommandsRequest extends Request {
     @Override
     protected void processResponse() throws GBException {
         LOG.debug("handle Supported Commands");
-        HuaweiTLV supportedCommands = receivedPacket.tlv.getObject(SupportedCommands.SupportedCommands);
+        HuaweiTLV supportedCommands = receivedPacket.tlv.getObject(SupportedCommands.supportedCommands);
         if (!commandsListArray.isEmpty()) {
             GetSupportedCommandsRequest nextRequest = new GetSupportedCommandsRequest(this.support, this.commandsListArray);
             this.support.addInProgressRequest(nextRequest);
@@ -113,7 +113,7 @@ public class GetSupportedCommandsRequest extends Request {
         TreeMap<Integer, byte[]> commandsPerService = coordinator.getCommandsPerService();
         Integer service_id = null;
         for(TLV tlv : supportedCommands.get()) {
-            if ((int)tlv.getTag() == SupportedCommands.ServiceId) {
+            if ((int)tlv.getTag() == SupportedCommands.serviceId) {
                 service_id = (int)ByteBuffer.wrap(tlv.getValue()).get();
             } else if (service_id != null) {
                 ByteBuffer buffer = ByteBuffer.allocate(tlv.getValue().length);

@@ -46,10 +46,10 @@ public class GetLinkParamsRequest extends Request {
         requestedPacket = new HuaweiPacket(serviceId,
             commandId,
             new HuaweiTLV()
-                .put(LinkParams.ProtocolVersion)
-                .put(LinkParams.MaxFrameSize)
-                .put(LinkParams.MaxLinkSize)
-                .put(LinkParams.ConnectionInterval)
+                .put(LinkParams.protocolVersion)
+                .put(LinkParams.maxFrameSize)
+                .put(LinkParams.maxLinkSize)
+                .put(LinkParams.connectionInterval)
         );
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request LinkParams: " + StringUtils.bytesToHex(serializedPacket));
@@ -59,7 +59,7 @@ public class GetLinkParamsRequest extends Request {
     @Override
     protected void processResponse() {
         LOG.debug("handle LinkParams");
-        System.arraycopy(receivedPacket.tlv.getBytes(LinkParams.ServerNonce),
+        System.arraycopy(receivedPacket.tlv.getBytes(LinkParams.serverNonce),
                             0, serverNonce,
                             0, 18
         );

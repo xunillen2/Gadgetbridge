@@ -24,8 +24,8 @@ public class LocaleConfig {
 
     public static class SetLocale {
         public static final int id = 0x01;
-        public static final int LanguageTag  = 0x01;
-        public static final int MeasurementSystem  = 0x02;
+        public static final int languageTag  = 0x01;
+        public static final int measurementSystem  = 0x02;
     }
 
     public LocaleConfig() {

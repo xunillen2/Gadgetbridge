@@ -14,6 +14,8 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 
+import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData.MessageCount;
+
 public class GetSleepDataCountRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataCountRequest.class);
     private int start = 0;
@@ -22,7 +24,7 @@ public class GetSleepDataCountRequest extends Request {
     public GetSleepDataCountRequest(HuaweiSupport support, int start, int end) {
         super(support);
         this.serviceId = FitnessData.id;
-        this.commandId = FitnessData.MessageCount.id;
+        this.commandId = MessageCount.id;
 
         this.start = start;
         this.end = end;
@@ -36,9 +38,9 @@ public class GetSleepDataCountRequest extends Request {
                 serviceId,
                 commandId,
                 new HuaweiTLV()
-                    .put(FitnessData.MessageCount.request_unknown_tag)
-                    .put(FitnessData.MessageCount.request_start_tag, this.start)
-                    .put(FitnessData.MessageCount.request_end_tag, this.end)
+                    .put(MessageCount.unknown)
+                    .put(MessageCount.start, this.start)
+                    .put(MessageCount.end, this.end)
         ).encrypt(support.getSecretKey(), support.getIV());
         return requestedPacket.serialize();
     }
@@ -46,8 +48,8 @@ public class GetSleepDataCountRequest extends Request {
     @Override
     protected void processResponse() throws GBException {
         short count = receivedPacket.tlv
-                .getObject(FitnessData.MessageCount.response_container_tag)
-                .getShort(FitnessData.MessageCount.response_container_count_tag);
+                .getObject(MessageCount.container)
+                .getShort(MessageCount.containerCount);
 
         if (count > 0) {
             GetSleepDataRequest nextRequest = new GetSleepDataRequest(this.support, this.builder, count, (short) 0);

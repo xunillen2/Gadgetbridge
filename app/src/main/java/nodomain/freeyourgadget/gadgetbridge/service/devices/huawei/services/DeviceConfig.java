@@ -24,107 +24,107 @@ public class DeviceConfig {
 
     public static class LinkParams {
         public static final int id = 0x01;
-        public static final int ProtocolVersion = 0x01;
-        public static final int MaxFrameSize = 0x02;
-        public static final int MaxLinkSize = 0x03;
-        public static final int ConnectionInterval = 0x04;
-        public static final int ServerNonce = 0x05;
-        public static final int PathExtendNumber = 0x06;
+        public static final int protocolVersion = 0x01;
+        public static final int maxFrameSize = 0x02;
+        public static final int maxLinkSize = 0x03;
+        public static final int connectionInterval = 0x04;
+        public static final int serverNonce = 0x05;
+        public static final int pathExtendNumber = 0x06;
     }
 
     public static class SupportedServices {
         public static final int id = 0x02;
-        public static final int Services = 0x01;
-        public static final int ActiveServices = 0x02;
+        public static final int services = 0x01;
+        public static final int activeServices = 0x02;
     }
 
     public static class SupportedCommands {
         public static final int id = 0x03;
-        public static final int ServiceId = 0x02;
-        public static final int Commands = 0x03;
-        public static final int ActiveCommands = 0x04;
-        public static final int SupportedCommands = 0x81;
+        public static final int serviceId = 0x02;
+        public static final int commands = 0x03;
+        public static final int activeCommands = 0x04;
+        public static final int supportedCommands = 0x81;
     }
 
     public static class SetDateFormat {
         public static final int id = 0x04;
-        public static final int DateFormat = 0x02;
-        public static final int TimeFormat = 0x03;
-        public static final int SetDateFormat = 0x81;
+        public static final int dateFormat = 0x02;
+        public static final int timeFormat = 0x03;
+        public static final int setDateFormat = 0x81;
     }
 
     public static class SetTime {
         public static final int id = 0x05;
-        public static final int Timestamp = 0x01;
-        public static final int ZoneOffset = 0x02;
+        public static final int timestamp = 0x01;
+        public static final int zoneOffset = 0x02;
     }
 
     public static class ProductInfo {
         public static final int id = 0x07;
         public static final int BTVersion = 0x01;
-        public static final int ProductType = 0x02;
-        public static final int HardwareVersion = 0x03;
-        public static final int PhoneNumber = 0x04;
-        public static final int MacAddress = 0x05;
+        public static final int productType = 0x02;
+        public static final int hardwareVersion = 0x03;
+        public static final int phoneNumber = 0x04;
+        public static final int macAddress = 0x05;
         public static final int IMEI = 0x06;
-        public static final int SoftwareVersion = 0x07;
-        public static final int OpenSourceVersion = 0x08;
-        public static final int SerialNumber = 0x09;
-        public static final int ProductModel = 0x0A;
+        public static final int softwareVersion = 0x07;
+        public static final int openSourceVersion = 0x08;
+        public static final int serialNumber = 0x09;
+        public static final int productModel = 0x0A;
         public static final int eMMCId = 0x0B;
-        public static final int HealthAppSupport = 0x0D;
+        public static final int healthAppSupport = 0x0D;
     }
 
     public static class Bond {
         public static final int id = 0x0E;
-        public static final int BondRequest = 0x01;
-        public static final int Status = 0x02;
-        public static final int RequestCode = 0x03;
-        public static final int ClientSerial = 0x05;
-        public static final int BondingKey = 0x06;
-        public static final int InitVector = 0x07;
+        public static final int bondRequest = 0x01;
+        public static final int status = 0x02;
+        public static final int requestCode = 0x03;
+        public static final int clientSerial = 0x05;
+        public static final int bondingKey = 0x06;
+        public static final int initVector = 0x07;
     }
 
     public static class BondParams {
         public static final int id = 0x0F;
-        public static final int Status = 0x01;
-        public static final int StatusInfo = 0x02;
-        public static final int ClientSerial = 0x03;
+        public static final int status = 0x01;
+        public static final int statusInfo = 0x02;
+        public static final int clientSerial = 0x03;
         public static final int BTVersion = 0x04;
-        public static final int MaxFrameSize = 0x05;
-        public static final int ClientMacAddress = 0x07;
-        public static final int EncryptionCounter = 0x09;
+        public static final int maxFrameSize = 0x05;
+        public static final int clientMacAddress = 0x07;
+        public static final int encryptionCounter = 0x09;
     }
 
     public static class Auth {
         public static final int id = 0x13;
-        public static final int Challenge = 0x01;
-        public static final int Nonce = 0x02;
+        public static final int challenge = 0x01;
+        public static final int nonce = 0x02;
     }
 
     public static class BatteryLevel {
         public static final int id = 0x08;
-        public static final int GetStatus = 0x01;
+        public static final int getStatus = 0x01;
     }
 
     public static class ActivateOnRotate {
         public static final int id = 0x09;
-        public static final int SetStatus = 0x01;
+        public static final int setStatus = 0x01;
     }
 
     public static class FactoryReset {
         public static final int id = 0x0D;
-        public static final int Send = 0x01;
+        public static final int send = 0x01;
     }
 
     public static class NavigateOnRotate {
         public static final int id = 0x1B;
-        public static final int SetStatus = 0x01;
+        public static final int setStatus = 0x01;
     }
 
     public static class WearLocation {
         public static final int id = 0x1A;
-        public static final int SetStatus = 0x01;
+        public static final int setStatus = 0x01;
     }
 
     public DeviceConfig() {

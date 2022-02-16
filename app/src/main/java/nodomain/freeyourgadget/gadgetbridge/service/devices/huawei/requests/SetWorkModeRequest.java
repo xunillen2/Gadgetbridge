@@ -49,7 +49,7 @@ public class SetWorkModeRequest extends Request {
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(SwitchStatus.SetStatus, workMode)
+                .put(SwitchStatus.setStatus, workMode)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set WorkMode: " + StringUtils.bytesToHex(serializedPacket));

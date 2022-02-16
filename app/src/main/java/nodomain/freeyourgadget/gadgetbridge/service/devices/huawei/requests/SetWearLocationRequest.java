@@ -49,7 +49,7 @@ public class SetWearLocationRequest extends Request {
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(WearLocation.SetStatus, (byte)location)
+                .put(WearLocation.setStatus, (byte)location)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set Wear Location: " + StringUtils.bytesToHex(serializedPacket));

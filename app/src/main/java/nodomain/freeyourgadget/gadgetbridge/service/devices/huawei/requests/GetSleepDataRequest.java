@@ -10,6 +10,8 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
 
+import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData.MessageData;
+
 public class GetSleepDataRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataRequest.class);
 
@@ -20,7 +22,7 @@ public class GetSleepDataRequest extends Request {
         // super(support, builder);
         super(support);
         this.serviceId = FitnessData.id;
-        this.commandId = FitnessData.MessageData.id;
+        this.commandId = MessageData.id;
         this.maxCount = maxCount;
         this.count = count;
     }
@@ -32,9 +34,9 @@ public class GetSleepDataRequest extends Request {
                 this.commandId,
                 new HuaweiTLV()
                     .put(
-                            FitnessData.MessageData.request_container_tag,
+                            MessageData.container,
                             new HuaweiTLV()
-                                .put(FitnessData.MessageData.request_container_number_tag, this.count)
+                                .put(MessageData.containerNumber, this.count)
                     )
         ).encrypt(support.getSecretKey(), support.getIV());
         return requestedPacket.serialize();
@@ -42,18 +44,18 @@ public class GetSleepDataRequest extends Request {
 
     @Override
     protected void processResponse() throws GBException {
-        HuaweiTLV container = receivedPacket.tlv.getObject(FitnessData.MessageData.response_container_tag);
-        short receivedCount = container.getShort(FitnessData.MessageData.response_container_number_tag);
+        HuaweiTLV container = receivedPacket.tlv.getObject(MessageData.container);
+        short receivedCount = container.getShort(MessageData.containerNumber);
 
         if (receivedCount != this.count) {
             LOG.warn("Counts do not match");
         }
 
-        container = container.getObject(FitnessData.MessageData.response_container_container_tag);
+        container = container.getObject(MessageData.containerContainer);
 
-        byte type = container.getByte(FitnessData.MessageData.response_container_container_data_tag);
+        byte type = container.getByte(MessageData.containerContainerData);
 
-        byte[] timestampBytes = container.getBytes(FitnessData.MessageData.response_container_container_timestamp_tag);
+        byte[] timestampBytes = container.getBytes(MessageData.containerContainerTimestamp);
         int[] timestampInts = new int[6];
 
         for (int i = 0; i < 6; i++) {

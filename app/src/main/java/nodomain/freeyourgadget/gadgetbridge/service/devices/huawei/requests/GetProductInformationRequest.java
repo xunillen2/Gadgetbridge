@@ -57,8 +57,8 @@ public class GetProductInformationRequest extends Request {
     @Override
     protected void processResponse() throws GBException {
         LOG.debug("handle Product Information");
-        getDevice().setFirmwareVersion(receivedPacket.tlv.getString(ProductInfo.SoftwareVersion));
-        getDevice().setFirmwareVersion2(receivedPacket.tlv.getString(ProductInfo.HardwareVersion));
-        getDevice().setModel(receivedPacket.tlv.getString(ProductInfo.ProductModel));
+        getDevice().setFirmwareVersion(receivedPacket.tlv.getString(ProductInfo.softwareVersion));
+        getDevice().setFirmwareVersion2(receivedPacket.tlv.getString(ProductInfo.hardwareVersion));
+        getDevice().setModel(receivedPacket.tlv.getString(ProductInfo.productModel));
     }
 }

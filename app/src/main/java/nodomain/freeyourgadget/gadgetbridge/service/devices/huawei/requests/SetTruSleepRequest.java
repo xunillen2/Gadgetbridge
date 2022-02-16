@@ -48,7 +48,7 @@ public class SetTruSleepRequest extends Request {
             serviceId,
             commandId,
             new HuaweiTLV()
-                .put(TruSleep.TrusleepSwitch, trusleepSwitch)
+                .put(TruSleep.trusleepSwitch, trusleepSwitch)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set TruSleep: " + StringUtils.bytesToHex(serializedPacket));

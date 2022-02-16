@@ -24,13 +24,13 @@ public class WorkMode {
 
     public static class ModeStatus {
         public static final int id = 0x01;
-        public static final int AutoDetectMode  = 0x01;
-        public static final int FootWear  = 0x02;
+        public static final int autoDetectMode  = 0x01;
+        public static final int footWear  = 0x02;
     }
 
     public static class SwitchStatus {
         public static final int id = 0x02;
-        public static final int SetStatus  = 0x01;
+        public static final int setStatus  = 0x01;
     }
 
     /*public static class FootWear {
