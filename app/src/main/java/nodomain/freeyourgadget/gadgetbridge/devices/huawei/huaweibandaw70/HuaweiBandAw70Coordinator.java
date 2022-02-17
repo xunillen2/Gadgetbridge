@@ -57,9 +57,9 @@ public class HuaweiBandAw70Coordinator extends HuaweiCoordinator{
     public int[] getSupportedDeviceSpecificSettings(GBDevice device) {
         int[] mainCoordinatorSettings = super.getSupportedDeviceSpecificSettings(device);
         int[] coordinatorSettings = new int[]{
-                R.xml.devicesettings_huawei_band_aw70,
+                R.xml.devicesettings_workmode,
         };
-        return concatSettings(mainCoordinatorSettings, coordinatorSettings);
+        return concatSettings(coordinatorSettings, mainCoordinatorSettings);
     }
 
 }
