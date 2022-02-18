@@ -178,9 +178,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         try {
             String name = gbDevice.getName();
             if (name != null && !name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME)) {
-                SetDateFormatRequest setDateFormatReq = new SetDateFormatRequest(this);
-                responseManager.addHandler(setDateFormatReq);
-                setDateFormatReq.perform();
+                onSetDateFormat();
             }
             onSetTime();
             GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
@@ -198,7 +196,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             editor.apply();
             initializeAlarms();
             // getAlarms();
-            getCommands();
+            // getCommands();
+            onSetWearLocation();
+            onSetActivateOnRotate();
+            onSetNavigateOnRotate();
+            onSetActivityReminder();
+            onSetTrusleep();
         } catch (IOException e) {
             GB.toast(getContext(), "Initializing Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
@@ -362,9 +365,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             switch (config) {
                 case DeviceSettingsPreferenceConst.PREF_DATEFORMAT:
                 case DeviceSettingsPreferenceConst.PREF_TIMEFORMAT: {
-                    SetDateFormatRequest setDateFormatReq = new SetDateFormatRequest(this);
-                    responseManager.addHandler(setDateFormatReq);
-                    setDateFormatReq.perform();
+                    onSetDateFormat();
                     break;
                 }
                 case SettingsActivity.PREF_MEASUREMENT_SYSTEM:
@@ -375,21 +376,15 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     break;
                 }
                 case DeviceSettingsPreferenceConst.PREF_WEARLOCATION: {
-                    SetWearLocationRequest setWearLocationReq = new SetWearLocationRequest(this);
-                    responseManager.addHandler(setWearLocationReq);
-                    setWearLocationReq.perform();
+                    onSetWearLocation();
                     break;
                 }
                 case DeviceSettingsPreferenceConst.PREF_LIFTWRIST_NOSHED: {
-                    SetActivateOnRotateRequest setActivateOnRotateReq = new SetActivateOnRotateRequest(this);
-                    responseManager.addHandler(setActivateOnRotateReq);
-                    setActivateOnRotateReq.perform();
+                    onSetActivateOnRotate();
                     break;
                 }
                 case MiBandConst.PREF_MI2_ROTATE_WRIST_TO_SWITCH_INFO: {
-                    SetNavigateOnRotateRequest setNavigateOnRotateReq = new SetNavigateOnRotateRequest(this);
-                    responseManager.addHandler(setNavigateOnRotateReq);
-                    setNavigateOnRotateReq.perform();
+                    onSetNavigateOnRotate();
                     break;
                 }
                 case DeviceSettingsPreferenceConst.PREF_LONGSIT_SWITCH:
@@ -403,15 +398,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 case ZeTimeConstants.PREF_INACTIVITY_FR:
                 case ZeTimeConstants.PREF_INACTIVITY_SA:
                 case ZeTimeConstants.PREF_INACTIVITY_SU: {
-                    SetActivityReminderRequest setActivityReminderReq = new SetActivityReminderRequest(this);
-                    responseManager.addHandler(setActivityReminderReq);
-                    setActivityReminderReq.perform();
+                    onSetActivityReminder();
                     break;
                 }
                 case HuaweiConstants.PREF_HUAWEI_TRUSLEEP: {
-                    SetTruSleepRequest setTruSleepReq = new SetTruSleepRequest(this);
-                    responseManager.addHandler(setTruSleepReq);
-                    setTruSleepReq.perform();
+                    onSetTrusleep();
                     break;
                 }
             }
@@ -574,6 +565,17 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     }
 
+    public void onSetDateFormat() {
+        try {
+            SetDateFormatRequest setDateFormatReq = new SetDateFormatRequest(this);
+            responseManager.addHandler(setDateFormatReq);
+            setDateFormatReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Faile to configure date format", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void onSetTime() {
         try {
@@ -695,6 +697,62 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             handledActivityTimestamps.add(timestamp);
             handledActivityTimestamps.add(timestamp + duration - 1);
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void onSetWearLocation() {
+        try {
+            SetWearLocationRequest setWearLocationReq = new SetWearLocationRequest(this);
+            responseManager.addHandler(setWearLocationReq);
+            setWearLocationReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Faile to configure Wear Location", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
+    }
+
+    public void onSetActivateOnRotate() {
+        try {
+            SetActivateOnRotateRequest setActivateOnRotateReq = new SetActivateOnRotateRequest(this);
+            responseManager.addHandler(setActivateOnRotateReq);
+            setActivateOnRotateReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Faile to configure Activate on Rotate", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
+    }
+
+    public void onSetNavigateOnRotate() {
+        try {
+            SetNavigateOnRotateRequest setNavigateOnRotateReq = new SetNavigateOnRotateRequest(this);
+            responseManager.addHandler(setNavigateOnRotateReq);
+            setNavigateOnRotateReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Faile to configure Navigate on Rotate", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
+    }
+
+    public void onSetActivityReminder() {
+        try {
+            SetActivityReminderRequest setActivityReminderReq = new SetActivityReminderRequest(this);
+            responseManager.addHandler(setActivityReminderReq);
+            setActivityReminderReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Faile to configure Activity reminder", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
+    }
+
+    public void onSetTrusleep() {
+        try {
+            SetTruSleepRequest setTruSleepReq = new SetTruSleepRequest(this);
+            responseManager.addHandler(setTruSleepReq);
+            setTruSleepReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Faile to configure truSleep", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
         }
     }
