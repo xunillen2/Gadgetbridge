@@ -16,6 +16,7 @@ public class Notifications {
         public static final int textType = 0x0E;
         public static final int textEncoding = 0x0F;
         public static final int textContent = 0x10;
+        public static final int sourceAppId = 0x11;
         public static final int payloadText = 0x84;
         public static final int payloadImage = 0x86;
         public static final int textList = 0x8C;
@@ -48,4 +49,17 @@ public class Notifications {
         public static final int unknown = 0x01;
         public static final int standard = 0x02;
     }
+
+    public static class SetNotification {
+        public static final int id = 0x04;
+        public static final int container = 0x81;
+        public static final int setStatus = 0x02;
+        public static final int setStatus2 = 0x03;
+    }
+
+    public static class SetWearMessagePush {
+        public static final int id = 0x08;
+        public static final int setStatus = 0x01;
+    }
+
 }

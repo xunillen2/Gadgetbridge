@@ -90,10 +90,12 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetA
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetActivityReminderRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetDateFormatRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetLocaleRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetNavigateOnRotateRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetTimeRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetTruSleepRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearLocationRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearMessagePushRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.serial.GBDeviceProtocol;
 import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
@@ -202,6 +204,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             onSetNavigateOnRotate();
             onSetActivityReminder();
             onSetTrusleep();
+            onSetNotification();
         } catch (IOException e) {
             GB.toast(getContext(), "Initializing Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
@@ -405,6 +408,10 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     onSetTrusleep();
                     break;
                 }
+                case DeviceSettingsPreferenceConst.PREF_NOTIFICATION_ENABLE: {
+                    onSetNotification();
+                    break;
+                }
             }
         } catch (IOException e) {
             GB.toast(getContext(), "Configuration of Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
@@ -538,6 +545,19 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     
     }
 
+    public void onSetNotification() {
+        try {
+            SetNotificationRequest setNotificationReq = new SetNotificationRequest(this);
+            responseManager.addHandler(setNotificationReq);
+            setNotificationReq.perform();
+            SetWearMessagePushRequest setWearMessagePushReq = new SetWearMessagePushRequest(this);
+            responseManager.addHandler(setWearMessagePushReq);
+            setWearMessagePushReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Setting notification failed", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
+    }
 
     public int getNotificationId() {
         if (msgId < 256) {

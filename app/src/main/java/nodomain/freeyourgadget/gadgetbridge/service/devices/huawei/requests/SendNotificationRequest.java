@@ -72,6 +72,7 @@ public class SendNotificationRequest extends Request {
                 .put(NotificationAction.textContent, notificationSpec.body);
 
         HuaweiTLV textList = new HuaweiTLV();
+        // TODO Add notification information per type if needed
         if (notificationSpec.title != null) {
             textList.put(NotificationAction.textItem, notificationTitle);
         } else {
@@ -79,13 +80,17 @@ public class SendNotificationRequest extends Request {
         }
         textList.put(NotificationAction.textItem, notificationText)
                 .put(NotificationAction.textItem, notificationSender);
-        
+
         HuaweiTLV notificationTLV = new HuaweiTLV()
                 .put(NotificationAction.notificationId, (short) support.getNotificationId())
                 .put(NotificationAction.notificationType, (byte) getNotificationType(notificationSpec.type))
-                .put(NotificationAction.vibrate, vibrate)
-                .put(NotificationAction.payloadText, new HuaweiTLV().put(NotificationAction.textList, textList));
-
+                .put(NotificationAction.vibrate, vibrate);
+        if (textList.length() != 0) {
+            notificationTLV.put(NotificationAction.payloadText, new HuaweiTLV().put(NotificationAction.textList, textList));
+        } else {
+            notificationTLV.put(NotificationAction.payloadEmpty);
+        }
+        notificationTLV.put(NotificationAction.sourceAppId, notificationSpec.sourceAppId);
         this.notificationTLV = notificationTLV;
     }
 
@@ -108,6 +113,7 @@ public class SendNotificationRequest extends Request {
         HuaweiTLV notificationTLV = new HuaweiTLV()
                 .put(NotificationAction.notificationId, (short) support.getNotificationId())
                 .put(NotificationAction.notificationType, (byte) Notifications.NotificationType.call)
+                // Seems to vibrate even if 0x00 - look in SetNotificationRequest
                 .put(NotificationAction.vibrate, vibrate)
                 .put(NotificationAction.payloadText, new HuaweiTLV().put(NotificationAction.textList, new HuaweiTLV()
                         .put(NotificationAction.textItem, notificationSender)
