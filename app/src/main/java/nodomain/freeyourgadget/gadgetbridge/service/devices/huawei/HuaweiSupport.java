@@ -229,7 +229,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     }
 
     protected void createRandomMacAddress() {
-        SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(getDevice().getAddress());
+        SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
 
         macAddress =  sharedPrefs.getString(HuaweiConstants.PREF_HUAWEI_ADDRESS, null);
         if (macAddress == null || macAddress.isEmpty()) {
@@ -312,11 +312,6 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         supportedServicesReq.perform();
     }
 
-    public HuaweiSupport enableNotifications(TransactionBuilder builder, boolean enable) {
-        builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), enable);
-        return this;
-    }
-
     public int getMtu() {
         return mtu;
     }
@@ -363,7 +358,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     @Override
     public void onSendConfiguration(String config) {
         try {
-            // SharedPreferences prefs = GBApplication.getDeviceSpecificSharedPrefs(getDevice().getAddress());
+            // SharedPreferences prefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
             switch (config) {
                 case DeviceSettingsPreferenceConst.PREF_DATEFORMAT:
                 case DeviceSettingsPreferenceConst.PREF_TIMEFORMAT: {
@@ -589,7 +584,6 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             GB.toast(getContext(), "Faile to configure time", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
         }
-
     }
 
     @Override
