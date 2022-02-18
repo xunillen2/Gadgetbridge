@@ -58,13 +58,17 @@ public class HuaweiBand6Coordinator extends HuaweiCoordinator{
 
     @Override
     public int[] getSupportedDeviceSpecificSettings(GBDevice device) {
-        int[] mainCoordinatorSettings = super.getSupportedDeviceSpecificSettings(device);
-        int[] coordinatorSettings = new int[]{
+        return new int[]{
                 R.xml.devicesettings_trusleep,
+                R.xml.devicesettings_vibrations_enable,
+                R.xml.devicesettings_longsit_sheduled,
+                R.xml.devicesettings_liftwrist_display_noshed,
+                R.xml.devicesettings_rotatewrist_cycleinfo,
                 R.xml.devicesettings_wearlocation,
+                R.xml.devicesettings_dateformat,
+                R.xml.devicesettings_timeformat,
                 R.xml.devicesettings_huawei,
         };
-        return concatSettings(mainCoordinatorSettings, coordinatorSettings);
     }
 
 }
