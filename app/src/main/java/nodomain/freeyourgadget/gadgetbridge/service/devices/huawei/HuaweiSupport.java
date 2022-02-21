@@ -180,9 +180,9 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         try {
             String name = gbDevice.getName();
             if (name != null && !name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME)) {
-                onSetDateFormat();
+                setDateFormat();
             }
-            onSetTime();
+            setTime();
             GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
             responseManager.addHandler(productInformationReq);
             productInformationReq.perform();
@@ -199,12 +199,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             initializeAlarms();
             // getAlarms();
             // getCommands();
-            onSetWearLocation();
-            onSetActivateOnRotate();
-            onSetNavigateOnRotate();
-            onSetActivityReminder();
-            onSetTrusleep();
-            onSetNotification();
+            setWearLocation();
+            setActivateOnRotate();
+            setNavigateOnRotate();
+            setActivityReminder();
+            setTrusleep();
+            setNotification();
         } catch (IOException e) {
             GB.toast(getContext(), "Initializing Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
@@ -368,7 +368,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             switch (config) {
                 case DeviceSettingsPreferenceConst.PREF_DATEFORMAT:
                 case DeviceSettingsPreferenceConst.PREF_TIMEFORMAT: {
-                    onSetDateFormat();
+                    setDateFormat();
                     break;
                 }
                 case SettingsActivity.PREF_MEASUREMENT_SYSTEM:
@@ -379,15 +379,15 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     break;
                 }
                 case DeviceSettingsPreferenceConst.PREF_WEARLOCATION: {
-                    onSetWearLocation();
+                    setWearLocation();
                     break;
                 }
                 case DeviceSettingsPreferenceConst.PREF_LIFTWRIST_NOSHED: {
-                    onSetActivateOnRotate();
+                    setActivateOnRotate();
                     break;
                 }
                 case MiBandConst.PREF_MI2_ROTATE_WRIST_TO_SWITCH_INFO: {
-                    onSetNavigateOnRotate();
+                    setNavigateOnRotate();
                     break;
                 }
                 case DeviceSettingsPreferenceConst.PREF_LONGSIT_SWITCH:
@@ -401,15 +401,15 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 case ZeTimeConstants.PREF_INACTIVITY_FR:
                 case ZeTimeConstants.PREF_INACTIVITY_SA:
                 case ZeTimeConstants.PREF_INACTIVITY_SU: {
-                    onSetActivityReminder();
+                    setActivityReminder();
                     break;
                 }
                 case HuaweiConstants.PREF_HUAWEI_TRUSLEEP: {
-                    onSetTrusleep();
+                    setTrusleep();
                     break;
                 }
                 case DeviceSettingsPreferenceConst.PREF_NOTIFICATION_ENABLE: {
-                    onSetNotification();
+                    setNotification();
                     break;
                 }
             }
@@ -545,7 +545,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     
     }
 
-    public void onSetNotification() {
+    public void setNotification() {
         try {
             SetNotificationRequest setNotificationReq = new SetNotificationRequest(this);
             responseManager.addHandler(setNotificationReq);
@@ -585,7 +585,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     }
 
-    public void onSetDateFormat() {
+    public void setDateFormat() {
         try {
             SetDateFormatRequest setDateFormatReq = new SetDateFormatRequest(this);
             responseManager.addHandler(setDateFormatReq);
@@ -597,7 +597,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     }
 
     @Override
-    public void onSetTime() {
+    public void setTime() {
         try {
             SetTimeRequest setTimeReq = new SetTimeRequest(this);
             responseManager.addHandler(setTimeReq);
@@ -722,7 +722,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     }
 
 
-    public void onSetWearLocation() {
+    public void setWearLocation() {
         try {
             SetWearLocationRequest setWearLocationReq = new SetWearLocationRequest(this);
             responseManager.addHandler(setWearLocationReq);
@@ -733,7 +733,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         }
     }
 
-    public void onSetActivateOnRotate() {
+    public void setActivateOnRotate() {
         try {
             SetActivateOnRotateRequest setActivateOnRotateReq = new SetActivateOnRotateRequest(this);
             responseManager.addHandler(setActivateOnRotateReq);
@@ -744,7 +744,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         }
     }
 
-    public void onSetNavigateOnRotate() {
+    public void setNavigateOnRotate() {
         try {
             SetNavigateOnRotateRequest setNavigateOnRotateReq = new SetNavigateOnRotateRequest(this);
             responseManager.addHandler(setNavigateOnRotateReq);
@@ -755,7 +755,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         }
     }
 
-    public void onSetActivityReminder() {
+    public void setActivityReminder() {
         try {
             SetActivityReminderRequest setActivityReminderReq = new SetActivityReminderRequest(this);
             responseManager.addHandler(setActivityReminderReq);
@@ -766,7 +766,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         }
     }
 
-    public void onSetTrusleep() {
+    public void setTrusleep() {
         try {
             SetTruSleepRequest setTruSleepReq = new SetTruSleepRequest(this);
             responseManager.addHandler(setTruSleepReq);
