@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
 
@@ -22,8 +21,6 @@ public class GetStepDataCountRequest extends Request {
         this.serviceId = FitnessData.id;
         this.commandId = FitnessData.MessageCount.stepId;
 
-//        this.builder = builder;
-
         this.start = start;
         this.end = end;
     }
@@ -34,9 +31,9 @@ public class GetStepDataCountRequest extends Request {
                 serviceId,
                 commandId,
                 new HuaweiTLV()
-                .put(FitnessData.MessageCount.requestUnknownTag)
-                .put(FitnessData.MessageCount.requestStartTag, this.start)
-                .put(FitnessData.MessageCount.requestEndTag, this.end)
+                    .put(FitnessData.MessageCount.requestUnknownTag)
+                    .put(FitnessData.MessageCount.requestStartTag, this.start)
+                    .put(FitnessData.MessageCount.requestEndTag, this.end)
         ).encrypt(support.getSecretKey(), support.getIV());
         return requestedPacket.serialize();
     }

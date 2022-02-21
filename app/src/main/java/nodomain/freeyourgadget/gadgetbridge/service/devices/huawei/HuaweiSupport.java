@@ -491,19 +491,29 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         int stepStart = 0;
         int end = (int) (System.currentTimeMillis() / 1000);
 
-        try (DBHandler db = GBApplication.acquireDB()) {
-            HuaweiSampleProvider sampleProvider = new HuaweiSampleProvider(getDevice(), db.getDaoSession());
-            sleepStart = sampleProvider.getLastSleepFetchTimestamp();
-            stepStart = sampleProvider.getLastStepFetchTimestamp();
-        } catch (Exception e) {
-            LOG.warn("Exception for getting start times, using 01/01/2000 - 00:00:00.");
-        }
+        SharedPreferences sharedPreferences = GBApplication.getDeviceSpecificSharedPrefs(getDevice().getAddress());
+        long prefLastSyncTime = sharedPreferences.getLong("lastSyncTimeMillis", 0);
+        if (prefLastSyncTime != 0) {
+            sleepStart = (int) (prefLastSyncTime / 1000);
+            stepStart = (int) (prefLastSyncTime / 1000);
 
-        // Some bands don't work with zero timestamp, so starting later
-        if (sleepStart == 0)
-            sleepStart = 946684800;
-        if (stepStart == 0)
-            stepStart = 946684800;
+            // Reset for next calls
+            sharedPreferences.edit().putLong("lastSyncTimeMillis", 0).apply();
+        } else {
+            try (DBHandler db = GBApplication.acquireDB()) {
+                HuaweiSampleProvider sampleProvider = new HuaweiSampleProvider(getDevice(), db.getDaoSession());
+                sleepStart = sampleProvider.getLastSleepFetchTimestamp();
+                stepStart = sampleProvider.getLastStepFetchTimestamp();
+            } catch (Exception e) {
+                LOG.warn("Exception for getting start times, using 01/01/2000 - 00:00:00.");
+            }
+
+            // Some bands don't work with zero timestamp, so starting later
+            if (sleepStart == 0)
+                sleepStart = 946684800;
+            if (stepStart == 0)
+                stepStart = 946684800;
+        }
 
         TransactionBuilder transactionBuilder = createTransactionBuilder("FetchRecordedData");
         transactionBuilder.add(new SetDeviceBusyAction(getDevice(), getContext().getString(R.string.busy_task_fetch_activity_data), getContext()));
