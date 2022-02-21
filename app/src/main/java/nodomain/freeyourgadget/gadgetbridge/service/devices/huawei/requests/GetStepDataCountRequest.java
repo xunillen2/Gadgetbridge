@@ -16,13 +16,13 @@ public class GetStepDataCountRequest extends Request {
     private int start = 0;
     private int end = 0;
 
-    public GetStepDataCountRequest(HuaweiSupport support, TransactionBuilder builder, int start, int end) {
+    public GetStepDataCountRequest(HuaweiSupport support, int start, int end) {
         super(support);
 
         this.serviceId = FitnessData.id;
         this.commandId = FitnessData.MessageCount.stepId;
 
-        this.builder = builder;
+//        this.builder = builder;
 
         this.start = start;
         this.end = end;

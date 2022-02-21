@@ -101,9 +101,6 @@ import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
-// TO TEST
-
-
 public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiSupport.class);
 
@@ -485,8 +482,6 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     @Override
     public void onFetchRecordedData(int dataTypes) {
-        // TODO: All requests run at the same time, which may not work properly on some bands
-
         if (getDevice().isBusy()) {
             LOG.warn("Device is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.");
             return;
@@ -513,59 +508,58 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         TransactionBuilder transactionBuilder = createTransactionBuilder("FetchRecordedData");
         transactionBuilder.add(new SetDeviceBusyAction(getDevice(), getContext().getString(R.string.busy_task_fetch_activity_data), getContext()));
 
-        GetSleepDataCountRequest getSleepDataCountRequest = new GetSleepDataCountRequest(this, sleepStart, end);
-        GetStepDataCountRequest getStepDataCountRequest = new GetStepDataCountRequest(this, transactionBuilder, stepStart, end);
-        GetFitnessTotalsRequest getFitnessTotalsRequest = new GetFitnessTotalsRequest(this);
-        try {
-            sleepSyncActive = true;
-            responseManager.addHandler(getSleepDataCountRequest);
-            getSleepDataCountRequest.setFinalizeReq(new RequestCallback() {
-                @Override
-                public void call() {
-                    sleepSyncActive = false;
-                    handleSyncPartFinished();
+        final GetSleepDataCountRequest getSleepDataCountRequest = new GetSleepDataCountRequest(this, transactionBuilder, sleepStart, end);
+        final GetStepDataCountRequest getStepDataCountRequest = new GetStepDataCountRequest(this, stepStart, end);
+        final GetFitnessTotalsRequest getFitnessTotalsRequest = new GetFitnessTotalsRequest(this);
+
+        getFitnessTotalsRequest.setFinalizeReq(new RequestCallback() {
+            @Override
+            public void call() {
+                handleSyncFinished();
+            }
+        });
+
+        getStepDataCountRequest.setFinalizeReq(new RequestCallback() {
+            @Override
+            public void call() {
+                try {
+                    responseManager.addHandler(getFitnessTotalsRequest);
+                    getFitnessTotalsRequest.perform();
+                } catch (IOException e) {
+                    handleSyncFinished();
+                    e.printStackTrace();
                 }
-            });
+            }
+        });
+
+        getSleepDataCountRequest.setFinalizeReq(new RequestCallback() {
+            @Override
+            public void call() {
+                try {
+                    responseManager.addHandler(getStepDataCountRequest);
+                    getStepDataCountRequest.perform();
+                } catch (IOException e) {
+                    handleSyncFinished();
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        try {
+            responseManager.addHandler(getSleepDataCountRequest);
             getSleepDataCountRequest.perform();
         } catch (IOException e) {
-            sleepSyncActive = false;
-            handleSyncPartFinished();
-            e.printStackTrace();
-        }
-
-        try {
-            stepSyncActive = true;
-            responseManager.addHandler(getStepDataCountRequest);
-            getStepDataCountRequest.setFinalizeReq(new RequestCallback() {
-                @Override
-                public void call() {
-                    stepSyncActive = false;
-                    handleSyncPartFinished();
-                }
-            });
-            getStepDataCountRequest.perform();
-        } catch (IOException e) {
-            stepSyncActive = false;
-            handleSyncPartFinished();
-            e.printStackTrace();
-        }
-
-        try {
-            responseManager.addHandler(getFitnessTotalsRequest);
-            getFitnessTotalsRequest.perform();
-        } catch (IOException e) {
+            handleSyncFinished();
             e.printStackTrace();
         }
     }
 
-    private void handleSyncPartFinished() {
-        if (!sleepSyncActive && !stepSyncActive) {
-            if (getDevice().isBusy()) {
-                getDevice().unsetBusyTask();
-                getDevice().sendDeviceUpdateIntent(getContext());
-            }
-            GB.signalActivityDataFinish();
+    private void handleSyncFinished() {
+        if (getDevice().isBusy()) {
+            getDevice().unsetBusyTask();
+            getDevice().sendDeviceUpdateIntent(getContext());
         }
+        GB.signalActivityDataFinish();
     }
 
     @Override

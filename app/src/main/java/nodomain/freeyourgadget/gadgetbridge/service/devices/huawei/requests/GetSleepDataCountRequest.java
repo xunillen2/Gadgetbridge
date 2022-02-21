@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
+import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
 
@@ -16,10 +17,12 @@ public class GetSleepDataCountRequest extends Request {
     private int start = 0;
     private int end = 0;
 
-    public GetSleepDataCountRequest(HuaweiSupport support, int start, int end) {
+    public GetSleepDataCountRequest(HuaweiSupport support, TransactionBuilder builder, int start, int end) {
         super(support);
         this.serviceId = FitnessData.id;
         this.commandId = FitnessData.MessageCount.sleepId;
+
+        this.builder = builder;
 
         this.start = start;
         this.end = end;
