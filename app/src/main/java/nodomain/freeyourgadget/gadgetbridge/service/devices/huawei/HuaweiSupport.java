@@ -753,7 +753,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     deviceId,
                     userId,
                     timestamp + duration,
-                    (byte) FitnessData.MessageData.seepId,
+                    (byte) FitnessData.MessageData.sleepId,
                     type,
                     1,
                     ActivitySample.NOT_MEASURED,

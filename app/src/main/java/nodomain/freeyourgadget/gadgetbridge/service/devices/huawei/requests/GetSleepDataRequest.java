@@ -20,7 +20,7 @@ public class GetSleepDataRequest extends Request {
     public GetSleepDataRequest(HuaweiSupport support, short maxCount, short count) {
         super(support);
         this.serviceId = FitnessData.id;
-        this.commandId = FitnessData.MessageData.seepId;
+        this.commandId = FitnessData.MessageData.sleepId;
 
         this.maxCount = maxCount;
         this.count = count;

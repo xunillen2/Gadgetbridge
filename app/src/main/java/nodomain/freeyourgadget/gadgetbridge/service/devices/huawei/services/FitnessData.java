@@ -27,7 +27,7 @@ public class FitnessData {
     }
 
     public static class MessageData {
-        public static final int seepId = 0x0D;
+        public static final int sleepId = 0x0D;
         public static final int stepId = 0x0B;
 
         public static final int requestContainerTag = 0x81;

@@ -270,7 +270,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
         for (HuaweiActivitySample sample : rawSamples) {
             // Filter on Source 0x0d, Type 0x01, until we know what it is and how we should
             // handle them. Just showing them currently has some issues.
-            if (sample.getSource() == FitnessData.MessageData.seepId && sample.getRawKind() == RawTypes.UNKNOWN)
+            if (sample.getSource() == FitnessData.MessageData.sleepId && sample.getRawKind() == RawTypes.UNKNOWN)
                 continue;
 
             // Filter samples on activity type
@@ -351,7 +351,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
                 processedSamples.add(sample);
 
                 // Set modifiers
-                if (sample.getSource() == FitnessData.MessageData.seepId && (sample.getRawKind() == RawTypes.LIGHT_SLEEP || sample.getRawKind() == RawTypes.DEEP_SLEEP))
+                if (sample.getSource() == FitnessData.MessageData.sleepId && (sample.getRawKind() == RawTypes.LIGHT_SLEEP || sample.getRawKind() == RawTypes.DEEP_SLEEP))
                     sleepModifier = sample.getRawKind();
                 if (sample.getSource() == FitnessData.MessageData.stepId)
                     insideStepMarker = true;
@@ -361,7 +361,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
                 // Handle if the start marker is before the start timestamp
                 if (sample.getOtherTimestamp() < timestamp_from) {
                     // This is only really useful for sleep data
-                    if (sample.getSource() == FitnessData.MessageData.seepId && (sample.getRawKind() == RawTypes.LIGHT_SLEEP || sample.getRawKind() == RawTypes.DEEP_SLEEP)) {
+                    if (sample.getSource() == FitnessData.MessageData.sleepId && (sample.getRawKind() == RawTypes.LIGHT_SLEEP || sample.getRawKind() == RawTypes.DEEP_SLEEP)) {
                         // Change the type of the previous markers so the sleep registers correctly
                         for (HuaweiActivitySample processedSample : processedSamples)
                             processedSample.setRawKind(sample.getRawKind());
@@ -386,7 +386,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
                 }
 
                 // Set modifiers
-                if (sample.getSource() == FitnessData.MessageData.seepId && sample.getRawKind() == sleepModifier)
+                if (sample.getSource() == FitnessData.MessageData.sleepId && sample.getRawKind() == sleepModifier)
                     sleepModifier = 0;
                 if (sample.getSource() == FitnessData.MessageData.stepId)
                     insideStepMarker = false;
