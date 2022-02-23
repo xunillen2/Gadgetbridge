@@ -186,9 +186,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
             responseManager.addHandler(productInformationReq);
             productInformationReq.perform();
-            GetBatteryLevelRequest batteryLevelReq = new GetBatteryLevelRequest(this);
-            responseManager.addHandler(batteryLevelReq);
-            batteryLevelReq.perform();
+            getBatteryLevel();
             builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZED, getContext()));
             performConnected(builder.getTransaction());
             // Workaround to enable PREF_HUAWEI_ROTATE_WRIST_TO_SWITCH_INFO preference
@@ -729,6 +727,17 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             setWearLocationReq.perform();
         } catch (IOException e) {
             GB.toast(getContext(), "Faile to configure Wear Location", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
+    }
+
+    public void getBatteryLevel() {
+        try {
+            GetBatteryLevelRequest batteryLevelReq = new GetBatteryLevelRequest(this);
+            responseManager.addHandler(batteryLevelReq);
+            batteryLevelReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Faile to get Batterry Level", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
         }
     }
