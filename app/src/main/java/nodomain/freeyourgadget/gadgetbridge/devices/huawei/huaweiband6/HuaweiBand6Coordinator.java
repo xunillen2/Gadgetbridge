@@ -68,7 +68,32 @@ public class HuaweiBand6Coordinator extends HuaweiCoordinator{
                 R.xml.devicesettings_wearlocation,
                 R.xml.devicesettings_dateformat,
                 R.xml.devicesettings_timeformat,
-                R.xml.devicesettings_huawei,
+        };
+    }
+
+    @Override
+    public String[] getSupportedLanguageSettings(GBDevice device) {
+        return new String[]{
+                "auto",
+                "ar_SA",
+                "de_DE",
+                "en_US",
+                "es_ES",
+                "fr_FR",
+                "id_ID",
+                "it_IT",
+                "ja_JP",
+                "ko_KO",
+                "pt_PT",
+                "nl_NL",
+                "pl_PL",
+                "ru_RU",
+                "th_TH",
+                "tr_TR",
+                "uk_UA",
+                "vi_VN",
+                "zh_CN",
+                "zh_TW",
         };
     }
 
