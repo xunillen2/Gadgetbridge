@@ -182,7 +182,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             if (name != null && !name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME)) {
                 setDateFormat();
             }
-            setTime();
+            onSetTime();
             GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
             responseManager.addHandler(productInformationReq);
             productInformationReq.perform();
@@ -597,7 +597,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     }
 
     @Override
-    public void setTime() {
+    public void onSetTime() {
         try {
             SetTimeRequest setTimeReq = new SetTimeRequest(this);
             responseManager.addHandler(setTimeReq);
