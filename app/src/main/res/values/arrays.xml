@@ -10,9 +10,6 @@
         <item>@string/pref_theme_value_light</item>
         <item>@string/pref_theme_value_dark</item>
     </string-array>
-    <string name="pref_theme_value_system" translatable="false">system</string>
-    <string name="pref_theme_value_light" translatable="false">light</string>
-    <string name="pref_theme_value_dark" translatable="false">dark</string>
 
     <string-array name="pref_language_options">
         <item name="default">System Default</item>
@@ -23,6 +20,7 @@
         <item name="es">Español</item>
         <item name="fr">Français</item>
         <item name="pl">Polski</item>
+        <item name="pt">Português</item>
         <item name="ru">Русский</item>
         <item name="vi">Tiếng Việt</item>
         <item name="tr">Türkçe</item>
@@ -42,6 +40,7 @@
         <item>es</item>
         <item>fr</item>
         <item>pl</item>
+        <item>pt</item>
         <item>ru</item>
         <item>vi</item>
         <item>tr</item>
@@ -918,6 +917,86 @@
         <item>@string/p_menuitem_more</item>
     </string-array>
 
+    <string-array name="pref_gts2mini_display_items">
+        <item>@string/menuitem_goal</item>
+        <item>@string/menuitem_hr</item>
+        <item>@string/menuitem_pai</item>
+        <item>@string/menuitem_workout</item>
+        <item>@string/menuitem_activity</item>
+        <item>@string/menuitem_sleep</item>
+        <item>@string/menuitem_weather</item>
+        <item>@string/menuitem_alarm</item>
+        <item>@string/menuitem_eventreminder</item>
+        <item>@string/menuitem_stopwatch</item>
+        <item>@string/menuitem_timer</item>
+        <item>@string/menuitem_breathing</item>
+        <item>@string/menuitem_stress</item>
+        <item>@string/menuitem_spo2</item>
+        <item>@string/menuitem_worldclock</item>
+        <item>@string/menuitem_pomodoro</item>
+        <item>@string/menuitem_music</item>
+        <item>@string/menuitem_cycles</item>
+        <item>@string/menuitem_compass</item>
+        <item>@string/menuitem_findphone</item>
+        <item>@string/menuitem_takephoto</item>
+        <item>@string/menuitem_alexa</item>
+        <item>@string/menuitem_settings</item>
+        <item>@string/menuitem_more</item>
+    </string-array>
+
+    <string-array name="pref_gts2mini_display_items_values">
+        <item>@string/p_menuitem_goal</item>
+        <item>@string/p_menuitem_hr</item>
+        <item>@string/p_menuitem_pai</item>
+        <item>@string/p_menuitem_workout</item>
+        <item>@string/p_menuitem_activity</item>
+        <item>@string/p_menuitem_sleep</item>
+        <item>@string/p_menuitem_weather</item>
+        <item>@string/p_menuitem_alarm</item>
+        <item>@string/p_menuitem_eventreminder</item>
+        <item>@string/p_menuitem_stopwatch</item>
+        <item>@string/p_menuitem_timer</item>
+        <item>@string/p_menuitem_breathing</item>
+        <item>@string/p_menuitem_stress</item>
+        <item>@string/p_menuitem_spo2</item>
+        <item>@string/p_menuitem_worldclock</item>
+        <item>@string/p_menuitem_pomodoro</item>
+        <item>@string/p_menuitem_music</item>
+        <item>@string/p_menuitem_cycles</item>
+        <item>@string/p_menuitem_compass</item>
+        <item>@string/p_menuitem_findphone</item>
+        <item>@string/p_menuitem_takephoto</item>
+        <item>@string/p_menuitem_alexa</item>
+        <item>@string/p_menuitem_settings</item>
+        <item>@string/p_menuitem_more</item>
+    </string-array>
+
+    <string-array name="pref_gts2mini_display_items_default">
+        <item>@string/p_menuitem_goal</item>
+        <item>@string/p_menuitem_hr</item>
+        <item>@string/p_menuitem_pai</item>
+        <item>@string/p_menuitem_workout</item>
+        <item>@string/p_menuitem_activity</item>
+        <item>@string/p_menuitem_sleep</item>
+        <item>@string/p_menuitem_weather</item>
+        <item>@string/p_menuitem_alarm</item>
+        <item>@string/p_menuitem_eventreminder</item>
+        <item>@string/p_menuitem_stopwatch</item>
+        <item>@string/p_menuitem_timer</item>
+        <item>@string/p_menuitem_breathing</item>
+        <item>@string/p_menuitem_stress</item>
+        <item>@string/p_menuitem_spo2</item>
+        <item>@string/p_menuitem_worldclock</item>
+        <item>@string/p_menuitem_pomodoro</item>
+        <item>@string/p_menuitem_music</item>
+        <item>@string/p_menuitem_cycles</item>
+        <item>@string/p_menuitem_compass</item>
+        <item>@string/p_menuitem_findphone</item>
+        <item>@string/p_menuitem_takephoto</item>
+        <item>@string/p_menuitem_settings</item>
+        <item>@string/p_menuitem_more</item>
+    </string-array>
+
     <string-array name="pref_trex_display_items">
         <item>@string/menuitem_status</item>
         <item>@string/menuitem_pai</item>
@@ -1093,6 +1172,7 @@
         <item>@string/menuitem_sleep</item>
         <item>@string/menuitem_weather</item>
         <item>@string/menuitem_alarm</item>
+        <item>@string/menuitem_eventreminder</item>
         <item>@string/menuitem_stress</item>
         <item>@string/menuitem_spo2</item>
         <item>@string/menuitem_breathing</item>
@@ -1117,6 +1197,7 @@
         <item>@string/p_menuitem_sleep</item>
         <item>@string/p_menuitem_weather</item>
         <item>@string/p_menuitem_alarm</item>
+        <item>@string/p_menuitem_eventreminder</item>
         <item>@string/p_menuitem_stress</item>
         <item>@string/p_menuitem_spo2</item>
         <item>@string/p_menuitem_breathing</item>
@@ -1154,6 +1235,7 @@
         <item>@string/menuitem_sleep</item>
         <item>@string/menuitem_weather</item>
         <item>@string/menuitem_alarm</item>
+        <item>@string/menuitem_eventreminder</item>
         <item>@string/menuitem_stress</item>
         <item>@string/menuitem_spo2</item>
         <item>@string/menuitem_breathing</item>
@@ -1180,6 +1262,7 @@
         <item>@string/p_menuitem_sleep</item>
         <item>@string/p_menuitem_weather</item>
         <item>@string/p_menuitem_alarm</item>
+        <item>@string/p_menuitem_eventreminder</item>
         <item>@string/p_menuitem_stress</item>
         <item>@string/p_menuitem_spo2</item>
         <item>@string/p_menuitem_breathing</item>
@@ -1490,6 +1573,14 @@
         <item>1800</item>
     </string-array>
 
+    <string-array name="reminder_repeat">
+        <item>@string/reminder_once</item>
+        <item>@string/reminder_every_day</item>
+        <item>@string/reminder_every_week</item>
+        <item>@string/reminder_every_month</item>
+        <item>@string/reminder_every_year</item>
+    </string-array>
+
     <string-array name="notification_filter_modes_entries">
         <item>@string/filter_mode_none</item>
         <item>@string/filter_mode_whitelist</item>
@@ -1563,20 +1654,13 @@
         <item>@string/pref_media_forward</item>
         <item>@string/pref_media_rewind</item>
         <item>@string/pref_device_action_broadcast</item>
+        <item>@string/pref_device_action_fitness_app_control_start</item>
+        <!--
+        Enable when OpenTracks allows to be stopped via intent
+        https://github.com/OpenTracksApp/OpenTracks/issues/1103
+        <item>@string/pref_device_action_fitness_app_control_stop</item>
+        -->
     </string-array>
-
-    <string name="pref_button_action_disabled">Disabled</string>
-    <string name="pref_media_play">Media Play</string>
-    <string name="pref_media_pause">Media Pause</string>
-    <string name="pref_media_playpause">Toggle playback</string>
-    <string name="pref_media_next">Next Track</string>
-    <string name="pref_media_previous">Previous Track</string>
-    <string name="pref_media_volumeup">Volume Up</string>
-    <string name="pref_media_volumedown">Volume Down</string>
-    <string name="pref_media_forward">Skip forward</string>
-    <string name="pref_media_rewind">Skip back</string>
-    <string name="pref_device_action_broadcast">Send Broadcast</string>
-
 
     <string-array name="button_action_values">
         <item>@string/pref_button_action_disabled_value</item>
@@ -1590,26 +1674,13 @@
         <item>@string/pref_media_forward_value</item>
         <item>@string/pref_media_rewind_value</item>
         <item>@string/pref_device_action_broadcast_value</item>
-
-
+        <item>@string/pref_device_action_fitness_app_control_start_value</item>
+        <!--
+        Enable when OpenTracks allows to be stopped via intent
+        https://github.com/OpenTracksApp/OpenTracks/issues/1103
+        <item>@string/pref_device_action_fitness_app_control_stop_value</item>
+        -->
     </string-array>
-
-    <string name="pref_button_action_disabled_value" translatable="false">UNKNOWN</string>
-    <string name="pref_media_play_value" translatable="false">PLAY</string>
-    <string name="pref_media_pause_value" translatable="false">PAUSE</string>
-    <string name="pref_media_playpause_value" translatable="false">PLAYPAUSE</string>
-    <string name="pref_media_next_value" translatable="false">NEXT</string>
-    <string name="pref_media_previous_value" translatable="false">PREVIOUS</string>
-    <string name="pref_media_volumeup_value" translatable="false">VOLUMEUP</string>
-    <string name="pref_media_volumedown_value" translatable="false">VOLUMEDOWN</string>
-    <string name="pref_media_forward_value" translatable="false">FORWARD</string>
-    <string name="pref_media_rewind_value" translatable="false">REWIND</string>
-    <string name="pref_device_action_broadcast_value" translatable="false">BROADCAST</string>
-    <string name="pref_title_touch_voice_assistant">Voice Assistant</string>
-    <string name="pref_title_touch_anc">Active Noise Cancelling</string>
-    <string name="pref_title_touch_quick_ambient">Quick Ambient Sound</string>
-    <string name="pref_title_touch_volume">Volume</string>
-    <string name="pref_title_touch_ambient">Ambient Sound</string>
 
     <string-array name="device_action_options">
         <item>@string/pref_button_action_disabled</item>
@@ -1617,6 +1688,12 @@
         <item>@string/pref_media_pause</item>
         <item>@string/pref_media_playpause</item>
         <item>@string/pref_device_action_broadcast</item>
+        <item>@string/pref_device_action_fitness_app_control_start</item>
+        <!--
+        Enable when OpenTracks allows to be stopped via intent
+        https://github.com/OpenTracksApp/OpenTracks/issues/1103
+        <item>@string/pref_device_action_fitness_app_control_stop</item>
+        -->
     </string-array>
 
     <string-array name="device_action_values">
@@ -1625,9 +1702,16 @@
         <item>@string/pref_media_pause_value</item>
         <item>@string/pref_media_playpause_value</item>
         <item>@string/pref_device_action_broadcast_value</item>
+        <item>@string/pref_device_action_fitness_app_control_start_value</item>
+        <!--
+        Enable when OpenTracks allows to be stopped via intent
+        https://github.com/OpenTracksApp/OpenTracks/issues/1103
+        <item>@string/pref_device_action_fitness_app_control_stop_value</item>
+        -->
     </string-array>
 
     <string-array name="pref_hybridhr_buttonfunctions">
+        <item name="">@string/menuitem_nothing</item>
         <item name="notificationsPanelApp">@string/menuitem_notifications</item>
         <item name="weatherApp">@string/menuitem_weather</item>
         <item name="musicApp">@string/menuitem_music</item>
@@ -1638,6 +1722,7 @@
         <item name="workoutApp">@string/hr_appname_workout</item>
     </string-array>
     <string-array name="pref_hybridhr_buttonfunctions_values">
+        <item></item>
         <item>notificationsPanelApp</item>
         <item>weatherApp</item>
         <item>musicApp</item>
@@ -1857,17 +1942,29 @@
         <item>3</item>
     </string-array>
 
-    <string-array name="sony_ambient_sound_control_names">
+    <string-array name="sony_ambient_sound_control_wind_noise_reduction_names">
         <item>@string/sony_ambient_sound_off</item>
         <item>@string/sony_ambient_sound_noise_cancelling</item>
         <item>@string/sony_ambient_sound_wind_noise_reduction</item>
         <item>@string/sony_ambient_sound_ambient_sound</item>
     </string-array>
 
-    <string-array name="sony_ambient_sound_control_values">
+    <string-array name="sony_ambient_sound_control_wind_noise_reduction_values">
         <item>off</item>
         <item>noise_cancelling</item>
         <item>wind_noise_reduction</item>
+        <item>ambient_sound</item>
+    </string-array>
+
+    <string-array name="sony_ambient_sound_control_names">
+        <item>@string/sony_ambient_sound_off</item>
+        <item>@string/sony_ambient_sound_noise_cancelling</item>
+        <item>@string/sony_ambient_sound_ambient_sound</item>
+    </string-array>
+
+    <string-array name="sony_ambient_sound_control_values">
+        <item>off</item>
+        <item>noise_cancelling</item>
         <item>ambient_sound</item>
     </string-array>
 
@@ -1949,6 +2046,68 @@
         <item>after_30_min</item>
         <item>after_1_hour</item>
         <item>after_3_hour</item>
+    </string-array>
+
+    <string-array name="sony_automatic_power_off_when_taken_off_names">
+        <item>@string/sony_automatic_power_off_off</item>
+        <item>@string/sony_automatic_power_off_when_taken_off</item>
+    </string-array>
+
+    <string-array name="sony_automatic_power_off_when_taken_off_values">
+        <item>off</item>
+        <item>when_taken_off</item>
+    </string-array>
+
+    <string-array name="sony_speak_to_chat_voice_sensitivity_names">
+        <item>@string/sony_speak_to_chat_sensitivity_auto</item>
+        <item>@string/sony_speak_to_chat_sensitivity_high</item>
+        <item>@string/sony_speak_to_chat_sensitivity_low</item>
+    </string-array>
+
+    <string-array name="sony_speak_to_chat_voice_sensitivity_values">
+        <item>auto</item>
+        <item>high</item>
+        <item>low</item>
+    </string-array>
+
+    <string-array name="sony_speak_to_chat_voice_timeout_names">
+        <item>@string/sony_speak_to_chat_timeout_off</item>
+        <item>@string/sony_speak_to_chat_timeout_short</item>
+        <item>@string/sony_speak_to_chat_timeout_standard</item>
+        <item>@string/sony_speak_to_chat_timeout_long</item>
+    </string-array>
+
+    <string-array name="sony_speak_to_chat_voice_timeout_values">
+        <item>off</item>
+        <item>short</item>
+        <item>standard</item>
+        <item>long</item>
+    </string-array>
+
+    <string-array name="sony_wfsp800n_button_mode_names">
+        <item>@string/sony_button_mode_off</item>
+        <item>@string/sony_button_mode_ambient_sound_control</item>
+        <item>@string/sony_button_mode_playback_control</item>
+        <item>@string/sony_button_mode_volume_control</item>
+    </string-array>
+
+    <string-array name="sony_wfsp800n_button_mode_values">
+        <item>off</item>
+        <item>ambient_sound_control</item>
+        <item>playback_control</item>
+        <item>volume_control</item>
+    </string-array>
+
+    <string-array name="fossil_hr_activity_recognition_modes">
+        <item>@string/pref_activity_recognition_mode_none</item>
+        <item>@string/pref_activity_recognition_mode_ask</item>
+        <item>@string/pref_activity_recognition_mode_auto</item>
+    </string-array>
+
+    <string-array name="fossil_hr_activity_recognition_mode_values">
+        <item>mode_none</item>
+        <item>mode_ask</item>
+        <item>mode_auto</item>
     </string-array>
 
     <string-array name="workmode">

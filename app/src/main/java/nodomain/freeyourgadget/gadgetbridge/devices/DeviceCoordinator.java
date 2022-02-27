@@ -32,6 +32,7 @@ import java.util.Collection;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsCustomizer;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
@@ -321,6 +322,16 @@ public interface DeviceCoordinator {
     boolean supportsMusicInfo();
 
     /**
+     * Indicates the maximum reminder message length.
+     */
+    int getMaximumReminderMessageLength();
+
+    /**
+     * Indicates the maximum number of reminder slots available in the device.
+     */
+    int getReminderSlotCount();
+
+    /**
      * Indicates whether the device has an led which supports custom colors
      */
     boolean supportsLedColor();
@@ -348,6 +359,11 @@ public interface DeviceCoordinator {
     int[] getSupportedDeviceSpecificSettings(GBDevice device);
 
     /**
+     * Returns the {@link DeviceSpecificSettingsCustomizer}, allowing for the customization of the devices specific settings screen.
+     */
+    DeviceSpecificSettingsCustomizer getDeviceSpecificSettingsCustomizer(GBDevice device);
+
+    /**
      * Indicates which device specific language the device supports
      */
     String[] getSupportedLanguageSettings(GBDevice device);
@@ -362,4 +378,5 @@ public interface DeviceCoordinator {
 
     BatteryConfig[] getBatteryConfig();
 
+    boolean supportsPowerOff();
 }

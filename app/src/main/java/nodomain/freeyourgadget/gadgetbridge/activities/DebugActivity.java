@@ -35,6 +35,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -70,6 +71,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
@@ -82,6 +86,8 @@ import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceManager;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.Device;
+import nodomain.freeyourgadget.gadgetbridge.externalevents.OpenTracksContentObserver;
+import nodomain.freeyourgadget.gadgetbridge.externalevents.OpenTracksController;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
@@ -99,6 +105,8 @@ import nodomain.freeyourgadget.gadgetbridge.util.WidgetPreferenceStorage;
 
 public class DebugActivity extends AbstractGBActivity {
     private static final Logger LOG = LoggerFactory.getLogger(DebugActivity.class);
+
+    private static Bundle dataLossSave;
 
     private static final String EXTRA_REPLY = "reply";
     private static final String ACTION_REPLY
@@ -125,7 +133,7 @@ public class DebugActivity extends AbstractGBActivity {
     };
     private Spinner sendTypeSpinner;
     private EditText editContent;
-    private static long SELECT_DEVICE = 999L;
+    public static final long SELECT_DEVICE = 999L;
     private long selectedTestDeviceKey = SELECT_DEVICE;
     private String selectedTestDeviceMAC;
 
@@ -474,12 +482,12 @@ public class DebugActivity extends AbstractGBActivity {
 
                 new AlertDialog.Builder(DebugActivity.this)
                         .setCancelable(true)
-                        .setTitle("Add test device")
+                        .setTitle(R.string.add_test_device)
                         .setView(linearLayout)
                         .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                createTestDevice();
+                                createTestDevice(DebugActivity.this, selectedTestDeviceKey, selectedTestDeviceMAC);
                             }
                         })
                         .setNegativeButton(R.string.Cancel, new DialogInterface.OnClickListener() {
@@ -505,6 +513,95 @@ public class DebugActivity extends AbstractGBActivity {
             }
         });
 
+        Button startFitnessAppTracking = findViewById(R.id.startFitnessAppTracking);
+        startFitnessAppTracking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OpenTracksController.startRecording(DebugActivity.this);
+            }
+        });
+
+        Button stopFitnessAppTracking = findViewById(R.id.stopFitnessAppTracking);
+        stopFitnessAppTracking.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OpenTracksController.stopRecording(DebugActivity.this);
+            }
+        });
+
+        Button showStatusFitnessAppTracking = findViewById(R.id.showStatusFitnessAppTracking);
+        final int delay = 2 * 1000;
+
+        showStatusFitnessAppTracking.setOnClickListener(new View.OnClickListener() {
+            final Handler handler = new Handler();
+            Runnable runnable;
+
+            @Override
+            public void onClick(View v) {
+                final AlertDialog.Builder fitnesStatusBuilder = new AlertDialog.Builder(DebugActivity.this);
+                fitnesStatusBuilder
+                        .setCancelable(false)
+                        .setTitle("openTracksObserver Status")
+                        .setMessage("Starting openTracksObserver watcher, waiting for an update, refreshing every: " + delay + "ms")
+                        .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                handler.removeCallbacks(runnable);
+                            }
+                        });
+                final AlertDialog alert = fitnesStatusBuilder.show();
+
+
+                runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        LOG.debug("openTracksObserver debug watch dialog running");
+                        handler.postDelayed(this, delay); //schedule next execution
+
+                        OpenTracksContentObserver openTracksObserver = GBApplication.app().getOpenTracksObserver();
+                        if (openTracksObserver == null) {
+                            LOG.debug("openTracksObserver is null");
+                            alert.cancel();
+                            alert.setMessage("openTracksObserver not running");
+                            alert.show();
+                            return;
+                        }
+                        LOG.debug("openTracksObserver is not null, updating debug view");
+                        long timeSecs = openTracksObserver.getTimeMillisChange() / 1000;
+                        float distanceCM = openTracksObserver.getDistanceMeterChange() * 100;
+
+                        LOG.debug("Time: " + timeSecs + " distanceCM " + distanceCM);
+                        alert.cancel();
+                        alert.setMessage("TimeSec: " + timeSecs + " distanceCM " + distanceCM);
+                        alert.show();
+                    }
+                };
+                handler.postDelayed(runnable, delay);
+            }
+        });
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (dataLossSave != null ) {
+            dataLossSave.clear();
+            dataLossSave = null ;
+        }
+        dataLossSave = new Bundle();
+        dataLossSave.putString("editContent", editContent.getText().toString());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (dataLossSave != null ) {
+            editContent.setText(dataLossSave.getString("editContent", ""));
+        }else{
+            editContent.setText("Test");
+        }
     }
 
     private void deleteWidgetsPrefs() {
@@ -646,25 +743,25 @@ public class DebugActivity extends AbstractGBActivity {
         spinner.setOnItemSelectedListener(new CustomOnDeviceSelectedListener());
     }
 
-    private void createTestDevice() {
-        if (selectedTestDeviceKey == SELECT_DEVICE) {
+    protected static void createTestDevice(Context context, long deviceKey, String deviceMac) {
+        if (deviceKey == SELECT_DEVICE) {
             return;
         }
-        DeviceType deviceType = DeviceType.fromKey((int) selectedTestDeviceKey);
+        DeviceType deviceType = DeviceType.fromKey((int) deviceKey);
         try (
-                DBHandler db = GBApplication.acquireDB()) {
+            DBHandler db = GBApplication.acquireDB()) {
             DaoSession daoSession = db.getDaoSession();
-            GBDevice gbDevice = new GBDevice(selectedTestDeviceMAC, deviceType.name(), "", deviceType);
-            gbDevice.setFirmwareVersion("V1.0");
-            gbDevice.setFirmwareVersion2("V1.0");
+            GBDevice gbDevice = new GBDevice(deviceMac, deviceType.name(), "", deviceType);
+            gbDevice.setFirmwareVersion("N/A");
+            gbDevice.setFirmwareVersion2("N/A");
 
             //this causes the attributes (fw version) to be stored as well. Not much useful, but still...
             gbDevice.setState(GBDevice.State.INITIALIZED);
 
-            Device device = DBHelper.getDevice(gbDevice, daoSession);
+            Device device = DBHelper.getDevice(gbDevice, daoSession); //the addition happens here
             Intent refreshIntent = new Intent(DeviceManager.ACTION_REFRESH_DEVICELIST);
-            LocalBroadcastManager.getInstance(DebugActivity.this).sendBroadcast(refreshIntent);
-            GB.toast(DebugActivity.this, "Added test device: " + deviceType.name(), Toast.LENGTH_SHORT, GB.INFO);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(refreshIntent);
+            GB.toast(context, "Added test device: " + deviceType.name(), Toast.LENGTH_SHORT, GB.INFO);
 
         } catch (
                 Exception e) {
@@ -686,9 +783,8 @@ public class DebugActivity extends AbstractGBActivity {
         return TextUtils.join(separator, mac).toUpperCase(Locale.ROOT);
     }
 
-    private LinkedHashMap getAllSupportedDevices(Context appContext) {
+    public static LinkedHashMap getAllSupportedDevices(Context appContext) {
         LinkedHashMap<String, Pair<Long, Integer>> newMap = new LinkedHashMap<>(1);
-        newMap.put("Select device", new Pair(SELECT_DEVICE, R.drawable.ic_create));
         GBApplication app = (GBApplication) appContext;
         for (DeviceCoordinator coordinator : DeviceHelper.getInstance().getAllCoordinators()) {
             DeviceType deviceType = coordinator.getDeviceType();
@@ -697,6 +793,10 @@ public class DebugActivity extends AbstractGBActivity {
             long deviceId = deviceType.getKey();
             newMap.put(name, new Pair(deviceId, icon));
         }
+        TreeMap <String, Pair<Long, Integer>> sortedMap = new TreeMap<>(newMap);
+        newMap = new LinkedHashMap<>(1);
+        newMap.put(app.getString(R.string.widget_settings_select_device_title), new Pair(SELECT_DEVICE, R.drawable.ic_device_unknown));
+        newMap.putAll(sortedMap);
 
         return newMap;
     }

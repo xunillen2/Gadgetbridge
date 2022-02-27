@@ -41,6 +41,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.DeviceService;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
+import nodomain.freeyourgadget.gadgetbridge.model.Reminder;
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceCommunicationService;
 import nodomain.freeyourgadget.gadgetbridge.util.RtlUtils;
@@ -52,14 +53,11 @@ public class GBDeviceService implements DeviceService {
     protected final Context mContext;
     private final Class<? extends Service> mServiceClass;
     public static final String[] transliterationExtras = new String[]{
-            EXTRA_NOTIFICATION_PHONENUMBER,
             EXTRA_NOTIFICATION_SENDER,
             EXTRA_NOTIFICATION_SUBJECT,
             EXTRA_NOTIFICATION_TITLE,
             EXTRA_NOTIFICATION_BODY,
             EXTRA_NOTIFICATION_SOURCENAME,
-            EXTRA_NOTIFICATION_ICONID,
-            EXTRA_CALL_PHONENUMBER,
             EXTRA_CALL_DISPLAYNAME,
             EXTRA_MUSIC_ARTIST,
             EXTRA_MUSIC_ALBUM,
@@ -222,6 +220,13 @@ public class GBDeviceService implements DeviceService {
                 .putExtra(EXTRA_MUSIC_STATE, stateSpec.state)
                 .putExtra(EXTRA_MUSIC_SHUFFLE, stateSpec.shuffle)
                 .putExtra(EXTRA_MUSIC_POSITION, stateSpec.position);
+        invokeService(intent);
+    }
+
+    @Override
+    public void onSetReminders(ArrayList<? extends Reminder> reminders) {
+        Intent intent = createIntent().setAction(ACTION_SET_REMINDERS)
+                .putExtra(EXTRA_REMINDERS, reminders);
         invokeService(intent);
     }
 
@@ -442,6 +447,12 @@ public class GBDeviceService implements DeviceService {
     public void onSetLedColor(int color) {
         Intent intent = createIntent().setAction(ACTION_SET_LED_COLOR)
                 .putExtra(EXTRA_LED_COLOR, color);
+        invokeService(intent);
+    }
+
+    @Override
+    public void onPowerOff() {
+        Intent intent = createIntent().setAction(ACTION_POWER_OFF);
         invokeService(intent);
     }
 }

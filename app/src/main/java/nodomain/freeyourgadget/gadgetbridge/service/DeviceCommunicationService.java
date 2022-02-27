@@ -73,6 +73,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationType;
+import nodomain.freeyourgadget.gadgetbridge.model.Reminder;
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.receivers.AutoConnectIntervalReceiver;
 import nodomain.freeyourgadget.gadgetbridge.service.receivers.GBAutoFetchReceiver;
@@ -101,6 +102,7 @@ import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_FI
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_HEARTRATE_TEST;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_INSTALL;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_NOTIFICATION;
+import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_POWER_OFF;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_READ_CONFIGURATION;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_REQUEST_APPINFO;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_REQUEST_DEVICEINFO;
@@ -117,6 +119,7 @@ import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SE
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_FM_FREQUENCY;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_HEARTRATE_MEASUREMENT_INTERVAL;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_LED_COLOR;
+import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_SET_REMINDERS;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_START;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_STARTAPP;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.ACTION_TEST_NEW_FUNCTION;
@@ -170,6 +173,7 @@ import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_NOT
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_NOTIFICATION_TITLE;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_NOTIFICATION_TYPE;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_RECORDED_DATA_TYPES;
+import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_REMINDERS;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_RESET_FLAGS;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_URI;
 import static nodomain.freeyourgadget.gadgetbridge.model.DeviceService.EXTRA_VIBRATION_INTENSITY;
@@ -578,6 +582,10 @@ public class DeviceCommunicationService extends Service implements SharedPrefere
                 ArrayList<? extends Alarm> alarms = (ArrayList<? extends Alarm>) intent.getSerializableExtra(EXTRA_ALARMS);
                 mDeviceSupport.onSetAlarms(alarms);
                 break;
+            case ACTION_SET_REMINDERS:
+                ArrayList<? extends Reminder> reminders = (ArrayList<? extends Reminder>) intent.getSerializableExtra(EXTRA_REMINDERS);
+                mDeviceSupport.onSetReminders(reminders);
+                break;
             case ACTION_ENABLE_REALTIME_STEPS: {
                 boolean enable = intent.getBooleanExtra(EXTRA_BOOLEAN_ENABLE, false);
                 mDeviceSupport.onEnableRealtimeSteps(enable);
@@ -624,6 +632,9 @@ public class DeviceCommunicationService extends Service implements SharedPrefere
                 if (color != 0) {
                     mDeviceSupport.onSetLedColor(color);
                 }
+                break;
+            case ACTION_POWER_OFF:
+                mDeviceSupport.onPowerOff();
                 break;
             case ACTION_SET_FM_FREQUENCY:
                 float frequency = intent.getFloatExtra(EXTRA_FM_FREQUENCY, -1);

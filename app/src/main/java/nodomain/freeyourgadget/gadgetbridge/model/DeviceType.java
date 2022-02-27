@@ -32,7 +32,7 @@ import nodomain.freeyourgadget.gadgetbridge.R;
  * and may not be changed.
  */
 public enum DeviceType {
-    UNKNOWN(-1, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_unknown),
+    UNKNOWN(-1, R.drawable.ic_device_unknown, R.drawable.ic_device_unknown_disabled, R.string.devicetype_unknown),
     PEBBLE(1, R.drawable.ic_device_pebble, R.drawable.ic_device_pebble_disabled, R.string.devicetype_pebble),
     MIBAND(10, R.drawable.ic_device_miband, R.drawable.ic_device_miband_disabled, R.string.devicetype_miband),
     MIBAND2(11, R.drawable.ic_device_miband2, R.drawable.ic_device_miband2_disabled, R.string.devicetype_miband2),
@@ -54,7 +54,7 @@ public enum DeviceType {
     AMAZFITGTS2(27, R.drawable.ic_device_amazfit_bip, R.drawable.ic_device_amazfit_bip_disabled, R.string.devicetype_amazfit_gts2),
     AMAZFITBIPU(28, R.drawable.ic_device_amazfit_bip, R.drawable.ic_device_amazfit_bip_disabled, R.string.devicetype_amazfit_bipu),
     AMAZFITVERGEL(29, R.drawable.ic_device_amazfit_bip, R.drawable.ic_device_amazfit_bip_disabled, R.string.devicetype_amazfit_vergel),
-    AMAZFITBIPUPRO(30, R.drawable.ic_device_amazfit_bip, R.drawable.ic_device_amazfit_bip_disabled, R.string.devicetype_amazfit_bipu),
+    AMAZFITBIPUPRO(30, R.drawable.ic_device_amazfit_bip, R.drawable.ic_device_amazfit_bip_disabled, R.string.devicetype_amazfit_bipupro),
     AMAZFITNEO(31, R.drawable.ic_device_amazfit_bip, R.drawable.ic_device_amazfit_bip_disabled, R.string.devicetype_amazfit_neo),
     AMAZFITGTS2_MINI(32, R.drawable.ic_device_amazfit_bip, R.drawable.ic_device_amazfit_bip_disabled, R.string.devicetype_amazfit_gts2_mini),
     ZEPP_E(33, R.drawable.ic_device_zetime, R.drawable.ic_device_zetime_disabled, R.string.devicetype_zepp_e),
@@ -63,6 +63,8 @@ public enum DeviceType {
     AMAZFITX(36, R.drawable.ic_device_miband2, R.drawable.ic_device_miband2_disabled, R.string.devicetype_amazfit_x),
     MIBAND6(37, R.drawable.ic_device_miband2, R.drawable.ic_device_miband2_disabled, R.string.devicetype_miband6),
     AMAZFITTREXPRO(38, R.drawable.ic_device_zetime, R.drawable.ic_device_zetime_disabled, R.string.devicetype_amazfit_trex_pro),
+    AMAZFITPOP(39, R.drawable.ic_device_amazfit_bip, R.drawable.ic_device_amazfit_bip_disabled, R.string.devicetype_amazfit_pop),
+    AMAZFITPOPPRO(10040, R.drawable.ic_device_amazfit_bip, R.drawable.ic_device_amazfit_bip_disabled, R.string.devicetype_amazfit_pop_pro),
     HPLUS(40, R.drawable.ic_device_hplus, R.drawable.ic_device_hplus_disabled, R.string.devicetype_hplus),
     MAKIBESF68(41, R.drawable.ic_device_hplus, R.drawable.ic_device_hplus_disabled, R.string.devicetype_makibes_f68),
     EXRIZUK8(42, R.drawable.ic_device_hplus, R.drawable.ic_device_hplus_disabled, R.string.devicetype_exrizu_k8),
@@ -104,10 +106,15 @@ public enum DeviceType {
     GALAXY_BUDS_LIVE(419, R.drawable.ic_device_galaxy_buds_live, R.drawable.ic_device_galaxy_buds_live_disabled, R.string.devicetype_galaxybuds_live),
     GALAXY_BUDS(420, R.drawable.ic_device_galaxy_buds, R.drawable.ic_device_galaxy_buds_disabled, R.string.devicetype_galaxybuds),
     SONY_WH_1000XM3(430, R.drawable.ic_device_headphones, R.drawable.ic_device_headphones_disabled, R.string.devicetype_sony_wh_1000xm3),
-    HONORBAND4(440, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_honor_band4),
-    HONORBAND5(441, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_honor_band5),
-    HUAWEIBANDAW70(442, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_band_aw70),
-    HUAWEIBAND6(443, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_band6),
+    SONY_WF_SP800N(431, R.drawable.ic_device_galaxy_buds, R.drawable.ic_device_galaxy_buds_disabled, R.string.devicetype_sony_wf_sp800n),
+    SONY_WH_1000XM4(432, R.drawable.ic_device_headphones, R.drawable.ic_device_headphones_disabled, R.string.devicetype_sony_wh_1000xm4),
+    BOSE_QC35(440, R.drawable.ic_device_headphones, R.drawable.ic_device_headphones_disabled, R.string.devicetype_bose_qc35),
+    HONORBAND4(450, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_honor_band4),
+    HONORBAND5(451, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_honor_band5),
+    HUAWEIBANDAW70(452, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_band_aw70),
+    HUAWEIBAND6(453, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_band6),
+    VESC_NRF(500, R.drawable.ic_device_vesc, R.drawable.ic_device_vesc_disabled, R.string.devicetype_vesc),
+    VESC_HM10(501, R.drawable.ic_device_vesc, R.drawable.ic_device_vesc_disabled, R.string.devicetype_vesc),
     TEST(1000, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_test);
 
     private final int key;

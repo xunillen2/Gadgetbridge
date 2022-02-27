@@ -164,6 +164,8 @@ public class HuamiService {
     public static final byte[] COMMAND_DISABLE_DISCONNECT_NOTIFCATION = new byte[]{ENDPOINT_DISPLAY, 0x0c, 0x00, 0x00, 0, 0, 0, 0};
 
     public static final byte[] COMMAND_REQUEST_ALARMS = new byte[]{0x0d};
+    public static final byte[] COMMAND_REQUEST_ALARMS_WITH_TIMES = new byte[]{(byte) 0xff,0x01,0x00,0x00,0x00};
+
     public static final byte[] COMMAND_REQUEST_GPS_VERSION = new byte[]{0x0e};
 
     // The third byte controls the threshold, in minutes
@@ -227,10 +229,10 @@ public class HuamiService {
 
     /**
      * Endpoints for 2021 chunked protocol
-     *
      */
-    public static final short CHUNKED2021_ENDPOINT_AUTH = 0x82;
-    public static final short CHUNKED2021_ENDPOINT_COMPAT = 0x90;
+    public static final short CHUNKED2021_ENDPOINT_AUTH = 0x0082;
+    public static final short CHUNKED2021_ENDPOINT_COMPAT = 0x0090;
+    public static final short CHUNKED2021_ENDPOINT_SMSREPLY = 0x0013;
 
     static {
         MIBAND_DEBUG = new HashMap<>();

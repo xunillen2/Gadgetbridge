@@ -29,7 +29,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bluetooth scan:" />
+                android:text="@string/discovery_bluetooth_scan" />
 
             <ProgressBar
                 android:id="@+id/discovery_progressbar"
@@ -50,7 +50,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bluetooth LE scan:" />
+                android:text="@string/discovery_bluetooth_le_scan" />
 
             <ProgressBar
                 android:id="@+id/discovery_ble_progressbar"
@@ -89,5 +89,10 @@
             android:textColor="@color/secondarytext"
             android:textIsSelectable="true" />
 
+        <Button
+            android:id="@+id/discovery_preferences"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/activity_prefs_discovery_pairing" />
     </LinearLayout>
 </LinearLayout>

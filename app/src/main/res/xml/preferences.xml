@@ -141,6 +141,12 @@
             android:layout="@layout/preference_checkbox"
             android:summary="@string/pref_summary_location_keep_uptodate"
             android:title="@string/pref_title_location_keep_uptodate" />
+        <EditTextPreference
+            android:inputType="text"
+            android:key="opentracks_packagename"
+            android:defaultValue="de.dennisguse.opentracks"
+            android:title="@string/pref_title_opentracks_packagename"
+            android:summary="@string/pref_summary_opentracks_packagename" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preferences_category_device_specific_settings">
 
@@ -376,24 +382,9 @@
             android:layout="@layout/preference_checkbox"
             android:summary="@string/pref_check_permission_status_summary"
             android:title="@string/pref_check_permission_status" />
-        <CheckBoxPreference
-            android:layout="@layout/preference_checkbox"
-            android:defaultValue="true"
-            android:key="ignore_bonded_devices"
-            android:summary="@string/ignore_bonded_devices_description"
-            android:title="@string/ignore_bonded_devices" />
-        <CheckBoxPreference
-            android:layout="@layout/preference_checkbox"
-            android:defaultValue="false"
-            android:key="disable_new_ble_scanning"
-            android:summary="@string/pref_summary_disable_new_ble_scanning"
-            android:title="@string/pref_disable_new_ble_scanning" />
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="enable_companiondevice_pairing"
-            android:layout="@layout/preference_checkbox"
-            android:summary="@string/companiondevice_pairing_details"
-            android:title="@string/companiondevice_pairing" />
+        <Preference
+            android:key="pref_discovery_pairing"
+            android:title="@string/activity_prefs_discovery_pairing" />
 
     </PreferenceCategory>
 </PreferenceScreen>

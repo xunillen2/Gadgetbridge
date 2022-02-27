@@ -25,6 +25,7 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_NOTIFICATION_ENABLE = "notification_enable";
     public static final String PREF_SCREEN_ORIENTATION = "screen_orientation";
     public static final String PREF_RESERVER_ALARMS_CALENDAR = "reserve_alarms_calendar";
+    public static final String PREF_RESERVER_REMINDERS_CALENDAR = "reserve_reminders_calendar";
     public static final String PREF_ALLOW_HIGH_MTU = "allow_high_mtu";
     public static final String PREF_SYNC_CALENDAR = "sync_calendar";
     public static final String PREF_USE_CUSTOM_DEVICEICON = "use_custom_deviceicon";
@@ -44,6 +45,11 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_HYBRID_HR_DRAW_WIDGET_CIRCLES = "widget_draw_circles";
     public static final String PREF_HYBRID_HR_SAVE_RAW_ACTIVITY_FILES = "save_raw_activity_files";
     public static final String PREF_HYBRID_HR_DANGEROUS_EXTERNAL_INTENTS = "dangerous_external_intents";
+    public static final String PREF_HYBRID_HR_ACTIVITY_RECOGNITION_RUNNING = "activity_recognize_running";
+    public static final String PREF_HYBRID_HR_ACTIVITY_RECOGNITION_BIKING = "activity_recognize_biking";
+    public static final String PREF_HYBRID_HR_ACTIVITY_RECOGNITION_WALKING = "activity_recognize_walking";
+    public static final String PREF_HYBRID_HR_ACTIVITY_RECOGNITION_ROWING = "activity_recognize_rowing";
+
 
     public static final String PREF_ACTIVATE_DISPLAY_ON_LIFT = "activate_display_on_lift_wrist";
     public static final String PREF_DISPLAY_ON_LIFT_START = "display_on_lift_start";
@@ -111,34 +117,38 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_GALAXY_BUDS_LIVE_ANC = "pref_galaxy_buds_live_anc";
     public static final String PREF_GALAXY_BUDS_PRESSURE_RELIEF = "pref_galaxy_buds_live_pressure_relief";
 
+    public static final String PREF_SONY_AUDIO_CODEC = "pref_sony_audio_codec";
     public static final String PREF_SONY_AMBIENT_SOUND_CONTROL = "pref_sony_ambient_sound_control";
     public static final String PREF_SONY_FOCUS_VOICE = "pref_sony_focus_voice";
     public static final String PREF_SONY_AMBIENT_SOUND_LEVEL = "pref_sony_ambient_sound_level";
+    public static final String PREF_SONY_NOISE_OPTIMIZER_START = "pref_sony_noise_optimizer_start";
+    public static final String PREF_SONY_NOISE_OPTIMIZER_CANCEL = "pref_sony_noise_optimizer_cancel";
+    public static final String PREF_SONY_NOISE_OPTIMIZER_STATUS = "pref_sony_noise_optimizer_status";
+    public static final String PREF_SONY_NOISE_OPTIMIZER_STATE_PRESSURE = "pref_sony_noise_optimizer_state_pressure";
     public static final String PREF_SONY_SOUND_POSITION = "pref_sony_sound_position";
     public static final String PREF_SONY_SURROUND_MODE = "pref_sony_surround_mode";
+    public static final String PREF_SONY_EQUALIZER = "pref_sony_equalizer";
     public static final String PREF_SONY_EQUALIZER_MODE = "pref_sony_equalizer_mode";
-    public static final String PREF_SONY_DSEE_HX = "pref_sony_dsee_hx";
-    public static final String PREF_SONY_EQUALIZER_MANUAL_BAND_400 = "pref_sony_equalizer_manual_band_400";
-    public static final String PREF_SONY_EQUALIZER_MANUAL_BAND_1000 = "pref_sony_equalizer_manual_band_1000";
-    public static final String PREF_SONY_EQUALIZER_MANUAL_BAND_2500 = "pref_sony_equalizer_manual_band_2500";
-    public static final String PREF_SONY_EQUALIZER_MANUAL_BAND_6300 = "pref_sony_equalizer_manual_band_6300";
-    public static final String PREF_SONY_EQUALIZER_MANUAL_BAND_16000 = "pref_sony_equalizer_manual_band_16000";
-    public static final String PREF_SONY_EQUALIZER_MANUAL_CLEAR_BASS = "pref_sony_equalizer_manual_clear_bass";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_1_BAND_400 = "pref_sony_equalizer_custom_1_band_400";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_1_BAND_1000 = "pref_sony_equalizer_custom_1_band_1000";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_1_BAND_2500 = "pref_sony_equalizer_custom_1_band_2500";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_1_BAND_6300 = "pref_sony_equalizer_custom_1_band_6300";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_1_BAND_16000 = "pref_sony_equalizer_custom_1_band_16000";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_1_CLEAR_BASS = "pref_sony_equalizer_custom_1_clear_bass";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_2_BAND_400 = "pref_sony_equalizer_custom_2_band_400";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_2_BAND_1000 = "pref_sony_equalizer_custom_2_band_1000";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_2_BAND_2500 = "pref_sony_equalizer_custom_2_band_2500";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_2_BAND_6300 = "pref_sony_equalizer_custom_2_band_6300";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_2_BAND_16000 = "pref_sony_equalizer_custom_2_band_16000";
-    public static final String PREF_SONY_EQUALIZER_CUSTOM_2_CLEAR_BASS = "pref_sony_equalizer_custom_2_clear_bass";
+    public static final String PREF_SONY_AUDIO_UPSAMPLING = "pref_sony_audio_upsampling";
+    public static final String PREF_SONY_EQUALIZER_BAND_400 = "pref_sony_equalizer_band_400";
+    public static final String PREF_SONY_EQUALIZER_BAND_1000 = "pref_sony_equalizer_band_1000";
+    public static final String PREF_SONY_EQUALIZER_BAND_2500 = "pref_sony_equalizer_band_2500";
+    public static final String PREF_SONY_EQUALIZER_BAND_6300 = "pref_sony_equalizer_band_6300";
+    public static final String PREF_SONY_EQUALIZER_BAND_16000 = "pref_sony_equalizer_band_16000";
+    public static final String PREF_SONY_EQUALIZER_BASS = "pref_sony_equalizer_bass";
     public static final String PREF_SONY_TOUCH_SENSOR = "pref_sony_touch_sensor";
+    public static final String PREF_SONY_PAUSE_WHEN_TAKEN_OFF = "sony_pause_when_taken_off";
+    public static final String PREF_SONY_BUTTON_MODE_LEFT = "pref_sony_button_mode_left";
+    public static final String PREF_SONY_BUTTON_MODE_RIGHT = "pref_sony_button_mode_right";
     public static final String PREF_SONY_AUTOMATIC_POWER_OFF = "pref_sony_automatic_power_off";
     public static final String PREF_SONY_NOTIFICATION_VOICE_GUIDE = "pref_sony_notification_voice_guide";
+    public static final String PREF_SONY_SPEAK_TO_CHAT = "pref_sony_speak_to_chat";
+    public static final String PREF_SONY_SPEAK_TO_CHAT_SENSITIVITY = "pref_sony_speak_to_chat_sensitivity";
+    public static final String PREF_SONY_SPEAK_TO_CHAT_FOCUS_ON_VOICE = "pref_sony_speak_to_chat_focus_on_voice";
+    public static final String PREF_SONY_SPEAK_TO_CHAT_TIMEOUT = "pref_sony_speak_to_chat_timeout";
+    public static final String PREF_SONY_CONNECT_TWO_DEVICES = "pref_sony_connect_two_devices";
+
+    public static final String PREF_QC35_NOISE_CANCELLING_LEVEL = "qc35_noise_cancelling_level";
 
     public static final String PREFS_ACTIVITY_IN_DEVICE_CARD = "prefs_activity_in_device_card";
     public static final String PREFS_ACTIVITY_IN_DEVICE_CARD_STEPS = "prefs_activity_in_device_card_steps";

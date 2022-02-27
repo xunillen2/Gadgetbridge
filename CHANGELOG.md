@@ -1,5 +1,54 @@
 ### Changelog
 
+### 0.65.0
+* Amazfit Pop/Pro: Initial Support (probably the same as Bip U but has a different firmware)
+* Sony WH-1000XM4: Initial Support
+* Sony WH-1000XM3: Disable equalizer, surround and sound position while in SBC codec
+* Sony Headphones: Improve initialization on connection
+* Sony Headphones: Implement Noise Cancelling Optimizer
+* Casio: Fix accidentally disabled time synchronization and pairing of new Casio GBX/GBD-series watches
+* Fossil Hybrid HR: Improve Device Applications List handling
+* Fossil Hybrid HR: Added ability to change activity recognition settings on the watch
+* Fossil Hybrid HR: Make width of custom widget configurable
+* Fossil Hybrid HR: Disable non-configurable buttons preferences
+* Amazfip Bip U: Read alarm from the watch on connect and update in Gadgetbrige when changing alarms on the watch (might work on other Huami devices)
+* Add icon for VESC devices
+* Add commit id into About screen
+* Make debug activity notification test to persist text while switching apps
+* Add Portuguese to the list of language options
+* Update configuration button icon in app notification settings
+
+### 0.64.0
+* Initial support for VESC NRF/HM10 devices
+* Initial support vor Bose QC35
+* Initial support for Sony WF-SP800N
+* Fossil Hybrid HR: Fix on-device confirmation for older firmwares
+* Sony WH-1000XM3: Fix Ambient Sound Control commands, potentially improving ANC quality
+* Sony WH-1000XM3: Read configuration from device
+* InfiniTime: Remove debug Toast and subscription to UUID_CHARACTERISTIC_MOTION_RAW_XYZ_VALUES
+* Roidmi: Fix frequency configuration on some non-english languages
+* Roidmi 3: Add support for Mojietu 3 rebrand
+* Huami: Support hiking and climbing activities, decode some more activity details
+* Amazfit GTS 2 mini: Fix notification title not appearing for non-chat apps
+* Amazfit Bip U/Pro: Disable event reminder feature, it is not supported by the device.
+* Amazfit Bip U/Pro: Allow enabling Todo List menu (feature still not supported)
+* Bangle.js: send weather condition code to device
+* Allow adding test device directly from the discovery screen
+* Keep device info on the correct device during reordering
+
+### 0.63.1
+* Huami: Support native reminders
+* InfiniTime: Initial support for step counting (currently very limited by the device firmware)
+* Bangle.js: Fix Gadgetbridge crashes when playing music with some players
+* Fossil Hybrid HR: Add support for on-device paring confirmation, for watches that are in a state which makes this neccessary
+* Fossil Hybrid HR: Fix widget configuration bug
+* Mi Band 3: Support lift wrist during DND setting
+* Amazfit GTS 2 Mini: Fix language setting
+* Amazfit GTS 2 Mini: Fix setting menu items on the watch
+* Activity card: Open specific Charts tab for each activity
+* Activity Card: React to User settings, unify step length
+* Activity card: simplify the layout and only show each chart if there is data (Cleaner layout for users with multiple devices)
+
 ### 0.63.0
 * Galaxy Buds Live: Initial Support
 * Sony WH-1000XM3: Initial Support

@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
+import android.content.Intent;
 
 import org.slf4j.Logger;
 
@@ -36,6 +37,7 @@ import java.util.UUID;
 
 import nodomain.freeyourgadget.gadgetbridge.Logging;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
+import nodomain.freeyourgadget.gadgetbridge.model.Reminder;
 import nodomain.freeyourgadget.gadgetbridge.service.AbstractDeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.CheckInitializedAction;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.profiles.AbstractBleProfile;
@@ -363,6 +365,16 @@ public abstract class AbstractBTLEDeviceSupport extends AbstractDeviceSupport im
 
     @Override
     public void onSetLedColor(int color) {
+
+    }
+
+    @Override
+    public void onPowerOff() {
+
+    }
+
+    @Override
+    public void onSetReminders(ArrayList<? extends Reminder> reminders) {
 
     }
 
