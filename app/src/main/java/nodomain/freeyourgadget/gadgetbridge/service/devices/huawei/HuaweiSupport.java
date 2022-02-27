@@ -178,31 +178,33 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), true);
         builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZING, getContext()));
         try {
-            String name = gbDevice.getName();
-            if (name != null && !name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME)) {
-                setDateFormat();
+            if (needsAuth) {
+                String name = gbDevice.getName();
+                if (name != null && !name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME)) {
+                    setDateFormat();
+                }
+                onSetTime();
+                GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
+                responseManager.addHandler(productInformationReq);
+                productInformationReq.perform();
+                builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZED, getContext()));
+                performConnected(builder.getTransaction());
+                // Workaround to enable PREF_HUAWEI_ROTATE_WRIST_TO_SWITCH_INFO preference
+                SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
+                SharedPreferences.Editor editor = sharedPrefs.edit();
+                editor.putString(HuamiConst.PREF_ACTIVATE_DISPLAY_ON_LIFT, "p_on");
+                editor.apply();
+                initializeAlarms();
+                // getAlarms();
+                // getCommands();
+                setWearLocation();
+                setActivateOnRotate();
+                setNavigateOnRotate();
+                setActivityReminder();
+                setTrusleep();
+                setNotification();
             }
-            onSetTime();
-            GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
-            responseManager.addHandler(productInformationReq);
-            productInformationReq.perform();
             getBatteryLevel();
-            builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZED, getContext()));
-            performConnected(builder.getTransaction());
-            // Workaround to enable PREF_HUAWEI_ROTATE_WRIST_TO_SWITCH_INFO preference
-            SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
-            SharedPreferences.Editor editor = sharedPrefs.edit();
-            editor.putString(HuamiConst.PREF_ACTIVATE_DISPLAY_ON_LIFT, "p_on");
-            editor.apply();
-            initializeAlarms();
-            // getAlarms();
-            // getCommands();
-            setWearLocation();
-            setActivateOnRotate();
-            setNavigateOnRotate();
-            setActivityReminder();
-            setTrusleep();
-            setNotification();
         } catch (IOException e) {
             GB.toast(getContext(), "Initializing Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
