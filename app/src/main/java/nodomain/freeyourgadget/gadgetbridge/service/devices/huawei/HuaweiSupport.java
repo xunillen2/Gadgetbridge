@@ -124,10 +124,16 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         addSupportedService(GattService.UUID_SERVICE_DEVICE_INFORMATION);
         addSupportedService(GattService.UUID_SERVICE_HUMAN_INTERFACE_DEVICE);
         addSupportedService(HuaweiConstants.UUID_SERVICE_HUAWEI_SERVICE);
+
     }
 
     @Override
     protected TransactionBuilder initializeDevice(TransactionBuilder builder) {
+        String name = gbDevice.getName();
+        if (name != null && name.toLowerCase().startsWith(HuaweiConstants.HU_WATCHGT2E_NAME)) {
+            mtu = 20;
+        }
+
         builder.setGattCallback(this);
         builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), true);
         deviceMac = gbDevice.getAddress();
