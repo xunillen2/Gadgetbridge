@@ -71,24 +71,9 @@ public class HonorBand5Coordinator extends HuaweiCoordinator{
                 R.xml.devicesettings_liftwrist_display_noshed,
                 R.xml.devicesettings_rotatewrist_cycleinfo,
                 R.xml.devicesettings_wearlocation,
+                R.xml.devicesettings_huawei,
                 R.xml.devicesettings_dateformat,
                 R.xml.devicesettings_timeformat,
-        };
-    }
-
-    @Override
-    public String[] getSupportedLanguageSettings(GBDevice device) {
-        return new String[]{
-            "auto",
-            "de_DE",
-            "en_US",
-            "es_ES",
-            "fr_FR",
-            "it_IT",
-            "pt_PT",
-            "ru_RU",
-            "zh_CN",
-            "zh_TW",
         };
     }
 
