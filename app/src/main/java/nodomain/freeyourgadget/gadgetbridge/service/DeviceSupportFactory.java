@@ -387,6 +387,7 @@ public class DeviceSupportFactory {
                     case HONORBAND4:
                     case HONORBAND5:
                     case HUAWEIBAND6:
+                    case HUAWEIWATCHGT2E:
                         // TODO: check if these devices also work well without BUSY_CHECKING, like the AW70
                         deviceSupport = new ServiceDeviceSupport(new HuaweiSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
                         break;
