@@ -19,8 +19,8 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="mi2_goal_notification"
-            android:summary="@string/mi2_prefs_goal_notification_summary"
-            android:title="@string/mi2_prefs_goal_notification" />
+            android:summary="@string/pref_goal_notification_summary"
+            android:title="@string/pref_goal_notification" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -37,20 +37,20 @@
 
         <PreferenceScreen
             android:key="mi2_inactivity_warning_key"
-            android:summary="@string/mi2_prefs_inactivity_warnings_summary"
-            android:title="@string/mi2_prefs_inactivity_warnings"
+            android:summary="@string/pref_inactivity_warnings_summary"
+            android:title="@string/pref_inactivity_warnings"
             android:persistent="false">
 
             <!-- workaround for missing toolbar -->
             <PreferenceCategory
-                android:title="@string/mi2_prefs_inactivity_warnings"
+                android:title="@string/pref_inactivity_warnings"
                 />
 
             <CheckBoxPreference
                 android:defaultValue="false"
                 android:key="mi2_inactivity_warnings"
-                android:summary="@string/mi2_prefs_inactivity_warnings_summary"
-                android:title="@string/mi2_prefs_inactivity_warnings" />
+                android:summary="@string/pref_inactivity_warnings_summary"
+                android:title="@string/pref_inactivity_warnings" />
 
             <EditTextPreference
                 android:defaultValue="60"
@@ -58,38 +58,38 @@
                 android:inputType="numberSigned"
                 android:key="mi2_inactivity_warnings_threshold"
                 android:maxLength="2"
-                android:title="@string/mi2_prefs_inactivity_warnings_threshold" />
+                android:title="@string/pref_inactivity_warnings_threshold" />
 
             <nodomain.freeyourgadget.gadgetbridge.util.TimePreference
                 android:defaultValue="06:00"
                 android:dependency="mi2_inactivity_warnings"
                 android:key="mi2_inactivity_warnings_start"
-                android:title="@string/mi2_prefs_do_not_disturb_start" />
+                android:title="@string/pref_do_not_disturb_start" />
 
             <nodomain.freeyourgadget.gadgetbridge.util.TimePreference
                 android:defaultValue="22:00"
                 android:dependency="mi2_inactivity_warnings"
                 android:key="mi2_inactivity_warnings_end"
-                android:title="@string/mi2_prefs_do_not_disturb_end" />
+                android:title="@string/pref_do_not_disturb_end" />
 
             <CheckBoxPreference
                 android:defaultValue="false"
                 android:dependency="mi2_inactivity_warnings"
                 android:key="mi2_inactivity_warnings_dnd"
-                android:summary="@string/mi2_prefs_inactivity_warnings_dnd_summary"
-                android:title="@string/mi2_prefs_do_not_disturb" />
+                android:summary="@string/pref_inactivity_warnings_dnd_summary"
+                android:title="@string/pref_do_not_disturb" />
 
             <nodomain.freeyourgadget.gadgetbridge.util.TimePreference
                 android:defaultValue="12:00"
                 android:dependency="mi2_inactivity_warnings_dnd"
                 android:key="mi2_inactivity_warnings_dnd_start"
-                android:title="@string/mi2_prefs_do_not_disturb_start" />
+                android:title="@string/pref_do_not_disturb_start" />
 
             <nodomain.freeyourgadget.gadgetbridge.util.TimePreference
                 android:defaultValue="14:00"
                 android:dependency="mi2_inactivity_warnings_dnd"
                 android:key="mi2_inactivity_warnings_dnd_end"
-                android:title="@string/mi2_prefs_do_not_disturb_end" />
+                android:title="@string/pref_do_not_disturb_end" />
         </PreferenceScreen>
 
     </PreferenceCategory>
@@ -113,7 +113,7 @@
                 android:entries="@array/vibration_profile"
                 android:entryValues="@array/vibration_profile_values"
                 android:key="mi_vibration_profile_generic_sms"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <EditTextPreference
@@ -144,7 +144,7 @@
                 android:entries="@array/vibration_profile"
                 android:entryValues="@array/vibration_profile_values"
                 android:key="mi_vibration_profile_incoming_call"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <EditTextPreference
@@ -170,7 +170,7 @@
                 android:entries="@array/vibration_profile"
                 android:entryValues="@array/vibration_profile_values"
                 android:key="mi_vibration_profile_generic_email"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <EditTextPreference
@@ -200,7 +200,7 @@
                 android:entries="@array/vibration_profile"
                 android:entryValues="@array/vibration_profile_values"
                 android:key="mi_vibration_profile_generic_chat"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <EditTextPreference
@@ -230,7 +230,7 @@
                 android:entries="@array/vibration_profile"
                 android:entryValues="@array/vibration_profile_values"
                 android:key="mi_vibration_profile_generic_social"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <EditTextPreference
@@ -260,7 +260,7 @@
                 android:entries="@array/vibration_profile"
                 android:entryValues="@array/vibration_profile_values"
                 android:key="mi_vibration_profile_alarm_clock"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <EditTextPreference
@@ -290,7 +290,7 @@
                 android:entries="@array/vibration_profile"
                 android:entryValues="@array/vibration_profile_values"
                 android:key="mi_vibration_profile_generic_navigation"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <EditTextPreference
@@ -320,7 +320,7 @@
                 android:entries="@array/vibration_profile"
                 android:entryValues="@array/vibration_profile_values"
                 android:key="mi_vibration_profile_generic"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <EditTextPreference

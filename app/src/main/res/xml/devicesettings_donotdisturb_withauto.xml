@@ -4,11 +4,11 @@
         android:icon="@drawable/ic_block"
         android:key="screen_do_not_disturb"
         android:persistent="false"
-        android:summary="@string/mi2_prefs_do_not_disturb_summary"
-        android:title="@string/mi2_prefs_do_not_disturb">
+        android:summary="@string/pref_do_not_disturb_summary"
+        android:title="@string/pref_do_not_disturb">
 
         <!-- workaround for missing toolbar -->
-        <PreferenceCategory android:title="@string/mi2_prefs_do_not_disturb" />
+        <PreferenceCategory android:title="@string/pref_do_not_disturb" />
 
         <ListPreference
             android:defaultValue="@string/p_off"
@@ -16,17 +16,17 @@
             android:entryValues="@array/mi2_do_not_disturb_values"
             android:key="do_not_disturb"
             android:summary="%s"
-            android:title="@string/mi2_prefs_do_not_disturb" />
+            android:title="@string/pref_do_not_disturb" />
 
         <nodomain.freeyourgadget.gadgetbridge.util.XTimePreference
             android:defaultValue="01:00"
             android:key="do_not_disturb_start"
-            android:title="@string/mi2_prefs_do_not_disturb_start" />
+            android:title="@string/pref_do_not_disturb_start" />
 
         <nodomain.freeyourgadget.gadgetbridge.util.XTimePreference
             android:defaultValue="06:00"
             android:key="do_not_disturb_end"
-            android:title="@string/mi2_prefs_do_not_disturb_end" />
+            android:title="@string/pref_do_not_disturb_end" />
 
     </PreferenceScreen>
 

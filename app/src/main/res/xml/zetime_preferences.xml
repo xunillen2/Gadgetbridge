@@ -53,20 +53,20 @@
 
         <PreferenceScreen
             android:key="zetime_inactivity_warning_key"
-            android:summary="@string/mi2_prefs_inactivity_warnings_summary"
-            android:title="@string/mi2_prefs_inactivity_warnings"
+            android:summary="@string/pref_inactivity_warnings_summary"
+            android:title="@string/pref_inactivity_warnings"
             android:persistent="false">
 
             <!-- workaround for missing toolbar -->
             <PreferenceCategory
-                android:title="@string/mi2_prefs_inactivity_warnings"
+                android:title="@string/pref_inactivity_warnings"
                 />
 
             <CheckBoxPreference
                 android:defaultValue="false"
                 android:key="zetime_inactivity_warnings"
-                android:summary="@string/mi2_prefs_inactivity_warnings_summary"
-                android:title="@string/mi2_prefs_inactivity_warnings" />
+                android:summary="@string/pref_inactivity_warnings_summary"
+                android:title="@string/pref_inactivity_warnings" />
 
             <EditTextPreference
                 android:defaultValue="60"
@@ -74,19 +74,19 @@
                 android:inputType="numberSigned"
                 android:key="zetime_inactivity_warnings_threshold"
                 android:maxLength="3"
-                android:title="@string/mi2_prefs_inactivity_warnings_threshold" />
+                android:title="@string/pref_inactivity_warnings_threshold" />
 
             <nodomain.freeyourgadget.gadgetbridge.util.TimePreference
                 android:defaultValue="06:00"
                 android:dependency="zetime_inactivity_warnings"
                 android:key="zetime_inactivity_warnings_start"
-                android:title="@string/mi2_prefs_do_not_disturb_start" />
+                android:title="@string/pref_do_not_disturb_start" />
 
             <nodomain.freeyourgadget.gadgetbridge.util.TimePreference
                 android:defaultValue="22:00"
                 android:dependency="zetime_inactivity_warnings"
                 android:key="zetime_inactivity_warnings_end"
-                android:title="@string/mi2_prefs_do_not_disturb_end" />
+                android:title="@string/pref_do_not_disturb_end" />
 
             <!-- workaround for missing toolbar -->
             <PreferenceCategory android:title="@string/zetime_prefs_inactivity_repetitions"
@@ -160,13 +160,13 @@
 
         <PreferenceScreen
             android:key="zetime_do_not_disturb_key"
-            android:title="@string/mi2_prefs_do_not_disturb"
+            android:title="@string/pref_do_not_disturb"
             android:persistent="false"
-            android:summary="@string/mi2_prefs_do_not_disturb_summary">
+            android:summary="@string/pref_do_not_disturb_summary">
 
             <!-- workaround for missing toolbar -->
             <PreferenceCategory
-                android:title="@string/mi2_prefs_do_not_disturb"
+                android:title="@string/pref_do_not_disturb"
                 />
 
             <ListPreference
@@ -174,18 +174,18 @@
                 android:entries="@array/zetime_do_not_disturb"
                 android:entryValues="@array/zetime_do_not_disturb_values"
                 android:key="zetime_do_not_disturb"
-                android:title="@string/mi2_prefs_do_not_disturb"
+                android:title="@string/pref_do_not_disturb"
                 android:summary="%s" />
 
             <nodomain.freeyourgadget.gadgetbridge.util.TimePreference
                 android:defaultValue="22:00"
                 android:key="zetime_do_not_disturb_start"
-                android:title="@string/mi2_prefs_do_not_disturb_start" />
+                android:title="@string/pref_do_not_disturb_start" />
 
             <nodomain.freeyourgadget.gadgetbridge.util.TimePreference
                 android:defaultValue="07:00"
                 android:key="zetime_do_not_disturb_end"
-                android:title="@string/mi2_prefs_do_not_disturb_end" />
+                android:title="@string/pref_do_not_disturb_end" />
 
         </PreferenceScreen>
     </PreferenceCategory>
@@ -253,7 +253,7 @@
                 android:entries="@array/zetime_signaling_types"
                 android:entryValues="@array/zetime_signaling_types_values"
                 android:key="zetime_vibration_profile_sms"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <Preference
@@ -277,7 +277,7 @@
                 android:entries="@array/zetime_signaling_types"
                 android:entryValues="@array/zetime_signaling_types_values"
                 android:key="zetime_vibration_profile_incoming_call"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
         </PreferenceScreen>
 
@@ -296,7 +296,7 @@
                 android:entries="@array/zetime_signaling_types"
                 android:entryValues="@array/zetime_signaling_types_values"
                 android:key="zetime_vibration_profile_missed_call"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
         </PreferenceScreen>
 
@@ -315,7 +315,7 @@
                 android:entries="@array/zetime_signaling_types"
                 android:entryValues="@array/zetime_signaling_types_values"
                 android:key="zetime_vibration_profile_generic_email"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <Preference
@@ -339,7 +339,7 @@
                 android:entries="@array/zetime_signaling_types"
                 android:entryValues="@array/zetime_signaling_types_values"
                 android:key="zetime_vibration_profile_generic_social"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <Preference
@@ -363,7 +363,7 @@
                 android:entries="@array/zetime_signaling_types"
                 android:entryValues="@array/zetime_signaling_types_values"
                 android:key="zetime_alarm_signaling"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <Preference
@@ -387,7 +387,7 @@
                 android:entries="@array/zetime_signaling_types"
                 android:entryValues="@array/zetime_signaling_types_values"
                 android:key="zetime_vibration_profile_calendar"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <Preference
@@ -411,7 +411,7 @@
                 android:entries="@array/zetime_signaling_types"
                 android:entryValues="@array/zetime_signaling_types_values"
                 android:key="zetime_vibration_profile_inactivity"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <Preference
@@ -435,7 +435,7 @@
                 android:entries="@array/zetime_signaling_types"
                 android:entryValues="@array/zetime_signaling_types_values"
                 android:key="zetime_vibration_profile_lowpower"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <Preference
@@ -459,7 +459,7 @@
                 android:entries="@array/zetime_signaling_types"
                 android:entryValues="@array/zetime_signaling_types_values"
                 android:key="zetime_vibration_profile_antiloss"
-                android:title="@string/miband_prefs_vibration"
+                android:title="@string/pref_vibration"
                 android:summary="%s" />
 
             <Preference

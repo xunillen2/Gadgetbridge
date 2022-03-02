@@ -4,16 +4,16 @@
         android:icon="@drawable/ic_chair"
         android:key="screen_longsit"
         android:persistent="false"
-        android:summary="@string/mi2_prefs_inactivity_warnings_summary"
-        android:title="@string/mi2_prefs_inactivity_warnings">
+        android:summary="@string/pref_inactivity_warnings_summary"
+        android:title="@string/pref_inactivity_warnings">
 
         <!-- workaround for missing toolbar -->
-        <PreferenceCategory android:title="@string/mi2_prefs_inactivity_warnings_summary" />
+        <PreferenceCategory android:title="@string/pref_inactivity_warnings_summary" />
 
         <SwitchPreference
             android:defaultValue="false"
             android:key="pref_longsit_switch"
-            android:title="@string/mi2_prefs_inactivity_warnings" />
+            android:title="@string/pref_inactivity_warnings" />
 
         <ListPreference
             android:defaultValue="4"
@@ -21,17 +21,17 @@
             android:entries="@array/inactivity_minutes"
             android:entryValues="@array/inactivity_minutes_values"
             android:key="pref_longsit_period"
-            android:summary="@string/mi2_prefs_inactivity_warnings_summary"
-            android:title="@string/mi2_prefs_inactivity_warnings_threshold" />
+            android:summary="@string/pref_inactivity_warnings_summary"
+            android:title="@string/pref_inactivity_warnings_threshold" />
 
         <nodomain.freeyourgadget.gadgetbridge.util.XTimePreference
             android:defaultValue="08:00"
             android:key="pref_longsit_start"
-            android:title="@string/mi2_prefs_do_not_disturb_start" />
+            android:title="@string/pref_do_not_disturb_start" />
 
         <nodomain.freeyourgadget.gadgetbridge.util.XTimePreference
             android:defaultValue="16:00"
             android:key="pref_longsit_end"
-            android:title="@string/mi2_prefs_do_not_disturb_end" />
+            android:title="@string/pref_do_not_disturb_end" />
     </PreferenceScreen>
 </androidx.preference.PreferenceScreen>

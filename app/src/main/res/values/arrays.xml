@@ -233,8 +233,8 @@
     </string-array>
 
     <string-array name="do_not_disturb_no_auto">
-        <item>@string/mi2_dnd_off</item>
-        <item>@string/mi2_dnd_scheduled</item>
+        <item>@string/off</item>
+        <item>@string/dnd_scheduled</item>
     </string-array>
     <string-array name="do_not_disturb_no_auto_values">
         <item>@string/p_off</item>
@@ -242,9 +242,9 @@
     </string-array>
 
     <string-array name="mi2_do_not_disturb">
-        <item>@string/mi2_dnd_off</item>
-        <item>@string/mi2_dnd_automatic</item>
-        <item>@string/mi2_dnd_scheduled</item>
+        <item>@string/off</item>
+        <item>@string/dnd_automatic</item>
+        <item>@string/dnd_scheduled</item>
     </string-array>
     <string-array name="mi2_do_not_disturb_values">
         <item>@string/p_off</item>
@@ -253,8 +253,8 @@
     </string-array>
 
     <string-array name="zetime_do_not_disturb">
-        <item>@string/mi2_dnd_off</item>
-        <item>@string/mi2_dnd_scheduled</item>
+        <item>@string/off</item>
+        <item>@string/dnd_scheduled</item>
     </string-array>
     <string-array name="zetime_do_not_disturb_values">
         <item>@string/p_off</item>
@@ -264,7 +264,7 @@
     <string-array name="activate_display_on_lift">
         <item>@string/off</item>
         <item>@string/on</item>
-        <item>@string/mi2_dnd_scheduled</item>
+        <item>@string/dnd_scheduled</item>
     </string-array>
     <string-array name="activate_display_on_lift_values">
         <item>@string/p_off</item>
@@ -277,7 +277,7 @@
         <!--
         <item>@string/mi3_night_mode_sunset</item>
         -->
-        <item>@string/mi2_dnd_scheduled</item>
+        <item>@string/dnd_scheduled</item>
     </string-array>
     <string-array name="mi3_night_mode_values">
         <item>@string/p_off</item>
@@ -1816,7 +1816,7 @@
         <item>@string/pref_title_notifications_call</item>
         <item>@string/menuitem_alarm</item>
         <item>@string/menuitem_notifications</item>
-        <item>@string/mi2_prefs_inactivity_warnings</item>
+        <item>@string/pref_inactivity_warnings</item>
         <item>@string/pref_title_notifications_sms</item>
         <item>@string/menuitem_goal</item>
     </string-array>

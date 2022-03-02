@@ -4,11 +4,11 @@
         android:key="screen_button_actions"
         android:icon="@drawable/ic_smart_button"
         android:persistent="false"
-        android:summary="@string/mi2_prefs_button_actions_summary"
-        android:title="@string/mi2_prefs_button_actions">
+        android:summary="@string/pref_button_actions_summary"
+        android:title="@string/pref_button_actions">
 
         <!-- workaround for missing toolbar -->
-        <PreferenceCategory android:title="@string/mi2_prefs_button_action" />
+        <PreferenceCategory android:title="@string/pref_button_action" />
 
         public static final String PREF_BUTTON_ACTION_PRESS_DELAY = "button_action_press_count_delay";
 
@@ -16,16 +16,16 @@
             android:defaultValue="false"
             android:icon="@drawable/ic_smart_button"
             android:key="button_action_enable"
-            android:summary="@string/mi2_prefs_button_action_summary"
-            android:title="@string/mi2_prefs_button_action" />
+            android:summary="@string/pref_button_action_summary"
+            android:title="@string/pref_button_action" />
 
         <SwitchPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_vibration"
             android:dependency="button_action_enable"
             android:key="button_action_vibrate"
-            android:summary="@string/mi2_prefs_button_action_vibrate_summary"
-            android:title="@string/mi2_prefs_button_action_vibrate" />
+            android:summary="@string/pref_button_action_vibrate_summary"
+            android:title="@string/pref_button_action_vibrate" />
 
         <ListPreference
             android:icon="@drawable/ic_filter_1"
@@ -65,16 +65,16 @@
                 android:dependency="button_action_enable"
                 android:inputType="number"
                 android:key="button_action_press_count"
-                android:summary="@string/mi2_prefs_button_press_count_summary"
-                android:title="@string/mi2_prefs_button_press_count" />
+                android:summary="@string/pref_button_press_count_summary"
+                android:title="@string/pref_button_press_count" />
 
             <EditTextPreference
-                android:defaultValue="@string/mi2_prefs_button_press_broadcast_default_value"
+                android:defaultValue="@string/pref_button_press_broadcast_default_value"
                 android:dependency="button_action_enable"
                 android:icon="@drawable/ic_message_outline"
                 android:key="button_action_broadcast"
-                android:summary="@string/mi2_prefs_button_press_broadcast_summary"
-                android:title="@string/mi2_prefs_button_press_broadcast" />
+                android:summary="@string/pref_button_press_broadcast_summary"
+                android:title="@string/pref_button_press_broadcast" />
 
             <EditTextPreference
                 android:icon="@drawable/ic_timer"
@@ -82,8 +82,8 @@
                 android:dependency="button_action_enable"
                 android:inputType="number"
                 android:key="button_action_press_max_interval"
-                android:summary="@string/mi2_prefs_button_press_count_max_delay_summary"
-                android:title="@string/mi2_prefs_button_press_count_max_delay" />
+                android:summary="@string/pref_button_press_count_max_delay_summary"
+                android:title="@string/pref_button_press_count_max_delay" />
 
         </PreferenceCategory>
 

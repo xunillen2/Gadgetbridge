@@ -4,10 +4,10 @@
         android:icon="@drawable/ic_arrow_upward"
         android:key="screen_liftwrist_display"
         android:persistent="false"
-        android:title="@string/mi2_prefs_activate_display_on_lift">
+        android:title="@string/pref_activate_display_on_lift">
 
         <!-- workaround for missing toolbar -->
-        <PreferenceCategory android:title="@string/mi2_prefs_activate_display_on_lift" />
+        <PreferenceCategory android:title="@string/pref_activate_display_on_lift" />
 
         <ListPreference
             android:defaultValue="@string/p_off"
@@ -15,17 +15,17 @@
             android:entryValues="@array/activate_display_on_lift_values"
             android:key="activate_display_on_lift_wrist"
             android:summary="%s"
-            android:title="@string/mi2_prefs_activate_display_on_lift" />
+            android:title="@string/pref_activate_display_on_lift" />
 
         <nodomain.freeyourgadget.gadgetbridge.util.XTimePreference
             android:defaultValue="00:00"
             android:key="display_on_lift_start"
-            android:title="@string/mi2_prefs_do_not_disturb_start" />
+            android:title="@string/pref_do_not_disturb_start" />
 
         <nodomain.freeyourgadget.gadgetbridge.util.XTimePreference
             android:defaultValue="00:00"
             android:key="display_on_lift_end"
-            android:title="@string/mi2_prefs_do_not_disturb_end" />
+            android:title="@string/pref_do_not_disturb_end" />
 
     </PreferenceScreen>
 </androidx.preference.PreferenceScreen>
