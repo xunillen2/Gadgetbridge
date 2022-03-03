@@ -195,8 +195,8 @@
             android:layout="@layout/preference_checkbox"
                     android:defaultValue="true"
                     android:key="enable_calendar_sync"
-                    android:summary="@string/pref_summary_enable_calendar_sync"
-                    android:title="@string/pref_title_enable_calendar_sync" />
+                    android:summary="@string/pref_summary_sync_calendar_events"
+                    android:title="@string/pref_title_sync_calendar" />
                 <Preference
                     android:key="pref_key_blacklist_calendars"
                     android:title="@string/pref_blacklist_calendars" />

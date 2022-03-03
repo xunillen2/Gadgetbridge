@@ -4,6 +4,6 @@
         android:defaultValue="false"
         android:icon="@drawable/ic_calendar_sync"
         android:key="sync_calendar"
-        android:summary="@string/pref_summary_sync_calendar"
-        android:title="@string/pref_title_sync_caldendar" />
+        android:summary="@string/pref_summary_sync_calendar_alerts"
+        android:title="@string/pref_title_sync_calendar" />
 </androidx.preference.PreferenceScreen>
