@@ -472,7 +472,7 @@
             android:label="@string/title_activity_mi_band_pairing" />
         <activity
             android:name=".devices.pebble.PebblePairingActivity"
-            android:label="@string/title_activity_pebble_pairing" />
+            android:label="@string/pebble_title_activity_pairing" />
         <activity
             android:name=".devices.watch9.Watch9PairingActivity"
             android:label="@string/title_activity_watch9_pairing" />

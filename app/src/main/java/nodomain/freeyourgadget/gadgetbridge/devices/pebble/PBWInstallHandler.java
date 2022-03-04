@@ -97,14 +97,14 @@ public class PBWInstallHandler implements InstallHandler {
 
             String hwRevision = mPBWReader.getHWRevision();
             if (hwRevision != null && hwRevision.equals(device.getModel())) {
-                installItem.setName(mContext.getString(R.string.pbw_installhandler_pebble_firmware, ""));
+                installItem.setName(mContext.getString(R.string.pebble_pbw_installhandler_firmware, ""));
                 installItem.setDetails(mContext.getString(R.string.pbwinstallhandler_correct_hw_revision));
 
                 installActivity.setInfoText(mContext.getString(R.string.firmware_install_warning, hwRevision));
                 installActivity.setInstallEnabled(true);
             } else {
                 if (hwRevision != null) {
-                    installItem.setName(mContext.getString(R.string.pbw_installhandler_pebble_firmware, hwRevision));
+                    installItem.setName(mContext.getString(R.string.pebble_pbw_installhandler_firmware, hwRevision));
                     installItem.setDetails(mContext.getString(R.string.pbwinstallhandler_incorrect_hw_revision));
                 }
                 installActivity.setInfoText(mContext.getString(R.string.pbw_install_handler_hw_revision_mismatch));

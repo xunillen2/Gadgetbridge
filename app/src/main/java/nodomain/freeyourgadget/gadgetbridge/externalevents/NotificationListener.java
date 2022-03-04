@@ -423,13 +423,13 @@ public class NotificationListener extends NotificationListenerService {
 
         // OPEN action
         NotificationSpec.Action openAction = new NotificationSpec.Action();
-        openAction.title = getString(R.string._pebble_watch_open_on_phone);
+        openAction.title = getString(R.string.pebble_watch_open_on_phone);
         openAction.type = NotificationSpec.Action.TYPE_SYNTECTIC_OPEN;
         notificationSpec.attachedActions.add(openAction);
 
         // MUTE action
         NotificationSpec.Action muteAction = new NotificationSpec.Action();
-        muteAction.title = getString(R.string._pebble_watch_mute);
+        muteAction.title = getString(R.string.pebble_watch_mute);
         muteAction.type = NotificationSpec.Action.TYPE_SYNTECTIC_MUTE;
         notificationSpec.attachedActions.add(muteAction);
 

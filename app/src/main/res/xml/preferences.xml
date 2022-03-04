@@ -280,8 +280,8 @@
                     android:defaultValue="false"
                     android:key="pebble_always_ack_pebblekit"
                     android:layout="@layout/preference_checkbox"
-                    android:summary="@string/pebble_summary_pebble_always_ackkit"
-                    android:title="@string/pebble_title_pebble_always_ackkit" />
+                    android:summary="@string/pebble_summary_always_ackkit"
+                    android:title="@string/pebble_title_always_ackkit" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:dependency="pebble_force_untested"

@@ -225,8 +225,8 @@
     <string name="pebble_title_gatt_clientonly">GATT client only</string>
     <string name="pebble_summary_gatt_clientonly">This is for Pebble 2 only and experimental, try this if you have connectivity problems</string>
     <string name="pebble_summary_enable_applogs">Will cause logs from watch apps to be logged by Gadgetbridge (requires reconnect)</string>
-    <string name="pebble_title_pebble_always_ackkit">Prematurely ACK PebbleKit</string>
-    <string name="pebble_summary_pebble_always_ackkit">Will cause messages that are sent to external 3rd party apps to be acknowledged always and immediately</string>
+    <string name="pebble_title_always_ackkit">Prematurely ACK PebbleKit</string>
+    <string name="pebble_summary_always_ackkit">Will cause messages that are sent to external 3rd party apps to be acknowledged always and immediately</string>
     <string name="pebble_title_enable_bgjs">Enable background JS</string>
     <string name="pebble_summary_enable_bgjs">When enabled, allows watchfaces to show weather, battery info etc.</string>
     <string name="pebble_title_reconnect_attempts">Reconnection attempts</string>
@@ -548,7 +548,7 @@
     <string name="miband_fwinstaller_compatible_version">Compatible version</string>
     <string name="miband_fwinstaller_untested_version">Untested version!</string>
     <string name="fwappinstaller_connection_state">Connection to device: %1$s</string>
-    <string name="pbw_installhandler_pebble_firmware">Pebble Firmware %1$s</string>
+    <string name="pebble_pbw_installhandler_firmware">Pebble Firmware %1$s</string>
     <string name="pbwinstallhandler_correct_hw_revision">Correct hardware revision</string>
     <string name="pbwinstallhandler_incorrect_hw_revision">Hardware revision mismatch!</string>
     <string name="pbwinstallhandler_app_item">%1$s (%2$s)</string>
@@ -791,7 +791,7 @@
     <!-- Strings related to Vibration Activity -->
     <string name="title_activity_vibration">Vibration</string>
     <!-- Strings related to Pebble Pairing Activity-->
-    <string name="title_activity_pebble_pairing">Pebble pairing</string>
+    <string name="pebble_title_activity_pairing">Pebble pairing</string>
     <string name="pebble_pairing_hint">A pairing dialog will pop up on your Android device. If not, look in the notification drawer and accept the pairing request. Also accept it on your Pebble afterwards.</string>
     <string name="weather_notification_label">Make sure that this skin is enabled in the Weather Notification app to get weather information on your Pebble.\n\nNo configuration is needed here.\n\nYou can enable the system weather app of your Pebble from the app management.\n\nSupported watchfaces will show the weather automatically.</string>
     <string name="pref_title_setup_bt_pairing">Enable Bluetooth pairing</string>
@@ -826,9 +826,9 @@
     <string name="discovery_yes_pair">Pair</string>
     <string name="discovery_dont_pair">Don\'t Pair</string>
     <!-- strings sent to pebble watches for quick actions -->
-    <string name="_pebble_watch_open_on_phone">Open on Android device</string>
-    <string name="_pebble_watch_mute">Mute</string>
-    <string name="_pebble_watch_reply">Reply</string>
+    <string name="pebble_watch_open_on_phone">Open on Android device</string>
+    <string name="pebble_watch_mute">Mute</string>
+    <string name="pebble_watch_reply">Reply</string>
     <string name="controlcenter_start_activity_tracks">Your activity tracks</string>
     <string name="activity_type_not_measured">Not measured</string>
     <string name="activity_type_activity">Activity</string>
