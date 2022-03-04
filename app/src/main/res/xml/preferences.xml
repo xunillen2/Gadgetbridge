@@ -161,7 +161,7 @@
         <PreferenceScreen
             android:icon="@drawable/ic_device_pebble"
             android:key="pref_key_pebble"
-            android:title="@string/pref_title_pebble_settings">
+            android:title="@string/pebble_title_settings">
             <PreferenceCategory
                 android:title="@string/pref_header_general">
                 <CheckBoxPreference
@@ -174,23 +174,23 @@
             android:layout="@layout/preference_checkbox"
                     android:defaultValue="false"
                     android:key="pebble_enable_pebblekit"
-                    android:summary="@string/pref_summary_enable_pebblekit"
-                    android:title="@string/pref_title_enable_pebblekit" />
+                    android:summary="@string/pebble_summary_enablekit"
+                    android:title="@string/pebble_title_enablekit" />
                 <EditTextPreference
                     android:defaultValue="12"
                     android:inputType="number"
                     android:key="pebble_reconnect_attempts"
                     android:maxLength="4"
-                    android:title="@string/pref_title_pebble_reconnect_attempts" />
+                    android:title="@string/pebble_title_reconnect_attempts" />
                 <ListPreference
                     android:key="pebble_pref_privacy_mode"
-                    android:title="@string/pref_title_pebble_privacy_mode"
+                    android:title="@string/pebble_title_privacy_mode"
                     android:entries="@array/pebble_privacymode"
                     android:entryValues="@array/pebble_privacymode_values"
                     android:defaultValue="@string/p_pebble_privacy_mode_off"
                     android:summary="%s" />
             </PreferenceCategory>
-            <PreferenceCategory android:title="@string/pref_header_pebble_timeline">
+            <PreferenceCategory android:title="@string/pebble_header_timeline">
                 <CheckBoxPreference
             android:layout="@layout/preference_checkbox"
                     android:defaultValue="true"
@@ -213,29 +213,29 @@
                     android:entryValues="@array/pebble_activitytracker_values"
                     android:key="pebble_activitytracker"
                     android:summary="%s"
-                    android:title="@string/pref_title_pebble_activitytracker" />
+                    android:title="@string/pebble_title_activitytracker" />
                 <CheckBoxPreference
             android:layout="@layout/preference_checkbox"
                     android:defaultValue="true"
                     android:key="pebble_sync_health"
-                    android:title="@string/pref_title_pebble_sync_health" />
+                    android:title="@string/pebble_title_sync_health" />
                 <CheckBoxPreference
             android:layout="@layout/preference_checkbox"
                     android:defaultValue="true"
                     android:key="pebble_health_store_raw"
                     android:dependency="pebble_sync_health"
-                    android:title="@string/pref_title_pebble_health_store_raw"
-                    android:summary="@string/pref_summary_pebble_health_store_raw" />
+                    android:title="@string/pebble_title_health_store_raw"
+                    android:summary="@string/pebble_summary_health_store_raw" />
                 <CheckBoxPreference
             android:layout="@layout/preference_checkbox"
                     android:defaultValue="true"
                     android:key="pebble_sync_misfit"
-                    android:title="@string/pref_title_pebble_sync_misfit" />>
+                    android:title="@string/pebble_title_sync_misfit" />>
                 <CheckBoxPreference
             android:layout="@layout/preference_checkbox"
                     android:defaultValue="true"
                     android:key="pebble_sync_morpheuz"
-                    android:title="@string/pref_title_pebble_sync_morpheuz" />
+                    android:title="@string/pebble_title_sync_morpheuz" />
             </PreferenceCategory>
             <PreferenceCategory
                 android:title="@string/pref_header_development">
@@ -243,52 +243,52 @@
                     android:defaultValue="false"
                     android:key="pebble_force_protocol"
                     android:layout="@layout/preference_checkbox"
-                    android:summary="@string/pref_summary_pebble_forceprotocol"
-                    android:title="@string/pref_title_pebble_forceprotocol" />
+                    android:summary="@string/pebble_summary_forceprotocol"
+                    android:title="@string/pebble_title_forceprotocol" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="pebble_force_untested"
                     android:layout="@layout/preference_checkbox"
-                    android:summary="@string/pref_summary_pebble_forceuntested"
-                    android:title="@string/pref_title_pebble_forceuntested" />
+                    android:summary="@string/pebble_summary_forceuntested"
+                    android:title="@string/pebble_title_forceuntested" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="pebble_force_le"
                     android:layout="@layout/preference_checkbox"
-                    android:summary="@string/pref_summary_pebble_forcele"
-                    android:title="@string/pref_title_pebble_forcele" />
+                    android:summary="@string/pebble_summary_forcele"
+                    android:title="@string/pebble_title_forcele" />
                 <EditTextPreference
                     android:inputType="number"
                     android:key="pebble_mtu_limit"
                     android:maxLength="3"
                     android:defaultValue="512"
-                    android:title="@string/pref_title_pebble_mtu_limit"
-                    android:summary="@string/pref_summary_pebble_mtu_limit" />
+                    android:title="@string/pebble_title_mtu_limit"
+                    android:summary="@string/pebble_summary_mtu_limit" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="pebble_gatt_clientonly"
                     android:layout="@layout/preference_checkbox"
-                    android:summary="@string/pref_summary_pebble_gatt_clientonly"
-                    android:title="@string/pref_title_pebble_gatt_clientonly" />
+                    android:summary="@string/pebble_summary_gatt_clientonly"
+                    android:title="@string/pebble_title_gatt_clientonly" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="pebble_enable_applogs"
                     android:layout="@layout/preference_checkbox"
-                    android:summary="@string/pref_summary_pebble_enable_applogs"
-                    android:title="@string/pref_title_pebble_enable_applogs" />
+                    android:summary="@string/pebble_summary_enable_applogs"
+                    android:title="@string/pebble_title_enable_applogs" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="pebble_always_ack_pebblekit"
                     android:layout="@layout/preference_checkbox"
-                    android:summary="@string/pref_summary_pebble_always_ack_pebblekit"
-                    android:title="@string/pref_title_pebble_always_ack_pebblekit" />
+                    android:summary="@string/pebble_summary_pebble_always_ackkit"
+                    android:title="@string/pebble_title_pebble_always_ackkit" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:dependency="pebble_force_untested"
                     android:key="pebble_enable_background_javascript"
                     android:layout="@layout/preference_checkbox"
-                    android:summary="@string/pref_summary_pebble_enable_bgjs"
-                    android:title="@string/pref_title_pebble_enable_bgjs" />
+                    android:summary="@string/pebble_summary_enable_bgjs"
+                    android:title="@string/pebble_title_enable_bgjs" />
                 <EditTextPreference
                     android:digits="0123456789."
                     android:key="pebble_emu_addr"

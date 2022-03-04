@@ -56,8 +56,8 @@
             android:entries="@array/notification_mode"
             android:entryValues="@array/notification_mode_values"
             android:key="notification_mode_pebblemsg"
-            android:summary="@string/pref_summary_notifications_pebblemsg"
-            android:title="@string/pref_title_notifications_pebblemsg" />
+            android:summary="@string/pebble_summary_notificationsmsg"
+            android:title="@string/pebble_title_notificationsmsg" />
 
         <ListPreference
             android:defaultValue="0"
