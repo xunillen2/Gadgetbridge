@@ -999,8 +999,8 @@
     <string name="watch9_time_seconds">Seconds:</string>
     <string name="watch9_calibration_hint">Set the time your device is showing to you right now.</string>
     <string name="watch9_calibration_button">Calibrate</string>
-    <string name="title_activity_watch9_pairing">Watch 9 pairing</string>
-    <string name="title_activity_watch9_calibration">Watch 9 calibration</string>
+    <string name="watch9_title_activity_pairing">Watch 9 pairing</string>
+    <string name="watch9_title_activity_calibration">Watch 9 calibration</string>
     <string name="pref_title_contextual_arabic">Contextual Arabic</string>
     <string name="pref_summary_contextual_arabic">Enable this to support contextual Arabic</string>
     <string name="preferences_rtl_settings">Right To Left Support</string>
