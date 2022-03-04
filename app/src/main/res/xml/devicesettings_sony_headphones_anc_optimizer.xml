@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
         android:key="pref_key_header_sony_anc_optimizer"
-        android:title="@string/pref_header_sony_anc_optimizer">
+        android:title="@string/sony_title_anc_optimizer">
 
         <EditTextPreference
             android:defaultValue="@string/unknown"
@@ -11,7 +11,7 @@
             android:icon="@drawable/ic_pressure"
             android:key="pref_sony_noise_optimizer_state_pressure"
             android:shouldDisableView="false"
-            android:title="@string/pref_anc_optimizer_state_pressure"
+            android:title="@string/sony_anc_optimizer_state_pressure"
             app:useSimpleSummaryProvider="true" />
 
         <Preference

@@ -2,7 +2,7 @@
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
         android:key="pref_key_header_sony_ambient_sound_control"
-        android:title="@string/pref_header_sony_ambient_sound_control">
+        android:title="@string/sony_title_ambient_sound_control">
 
         <ListPreference
             android:defaultValue="noise_cancelling"

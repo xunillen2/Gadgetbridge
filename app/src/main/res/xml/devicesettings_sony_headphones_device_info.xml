@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory
         android:key="pref_key_header_sony_device_info"
-        android:title="@string/pref_header_sony_device_info">
+        android:title="@string/sony_title_device_info">
 
         <EditTextPreference
             android:defaultValue="\?"
