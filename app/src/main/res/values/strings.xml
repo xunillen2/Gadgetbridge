@@ -645,10 +645,10 @@
     <string name="pref_do_not_disturb_start">Start time</string>
     <string name="pref_do_not_disturb_end">End time</string>
     <string name="pref_do_not_disturb_lift_wrist">Activate display upon lift during Do Not Disturb</string>
-    <string name="mi3_prefs_band_screen_unlock">Band screen unlock"</string>
-    <string name="mi3_prefs_band_screen_unlock_summary">Swipe up to unlock the band\'s screen</string>
-    <string name="mi3_prefs_night_mode">Night mode</string>
-    <string name="mi3_prefs_night_mode_summary">Lower band screen brightness automatically at night</string>
+    <string name="pref_band_screen_unlock">Band screen unlock"</string>
+    <string name="pref_band_screen_unlock_summary">Swipe up to unlock the band\'s screen</string>
+    <string name="pref_night_mode">Night mode</string>
+    <string name="pref_night_mode_summary">Lower band screen brightness automatically at night</string>
     <string name="bip_prefs_shortcuts">Shortcuts</string>
     <string name="bip_prefs_shotcuts_summary">Choose the shortcuts on the band screen</string>
     <string name="pref_title_force_white_color_scheme">Force black on white color scheme</string>
@@ -812,7 +812,7 @@
     <string name="on">On</string>
     <string name="off">Off</string>
 
-    <string name="mi3_night_mode_sunset">At sunset</string>
+    <string name="pref_night_mode_sunset">At sunset</string>
     <string name="dnd_automatic">Automatic (sleep detection)</string>
     <string name="dnd_scheduled">Scheduled (time interval)</string>
     <string name="maximum_duration">Duration</string>
