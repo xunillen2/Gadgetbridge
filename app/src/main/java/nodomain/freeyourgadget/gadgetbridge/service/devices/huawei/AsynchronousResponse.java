@@ -7,10 +7,13 @@ import android.os.Build;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventFindPhone;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventMusicControl;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicStatusRequest;
 
 /**
  * Handles responses that are not a reply to a request
@@ -48,6 +51,12 @@ public class AsynchronousResponse {
             AudioManager audioManager = (AudioManager) this.support.getContext().getSystemService(Context.AUDIO_SERVICE);
 
             if (response.commandId == 1) {
+                SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, 1, 100000);
+                try {
+                    setMusicStatusRequest.perform();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 // Send Music Info
                 this.support.sendSetMusic();
             } else if (response.commandId == 3) {
@@ -82,7 +91,12 @@ public class AsynchronousResponse {
                     }
                     audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
                 }
-                // TODO: Send back success
+                SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, 3, 100000);
+                try {
+                    setMusicStatusRequest.perform();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

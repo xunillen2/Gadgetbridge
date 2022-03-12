@@ -31,12 +31,12 @@ public class SetMusicRequest extends Request {
 
     @Override
     protected byte[] createRequest() {
-        String hexArtistName = "";
-        String hexSongName = "";
+        String artistName = "";
+        String songName = "";
         byte playState = MusicStateSpec.STATE_UNKNOWN;
         if (this.musicSpec != null) {
-            hexArtistName = StringUtils.bytesToHex(this.musicSpec.artist.getBytes(StandardCharsets.UTF_8));
-            hexSongName = StringUtils.bytesToHex(this.musicSpec.track.getBytes(StandardCharsets.UTF_8));
+            artistName = this.musicSpec.artist;
+            songName = this.musicSpec.track;
         }
         if (this.musicStateSpec != null)
             playState = this.musicStateSpec.state;
@@ -48,8 +48,8 @@ public class SetMusicRequest extends Request {
                 this.serviceId,
                 this.commandId,
                 new HuaweiTLV()
-                        .put(0x01, hexArtistName)
-                        .put(0x02, hexSongName)
+                        .put(0x01, artistName)
+                        .put(0x02, songName)
                         .put(0x03, playState)
                         .put(0x04, maxVolume)
                         .put(0x05, currentVolume)
