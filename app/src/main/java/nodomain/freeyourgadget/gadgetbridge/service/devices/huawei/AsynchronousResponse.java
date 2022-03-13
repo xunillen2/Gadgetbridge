@@ -14,6 +14,7 @@ import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventMusicContr
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicStatusRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.MusicControl;
 
 /**
  * Handles responses that are not a reply to a request
@@ -46,12 +47,23 @@ public class AsynchronousResponse {
         }
     }
 
+    /**
+     * Handles asynchronous music packet, for the following events:
+     *  - The app is opened on the band (sends back music info)
+     *  - A button is clicked
+     *    - Play/pause
+     *    - Previous
+     *    - Next
+     *  - The volume is adjusted
+     * @param response Packet to be handled
+     */
     private void handleMusicControls(HuaweiPacket response) {
-        if (response.serviceId == 37) {
+        if (response.serviceId == MusicControl.id) {
             AudioManager audioManager = (AudioManager) this.support.getContext().getSystemService(Context.AUDIO_SERVICE);
 
-            if (response.commandId == 1) {
-                SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, 1, 100000);
+            if (response.commandId == MusicControl.MusicInfoResponse.id) {
+                LOG.debug("Music information requested, sending acknowledgement and music info.");
+                SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, MusicControl.MusicInfoResponse.id, MusicControl.successValue);
                 try {
                     setMusicStatusRequest.perform();
                 } catch (IOException e) {
@@ -59,39 +71,51 @@ public class AsynchronousResponse {
                 }
                 // Send Music Info
                 this.support.sendSetMusic();
-            } else if (response.commandId == 3) {
-                if (response.tlv.contains(1)) {
+            } else if (response.commandId == MusicControl.Control.id) {
+                if (response.tlv.contains(MusicControl.Control.buttonTag)) {
                     GBDeviceEventMusicControl musicControl = new GBDeviceEventMusicControl();
-                    switch (response.tlv.getByte(1)) {
+                    switch (response.tlv.getByte(MusicControl.Control.buttonTag)) {
                         case 1:
+                            LOG.debug("Music - Play/Pause button event received");
                             musicControl.event = GBDeviceEventMusicControl.Event.PLAYPAUSE;
                             break;
                         case 3:
+                            LOG.debug("Music - Previous button event received");
                             musicControl.event = GBDeviceEventMusicControl.Event.PREVIOUS;
                             break;
                         case 4:
+                            LOG.debug("Music - Next button event received");
                             musicControl.event = GBDeviceEventMusicControl.Event.NEXT;
                         default:
                     }
                     this.support.evaluateGBDeviceEvent(musicControl);
                 }
-                if (response.tlv.contains(2)) {
-                    byte volume = response.tlv.getByte(2);
+                if (response.tlv.contains(MusicControl.Control.volumeTag)) {
+                    byte volume = response.tlv.getByte(MusicControl.Control.volumeTag);
                     if (volume > audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)) {
-                        // Not possible
-                        // TODO: handle nicely
+                        LOG.warn("Music - Received volume is too high: 0x"
+                                + Integer.toHexString(volume)
+                                + " > 0x"
+                                + Integer.toHexString(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
+                        );
+                        // TODO: probably best to send back an error code, though I wouldn't know which
                         return;
                     }
                     if (Build.VERSION.SDK_INT > 28) {
                         if (volume < audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC)) {
-                            // Not possible
-                            // TODO: handle nicely
+                            LOG.warn("Music - Received volume is too low: 0x"
+                                    + Integer.toHexString(volume)
+                                    + " < 0x"
+                                    + audioManager.getStreamMinVolume(AudioManager.STREAM_MUSIC)
+                            );
+                            // TODO: probably best to send back an error code, though I wouldn't know which
                             return;
                         }
                     }
+                    LOG.debug("Music - Setting volume to: 0x" + Integer.toHexString(volume));
                     audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
                 }
-                SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, 3, 100000);
+                SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, MusicControl.Control.id, MusicControl.successValue);
                 try {
                     setMusicStatusRequest.perform();
                 } catch (IOException e) {

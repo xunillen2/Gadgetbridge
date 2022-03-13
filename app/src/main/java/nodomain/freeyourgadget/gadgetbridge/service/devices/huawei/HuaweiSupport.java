@@ -666,8 +666,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     }
 
     public void sendSetMusic() {
+        // This often gets called twice in a row because of onSetMusicState and onSetMusicInfo
+        // Maybe we can consolidate that into just one request?
         SetMusicRequest setMusicRequest = new SetMusicRequest(this, this.musicStateSpec, this.musicSpec);
         try {
+            responseManager.addHandler(setMusicRequest);
             setMusicRequest.perform();
         } catch (IOException e) {
             e.printStackTrace();
