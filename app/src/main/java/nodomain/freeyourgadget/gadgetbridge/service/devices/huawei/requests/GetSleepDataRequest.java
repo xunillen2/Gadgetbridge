@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
 
@@ -14,8 +13,8 @@ import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.servic
 public class GetSleepDataRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataRequest.class);
 
-    short maxCount = 0;
-    short count = 0;
+    short maxCount;
+    short count;
 
     public GetSleepDataRequest(HuaweiSupport support, short maxCount, short count) {
         super(support);
@@ -31,37 +30,29 @@ public class GetSleepDataRequest extends Request {
         requestedPacket = new HuaweiPacket(
                 this.serviceId,
                 this.commandId,
-                new HuaweiTLV()
-                    .put(
-                            MessageData.requestContainerTag,
-                            new HuaweiTLV()
-                                .put(MessageData.requestContainerNumberTag, this.count)
-                    )
+                MessageData.Request.toTlv(this.count)
         ).encrypt(support.getSecretKey(), support.getIV());
         return requestedPacket.serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
-        HuaweiTLV parentContainer = receivedPacket.tlv.getObject(MessageData.responseContainerTag);
-        short receivedCount = parentContainer.getShort(MessageData.responseContainerNumberTag);
+        MessageData.SleepResponse response = MessageData.SleepResponse.fromTlv(receivedPacket.tlv);
+        short receivedCount = response.container.number;
 
         if (receivedCount != this.count) {
             LOG.warn("Counts do not match");
         }
 
-        for (HuaweiTLV container : parentContainer.getObjects(FitnessData.MessageData.sleepResponseContainerContainerTag)) {
-            byte type = container.getByte(FitnessData.MessageData.sleepResponseContainerContainerDataTag);
-
-            byte[] timestampBytes = container.getBytes(FitnessData.MessageData.sleepResponseContainerContainerTimestampTag);
-
+        for (MessageData.SleepResponse.Container.SubContainer subContainer : response.container.containers) {
+            // TODO: it might make more sense to convert the timestamp in the FitnessData class
             int[] timestampInts = new int[6];
 
             for (int i = 0; i < 6; i++) {
-                if (timestampBytes[i] >= 0)
-                    timestampInts[i] = timestampBytes[i];
+                if (subContainer.timestamp[i] >= 0)
+                    timestampInts[i] = subContainer.timestamp[i];
                 else
-                    timestampInts[i] = timestampBytes[i] & 0xFF;
+                    timestampInts[i] = subContainer.timestamp[i] & 0xFF;
             }
 
             int timestamp =
@@ -75,7 +66,7 @@ public class GetSleepDataRequest extends Request {
                             (timestampInts[5]);
             short duration = (short) (durationInt * 60);
 
-            this.support.addSleepActivity(timestamp, duration, type);
+            this.support.addSleepActivity(timestamp, duration, subContainer.type);
         }
 
         if (count + 1 < maxCount) {

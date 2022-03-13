@@ -50,32 +50,24 @@ public class GetStepDataRequest extends Request {
         requestedPacket = new HuaweiPacket(
                 this.serviceId,
                 this.commandId,
-                new HuaweiTLV()
-                    .put(
-                            FitnessData.MessageData.requestContainerTag,
-                            new HuaweiTLV()
-                                .put(FitnessData.MessageData.requestContainerNumberTag, this.count)
-                    )
+                FitnessData.MessageData.Request.toTlv(this.count)
         ).encrypt(support.getSecretKey(), support.getIV());
         return requestedPacket.serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
-        HuaweiTLV container = receivedPacket.tlv.getObject(FitnessData.MessageData.responseContainerTag);
-        short receivedCount = container.getShort(FitnessData.MessageData.responseContainerNumberTag);
-        int timestamp = container.getInteger(FitnessData.MessageData.stepResponseContainerTimestampTag);
+        FitnessData.MessageData.StepResponse response = FitnessData.MessageData.StepResponse.fromTlv(receivedPacket.tlv);
 
-        if (receivedCount != this.count) {
+        if (response.container.number != this.count) {
             LOG.warn("Counts do not match");
         }
 
-        List<HuaweiTLV> containers = container.getObjects(FitnessData.MessageData.stepResponseContainerContainerTag);
-        for (HuaweiTLV dataContainer : containers) {
-            byte timestampOffset = dataContainer.getByte(FitnessData.MessageData.stepResponseContainerContainerTimeOffsetTag);
-            int dataTimestamp = timestamp + 60 * timestampOffset;
+        for (FitnessData.MessageData.StepResponse.Container.SubContainer subContainer : response.container.containers) {
+            byte timestampOffset = subContainer.timestampOffset;
+            int dataTimestamp = response.container.timestamp + 60 * timestampOffset;
 
-            byte[] data = dataContainer.getBytes(FitnessData.MessageData.stepResponseContainerContainerDataTag);
+            byte[] data = subContainer.data;
             List<TV> tagValuePairs = parseData(data);
 
             if (tagValuePairs != null) {

@@ -1,5 +1,10 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
+
 public class FitnessData {
     public static final int id = 0x07;
 
@@ -18,32 +23,108 @@ public class FitnessData {
         public static final int sleepId = 0x0C;
         public static final int stepId = 0x0A;
 
-        public static final int requestUnknownTag = 0x81;
-        public static final int requestStartTag = 0x03;
-        public static final int requestEndTag = 0x04;
+        public static class Request {
+            public static HuaweiTLV toTlv(int start, int end) {
+                return new HuaweiTLV()
+                        .put(0x81)
+                        .put(0x03, start)
+                        .put(0x04, end);
+            }
+        }
 
-        public static final int responseContainerTag = 0x81;
-        public static final int responseContainerCountTag = 0x02;
+        public static class Response {
+            public static class Container {
+                public short count;
+            }
+
+            public Container container;
+
+            public static Response fromTlv(HuaweiTLV input) {
+                Response returnValue = new Response();
+                returnValue.container = new Container();
+                returnValue.container.count = input.getObject(0x81).getShort(0x02);
+                return returnValue;
+            }
+        }
     }
 
     public static class MessageData {
         public static final int sleepId = 0x0D;
         public static final int stepId = 0x0B;
 
-        public static final int requestContainerTag = 0x81;
-        public static final int requestContainerNumberTag = 0x02;
+        public static class Request {
+            public static HuaweiTLV toTlv(short count) {
+                return new HuaweiTLV()
+                        .put(
+                            0x81,
+                            new HuaweiTLV()
+                                .put(0x02, count)
+                        );
+            }
+        }
 
-        public static final int responseContainerTag = 0x81;
-        public static final int responseContainerNumberTag = 0x02;
+        public static class SleepResponse {
+            public static class Container {
+                public static class SubContainer {
+                    public byte type;
+                    public byte[] timestamp;
+                }
 
-        public static final int sleepResponseContainerContainerTag = 0x83;
-        public static final int sleepResponseContainerContainerDataTag = 0x04;
-        public static final int sleepResponseContainerContainerTimestampTag = 0x05;
+                public short number;
+                public List<SubContainer> containers;
+            }
 
-        public static final int stepResponseContainerTimestampTag = 0x03;
-        public static final int stepResponseContainerContainerTag = 0x84;
-        public static final int stepResponseContainerContainerTimeOffsetTag = 0x05;
-        public static final int stepResponseContainerContainerDataTag = 0x06;
+            public Container container;
+
+            public static SleepResponse fromTlv(HuaweiTLV input) {
+                HuaweiTLV container = input.getObject(0x81);
+                List<HuaweiTLV> subContainers = container.getObjects(0x83);
+
+                SleepResponse returnValue = new SleepResponse();
+                returnValue.container = new Container();
+                returnValue.container.number = container.getShort(0x02);
+                returnValue.container.containers = new ArrayList<>();
+                for (HuaweiTLV subContainerTlv : subContainers) {
+                    Container.SubContainer subContainer = new Container.SubContainer();
+                    subContainer.type = subContainerTlv.getByte(0x04);
+                    subContainer.timestamp = subContainerTlv.getBytes(0x05);
+                    returnValue.container.containers.add(subContainer);
+                }
+                return returnValue;
+            }
+        }
+
+        public static class StepResponse {
+            public static class Container {
+                public static class SubContainer {
+                    public byte timestampOffset;
+                    public byte[] data;
+                }
+
+                public short number;
+                public int timestamp;
+                public List<SubContainer> containers;
+            }
+
+            public Container container;
+
+            public static StepResponse fromTlv(HuaweiTLV input) {
+                HuaweiTLV container = input.getObject(0x81);
+                List<HuaweiTLV> subContainers = container.getObjects(0x84);
+
+                StepResponse returnValue = new StepResponse();
+                returnValue.container = new Container();
+                returnValue.container.number = container.getShort(0x02);
+                returnValue.container.timestamp = container.getInteger(0x03);
+                returnValue.container.containers = new ArrayList<>();
+                for (HuaweiTLV subContainerTlv : subContainers) {
+                    Container.SubContainer subContainer = new Container.SubContainer();
+                    subContainer.timestampOffset = subContainerTlv.getByte(0x05);
+                    subContainer.data = subContainerTlv.getBytes(0x06);
+                }
+                return returnValue;
+            }
+        }
     }
 
     public static class TruSleep {
