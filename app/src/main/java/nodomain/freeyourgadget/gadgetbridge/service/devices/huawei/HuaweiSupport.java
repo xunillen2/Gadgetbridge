@@ -183,12 +183,9 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 if (name != null && !name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME)) {
                     setDateFormat();
                 }
-                onSetTime();
                 GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
                 responseManager.addHandler(productInformationReq);
                 productInformationReq.perform();
-                builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZED, getContext()));
-                performConnected(builder.getTransaction());
                 // Workaround to enable PREF_HUAWEI_ROTATE_WRIST_TO_SWITCH_INFO preference
                 SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
                 SharedPreferences.Editor editor = sharedPrefs.edit();
@@ -204,7 +201,10 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 setTrusleep();
                 setNotification();
             }
+            onSetTime();
             getBatteryLevel();
+            builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZED, getContext()));
+            performConnected(builder.getTransaction());
         } catch (IOException e) {
             GB.toast(getContext(), "Initializing Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
