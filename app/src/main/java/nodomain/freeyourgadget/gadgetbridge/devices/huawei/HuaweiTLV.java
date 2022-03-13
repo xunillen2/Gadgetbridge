@@ -63,7 +63,7 @@ public class HuaweiTLV {
         }
 
         public String toString() {
-            return "{tag: " + (tag & 0xFF) + " - Value: " + StringUtils.bytesToHex(value) + "} - ";
+            return "{tag: " + Integer.toHexString(tag & 0xFF) + " - Value: " + StringUtils.bytesToHex(value) + "} - ";
         }
 
         @Override
