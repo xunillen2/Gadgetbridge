@@ -124,7 +124,7 @@ public class HuaweiPacket {
                 .array();
         }
         LOG.debug("Parsed packet values :\n"
-                    + "Service ID: " + newPayload[0] + " - Command ID: " + newPayload[1] + "\n"
+                    + "Service ID: " + Integer.toHexString(newPayload[0]) + " - Command ID: " + Integer.toHexString(newPayload[1]) + "\n"
                     // + "Magic: " + Integer.toHexString(magic) + "\n"
                     // + "expectedSize: " + String.valueOf(expectedSize) + "\n"
                     // + "isSLiced: " + String.valueOf(isSLiced) + "\n"
