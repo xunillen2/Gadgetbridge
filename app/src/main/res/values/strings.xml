@@ -496,7 +496,7 @@
     <string name="chart_no_active_data">No activities detected.</string>
     <string name="chart_get_active_and_synchronize">Do some activity and synchronize device.</string>
     <string name="user_feedback_miband_activity_data_transfer">About to transfer %1$s of data starting from %2$s</string>
-    <string name="miband_prefs_fitness_goal">Daily step target</string>
+    <string name="pref_fitness_goal">Daily step target</string>
     <string name="dbaccess_error_executing">Error executing \'%1$s\'</string>
     <string name="controlcenter_start_activitymonitor">Your activity (ALPHA)</string>
     <string name="cannot_connect">Cannot connect: %1$s</string>

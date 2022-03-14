@@ -93,7 +93,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="onClick"
-            android:text="@string/miband_prefs_fitness_goal"
+            android:text="@string/pref_fitness_goal"
             android:textSize="30sp" />
     </LinearLayout>
 
