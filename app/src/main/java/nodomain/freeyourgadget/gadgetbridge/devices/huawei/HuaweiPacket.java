@@ -84,7 +84,10 @@ public class HuaweiPacket {
 
         byte magic = buffer.get();
         short expectedSize = buffer.getShort();
-        int isSLiced = buffer.get();
+        int isSliced = buffer.get();
+        if (isSliced == 1 || isSliced == 2 || isSliced == 3) {
+            int sliceFlag = buffer.get();
+        }
         byte[] newPayload = new byte[buffer.remaining() - 2];
         buffer.get(newPayload, 0, buffer.remaining() - 2);
         short expectedChecksum = buffer.getShort();
@@ -96,13 +99,19 @@ public class HuaweiPacket {
                             + " != 0x5A"
                         );
         }
-        if ( expectedSize != (short)(newPayload.length + 1)) {
+
+        int newPayloadLen = newPayload.length + 1;
+        if (isSliced == 1 || isSliced == 2 || isSliced == 3) {
+            newPayloadLen = newPayload.length + 2;
+        }
+        if ( expectedSize != (short)newPayloadLen) {
             // Older band and BT version do not handle message with more than 256 bits.
             this.serviceId = (byte)newPayload[0];
             this.commandId = (byte)newPayload[1];
             this.partialPacket = data;
             return this;
         }
+        this.partialPacket = null;
 
         byte[] dataNoCRC = new byte[buffer.capacity() - 2];
         buffer.get(dataNoCRC, 0, buffer.capacity() - 2);
@@ -115,26 +124,26 @@ public class HuaweiPacket {
                         );
         }
 
-        if (isSLiced == 1 || isSLiced == 2 || isSLiced == 3) {
+        if (isSliced == 1 || isSliced == 2 || isSliced == 3) {
             LOG.debug("IsSliced");
-            int newCapacity = payload.length + newPayload.length - 1;
+            int newCapacity = payload.length + newPayload.length;
             newPayload = ByteBuffer.allocate(newCapacity)
                 .put(payload)
-                .put(buffer.array(), 5, buffer.capacity() - 7)
+                .put(newPayload)
                 .array();
         }
         LOG.debug("Parsed packet values :\n"
                     + "Service ID: " + Integer.toHexString(newPayload[0]) + " - Command ID: " + Integer.toHexString(newPayload[1]) + "\n"
                     // + "Magic: " + Integer.toHexString(magic) + "\n"
                     // + "expectedSize: " + String.valueOf(expectedSize) + "\n"
-                    // + "isSLiced: " + String.valueOf(isSLiced) + "\n"
+                    // + "isSliced: " + String.valueOf(isSliced) + "\n"
                     + "newPayload: " + StringUtils.bytesToHex(newPayload) + "\n"
                     // + "expectedChecksum: " + Integer.toHexString(0xFFFF & expectedChecksum)
         );
 
         this.serviceId = (byte)newPayload[0];
         this.commandId = (byte)newPayload[1];
-        if (isSLiced == 0 || isSLiced == 3) {
+        if (isSliced == 0 || isSliced == 3) {
             this.tlv = new HuaweiTLV();
             this.tlv.parse(newPayload, 2, newPayload.length - 2);
             this.complete = true;
