@@ -21,8 +21,8 @@
         android:icon="@drawable/ic_touch"
         android:key="prefs_galaxy_touch_options"
         android:persistent="false"
-        android:title="@string/prefs_galaxy_touch_options">
-        <PreferenceCategory android:title="@string/prefs_galaxy_touch_options">
+        android:title="@string/galaxy_touch_options">
+        <PreferenceCategory android:title="@string/galaxy_touch_options">
             <SwitchPreference
                 android:defaultValue="false"
                 android:disableDependentsState="true"
