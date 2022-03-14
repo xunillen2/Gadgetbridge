@@ -736,7 +736,7 @@ public class HybridHRWatchfaceDesignerActivity extends AbstractGBActivity implem
                         renderWatchfacePreview();
                     }
                 })
-                .setTitle(R.string.watchface_dialog_title_add_widget)
+                .setTitle(R.string.add_widget)
                 .show();
     }
 
