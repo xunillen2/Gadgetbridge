@@ -276,7 +276,7 @@ public class FetchActivityOperation extends AbstractMiBand1Operation {
 
         if (activityStruct.isFirstChunk() && dataUntilNextHeader != 0) {
 
-            GB.updateTransferNotification(getContext().getString(R.string.busy_task_fetch_activity_data), getContext().getString(R.string.user_feedback_miband_activity_data_transfer,
+            GB.updateTransferNotification(getContext().getString(R.string.busy_task_fetch_activity_data), getContext().getString(R.string.user_feedback_activity_data_transfer,
                     DateTimeUtils.formatDurationHoursMinutes((totalDataToRead / getBytesPerMinuteOfActivityData()), TimeUnit.MINUTES),
                     DateFormat.getDateTimeInstance().format(timestamp.getTime())), true, 0, getContext());
         }

@@ -675,12 +675,12 @@ public class HuamiSupport extends AbstractBTLEDeviceSupport {
             }
             builder.queue(getQueue());
             if (anyAlarmEnabled) {
-                GB.toast(getContext(), getContext().getString(R.string.user_feedback_miband_set_alarms_ok), Toast.LENGTH_SHORT, GB.INFO);
+                GB.toast(getContext(), getContext().getString(R.string.user_feedback_set_alarms_ok), Toast.LENGTH_SHORT, GB.INFO);
             } else {
                 GB.toast(getContext(), getContext().getString(R.string.user_feedback_all_alarms_disabled), Toast.LENGTH_SHORT, GB.INFO);
             }
         } catch (IOException ex) {
-            GB.toast(getContext(), getContext().getString(R.string.user_feedback_miband_set_alarms_failed), Toast.LENGTH_LONG, GB.ERROR, ex);
+            GB.toast(getContext(), getContext().getString(R.string.user_feedback_set_alarms_failed), Toast.LENGTH_LONG, GB.ERROR, ex);
         }
     }
 

@@ -439,7 +439,7 @@ public class HPlusSupport extends AbstractBTLEDeviceSupport {
                 setAlarm(builder, t);
                 builder.queue(getQueue());
 
-                GB.toast(getContext(), getContext().getString(R.string.user_feedback_miband_set_alarms_ok), Toast.LENGTH_SHORT, GB.INFO);
+                GB.toast(getContext(), getContext().getString(R.string.user_feedback_set_alarms_ok), Toast.LENGTH_SHORT, GB.INFO);
 
                 return; //Only first alarm
             }
