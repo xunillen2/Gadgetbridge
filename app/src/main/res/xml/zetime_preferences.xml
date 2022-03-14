@@ -89,36 +89,36 @@
                 android:title="@string/pref_do_not_disturb_end" />
 
             <!-- workaround for missing toolbar -->
-            <PreferenceCategory android:title="@string/zetime_prefs_inactivity_repetitions"
+            <PreferenceCategory android:title="@string/pref_inactivity_repetitions"
                 android:dependency="zetime_inactivity_warnings">
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="zetime_prefs_inactivity_repetitions_mo"
-                    android:title="@string/zetime_prefs_inactivity_mo" />
+                    android:title="@string/pref_inactivity_mo" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="zetime_prefs_inactivity_repetitions_tu"
-                    android:title="@string/zetime_prefs_inactivity_tu" />
+                    android:title="@string/pref_inactivity_tu" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="zetime_prefs_inactivity_repetitions_we"
-                    android:title="@string/zetime_prefs_inactivity_we" />
+                    android:title="@string/pref_inactivity_we" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="zetime_prefs_inactivity_repetitions_th"
-                    android:title="@string/zetime_prefs_inactivity_th" />
+                    android:title="@string/pref_inactivity_th" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="zetime_prefs_inactivity_repetitions_fr"
-                    android:title="@string/zetime_prefs_inactivity_fr" />
+                    android:title="@string/pref_inactivity_fr" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="zetime_prefs_inactivity_repetitions_sa"
-                    android:title="@string/zetime_prefs_inactivity_sa" />
+                    android:title="@string/pref_inactivity_sa" />
                 <CheckBoxPreference
                     android:defaultValue="false"
                     android:key="zetime_prefs_inactivity_repetitions_su"
-                    android:title="@string/zetime_prefs_inactivity_su" />
+                    android:title="@string/pref_inactivity_su" />
             </PreferenceCategory>
         </PreferenceScreen>
 
