@@ -21,6 +21,6 @@
         android:defaultValue="false"
         android:icon="@drawable/ic_circle"
         android:key="widget_draw_circles"
-        android:title="@string/pref_qhybrid_title_widget_draw_circles" />
+        android:title="@string/qhybrid_title_widget_draw_circles" />
 
 </androidx.preference.PreferenceScreen>

@@ -195,7 +195,7 @@ public class ConfigActivity extends AbstractGBActivity {
         });
         updateTimezoneOffset();
 
-        setTitle(R.string.preferences_qhybrid_settings);
+        setTitle(R.string.qhybrid_preferences_settings);
 
         ListView appList = findViewById(R.id.qhybrid_appList);
 
