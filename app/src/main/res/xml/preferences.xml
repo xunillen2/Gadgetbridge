@@ -156,7 +156,7 @@
         <Preference
             android:icon="@drawable/ic_device_miband"
             android:key="pref_key_miband"
-            android:title="@string/preferences_miband_settings" />
+            android:title="@string/miband_preferences_settings" />
 
         <PreferenceScreen
             android:icon="@drawable/ic_device_pebble"
