@@ -48,7 +48,7 @@
                 android:title="@string/prefs_right" />
         </PreferenceCategory>
     </PreferenceScreen>
-    <PreferenceCategory android:title="@string/prefs_galaxy_buds_experimental">
+    <PreferenceCategory android:title="@string/experimental">
         <SwitchPreference
             android:defaultValue="false"
             android:icon="@drawable/ic_videogame"

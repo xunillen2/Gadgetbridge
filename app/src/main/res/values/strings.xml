@@ -1379,7 +1379,7 @@
     <string name="prefs_game_mode_summary">Only if your phone supports game mode</string>
     <string name="prefs_touch_lock">Touch Lock</string>
     <string name="prefs_touch_lock_summary">Disable touch events</string>
-    <string name="prefs_galaxy_buds_experimental">Experimental</string>
+    <string name="experimental">Experimental</string>
     <string name="prefs_ambient_volume">Ambient volume</string>
     <string name="prefs_ambient_voice_focus">Voice Focus</string>
     <string name="prefs_ambient_voice_summary">Make voice stand out</string>
