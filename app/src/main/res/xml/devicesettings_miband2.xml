@@ -24,6 +24,6 @@
         android:entryValues="@array/mi2_dateformats_values"
         android:key="mi2_dateformat"
         android:summary="%s"
-        android:title="@string/miband2_prefs_dateformat" />
+        android:title="@string/pref_dateformat" />
 
 </androidx.preference.PreferenceScreen>
