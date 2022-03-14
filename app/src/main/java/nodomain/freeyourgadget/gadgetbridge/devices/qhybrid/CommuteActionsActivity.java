@@ -106,7 +106,7 @@ public class CommuteActionsActivity extends AbstractGBActivity implements Commut
 
             new AlertDialog.Builder(this)
                     .setView(input)
-                    .setNegativeButton(R.string.fossil_hr_new_action_cancel, null)
+                    .setNegativeButton(R.string.Cancel, null)
                     .setPositiveButton(R.string.ok, this)
                     .setTitle(R.string.fossil_hr_new_action)
                     .show();
@@ -125,7 +125,7 @@ public class CommuteActionsActivity extends AbstractGBActivity implements Commut
 
         new AlertDialog.Builder(this)
                 .setView(input)
-                .setNegativeButton(R.string.fossil_hr_edit_action_delete, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.Delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         actionsList.remove(position);

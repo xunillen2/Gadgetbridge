@@ -215,7 +215,7 @@ public class HybridHRWatchfaceDesignerActivity extends AbstractGBActivity implem
             input.setLayoutParams(lp);
             new AlertDialog.Builder(this)
                     .setView(input)
-                    .setNegativeButton(R.string.fossil_hr_new_action_cancel, null)
+                    .setNegativeButton(R.string.Cancel, null)
                     .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -674,7 +674,7 @@ public class HybridHRWatchfaceDesignerActivity extends AbstractGBActivity implem
         // Show dialog
         new AlertDialog.Builder(this)
                 .setView(layout)
-                .setNegativeButton(R.string.fossil_hr_edit_action_delete, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.Delete, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (index >= 0) {
