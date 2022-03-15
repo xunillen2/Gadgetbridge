@@ -191,4 +191,27 @@ public class FitnessData {
             }
         }
     }
+
+    public static class ActivityReminder {
+        public static final int id = 0x07;
+
+        public static class Request {
+            public static HuaweiTLV toTlv(
+                    boolean longSitSwitch,
+                    byte longSitInterval,
+                    byte[] longSitStart,
+                    byte[] longSitEnd,
+                    byte cycle
+            ) {
+                return new HuaweiTLV()
+                        .put(0x81, new HuaweiTLV()
+                                .put(0x02, longSitSwitch)
+                                .put(0x03, longSitInterval)
+                                .put(0x04, longSitStart)
+                                .put(0x05, longSitEnd)
+                                .put(0x06, cycle)
+                        );
+            }
+        }
+    }
 }

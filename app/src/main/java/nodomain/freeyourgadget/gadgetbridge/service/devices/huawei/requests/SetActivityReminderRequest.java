@@ -18,7 +18,6 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
 import android.content.SharedPreferences;
 
-import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,13 +30,10 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.devices.zetime.ZeTimeConstants;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects.FitnessData;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData.ActivityReminder;
 
 public class SetActivityReminderRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetActivityReminderRequest.class);
@@ -45,7 +41,7 @@ public class SetActivityReminderRequest extends Request {
     public SetActivityReminderRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = FitnessData.id;
-        this.commandId = ActivityReminder.id;
+        this.commandId = FitnessData.ActivityReminder.id;
     }
 
     @Override
@@ -80,18 +76,16 @@ public class SetActivityReminderRequest extends Request {
         cycle |= ((sharedPrefs.getBoolean(ZeTimeConstants.PREF_INACTIVITY_SA, false) ? 1 : 0) << 5);
         cycle |= ((sharedPrefs.getBoolean(ZeTimeConstants.PREF_INACTIVITY_SU, false) ? 1 : 0) << 6);
 
-        HuaweiTLV container = new HuaweiTLV();
-        container.put(ActivityReminder.longsitSwitch, longsitSwitch);
-        container.put(ActivityReminder.longsitInterval, (byte)Integer.parseInt(longsitInterval));
-        container.put(ActivityReminder.longsitStart, start);
-        container.put(ActivityReminder.longsitEnd, end);
-        container.put(ActivityReminder.longsitCycle, (byte)cycle);
-
         requestedPacket = new HuaweiPacket(
             serviceId,
             commandId,
-            new HuaweiTLV()
-                .put(ActivityReminder.container, container)
+            FitnessData.ActivityReminder.Request.toTlv(
+                    longsitSwitch,
+                    (byte) Integer.parseInt(longsitInterval),
+                    start,
+                    end,
+                    (byte) cycle
+            )
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set Activity Reminder: " + StringUtils.bytesToHex(serializedPacket));
