@@ -28,10 +28,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 public class HuaweiTLV {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HuaweiTLV huaweiTLV = (HuaweiTLV) o;
+        return Objects.equals(valueMap, huaweiTLV.valueMap);
+    }
 
     public static class TLV {
         private final byte tag;

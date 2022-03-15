@@ -110,6 +110,7 @@ public class FitnessData {
                     Container.SubContainer subContainer = new Container.SubContainer();
                     subContainer.timestampOffset = subContainerTlv.getByte(0x05);
                     subContainer.data = subContainerTlv.getBytes(0x06);
+                    returnValue.container.containers.add(subContainer);
                 }
                 return returnValue;
             }
