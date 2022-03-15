@@ -22,16 +22,11 @@ public class FitnessData {
         }
 
         public static class Response {
-            public static class Container {
-                public short count;
-            }
-
-            public Container container;
+            public short count;
 
             public static Response fromTlv(HuaweiTLV input) {
                 Response returnValue = new Response();
-                returnValue.container = new Container();
-                returnValue.container.count = input.getObject(0x81).getShort(0x02);
+                returnValue.count = input.getObject(0x81).getShort(0x02);
                 return returnValue;
             }
         }
@@ -53,64 +48,54 @@ public class FitnessData {
         }
 
         public static class SleepResponse {
-            public static class Container {
-                public static class SubContainer {
-                    public byte type;
-                    public byte[] timestamp;
-                }
-
-                public short number;
-                public List<SubContainer> containers;
+            public static class SubContainer {
+                public byte type;
+                public byte[] timestamp;
             }
 
-            public Container container;
+            public short number;
+            public List<SubContainer> containers;
 
             public static SleepResponse fromTlv(HuaweiTLV input) {
                 HuaweiTLV container = input.getObject(0x81);
                 List<HuaweiTLV> subContainers = container.getObjects(0x83);
 
                 SleepResponse returnValue = new SleepResponse();
-                returnValue.container = new Container();
-                returnValue.container.number = container.getShort(0x02);
-                returnValue.container.containers = new ArrayList<>();
+                returnValue.number = container.getShort(0x02);
+                returnValue.containers = new ArrayList<>();
                 for (HuaweiTLV subContainerTlv : subContainers) {
-                    Container.SubContainer subContainer = new Container.SubContainer();
+                    SubContainer subContainer = new SubContainer();
                     subContainer.type = subContainerTlv.getByte(0x04);
                     subContainer.timestamp = subContainerTlv.getBytes(0x05);
-                    returnValue.container.containers.add(subContainer);
+                    returnValue.containers.add(subContainer);
                 }
                 return returnValue;
             }
         }
 
         public static class StepResponse {
-            public static class Container {
-                public static class SubContainer {
-                    public byte timestampOffset;
-                    public byte[] data;
-                }
-
-                public short number;
-                public int timestamp;
-                public List<SubContainer> containers;
+            public static class SubContainer {
+                public byte timestampOffset;
+                public byte[] data;
             }
 
-            public Container container;
+            public short number;
+            public int timestamp;
+            public List<SubContainer> containers;
 
             public static StepResponse fromTlv(HuaweiTLV input) {
                 HuaweiTLV container = input.getObject(0x81);
                 List<HuaweiTLV> subContainers = container.getObjects(0x84);
 
                 StepResponse returnValue = new StepResponse();
-                returnValue.container = new Container();
-                returnValue.container.number = container.getShort(0x02);
-                returnValue.container.timestamp = container.getInteger(0x03);
-                returnValue.container.containers = new ArrayList<>();
+                returnValue.number = container.getShort(0x02);
+                returnValue.timestamp = container.getInteger(0x03);
+                returnValue.containers = new ArrayList<>();
                 for (HuaweiTLV subContainerTlv : subContainers) {
-                    Container.SubContainer subContainer = new Container.SubContainer();
+                    SubContainer subContainer = new SubContainer();
                     subContainer.timestampOffset = subContainerTlv.getByte(0x05);
                     subContainer.data = subContainerTlv.getBytes(0x06);
-                    returnValue.container.containers.add(subContainer);
+                    returnValue.containers.add(subContainer);
                 }
                 return returnValue;
             }

@@ -37,13 +37,13 @@ public class GetSleepDataRequest extends Request {
     @Override
     protected void processResponse() throws GBException {
         FitnessData.MessageData.SleepResponse response = FitnessData.MessageData.SleepResponse.fromTlv(receivedPacket.tlv);
-        short receivedCount = response.container.number;
+        short receivedCount = response.number;
 
         if (receivedCount != this.count) {
             LOG.warn("Counts do not match");
         }
 
-        for (FitnessData.MessageData.SleepResponse.Container.SubContainer subContainer : response.container.containers) {
+        for (FitnessData.MessageData.SleepResponse.SubContainer subContainer : response.containers) {
             // TODO: it might make more sense to convert the timestamp in the FitnessData class
             int[] timestampInts = new int[6];
 

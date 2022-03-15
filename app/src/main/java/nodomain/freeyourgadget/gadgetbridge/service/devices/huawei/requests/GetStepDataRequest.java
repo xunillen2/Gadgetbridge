@@ -58,13 +58,15 @@ public class GetStepDataRequest extends Request {
     protected void processResponse() throws GBException {
         FitnessData.MessageData.StepResponse response = FitnessData.MessageData.StepResponse.fromTlv(receivedPacket.tlv);
 
-        if (response.container.number != this.count) {
+        if (response.number != this.count) {
             LOG.warn("Counts do not match");
         }
 
-        for (FitnessData.MessageData.StepResponse.Container.SubContainer subContainer : response.container.containers) {
+        for (FitnessData.MessageData.StepResponse.SubContainer subContainer : response.containers) {
+            // TODO: it would make sense to move this to packet object
+
             byte timestampOffset = subContainer.timestampOffset;
-            int dataTimestamp = response.container.timestamp + 60 * timestampOffset;
+            int dataTimestamp = response.timestamp + 60 * timestampOffset;
 
             byte[] data = subContainer.data;
             List<TV> tagValuePairs = parseData(data);

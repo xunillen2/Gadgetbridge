@@ -36,7 +36,7 @@ public class GetStepDataCountRequest extends Request {
 
     @Override
     protected void processResponse() throws GBException {
-        short count = FitnessData.MessageCount.Response.fromTlv(receivedPacket.tlv).container.count;
+        short count = FitnessData.MessageCount.Response.fromTlv(receivedPacket.tlv).count;
 
         if (count > 0) {
             GetStepDataRequest nextRequest = new GetStepDataRequest(this.support, count, (short) 0);
