@@ -214,4 +214,15 @@ public class FitnessData {
             }
         }
     }
+
+    public static class TruSleep {
+        public static final int id = 0x16;
+
+        public static class Request {
+            public static HuaweiTLV toTlv(boolean truSleepSwitch) {
+                return new HuaweiTLV()
+                        .put(0x01, truSleepSwitch);
+            }
+        }
+    }
 }

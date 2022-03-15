@@ -23,12 +23,9 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects.FitnessData;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData.TruSleep;
 
 public class SetTruSleepRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetTruSleepRequest.class);
@@ -36,7 +33,7 @@ public class SetTruSleepRequest extends Request {
     public SetTruSleepRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = FitnessData.id;
-        this.commandId = TruSleep.id;
+        this.commandId = FitnessData.TruSleep.id;
     }
 
     @Override
@@ -47,8 +44,7 @@ public class SetTruSleepRequest extends Request {
         requestedPacket = new HuaweiPacket(
             serviceId,
             commandId,
-            new HuaweiTLV()
-                .put(TruSleep.trusleepSwitch, trusleepSwitch)
+            FitnessData.TruSleep.Request.toTlv(trusleepSwitch)
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set TruSleep: " + StringUtils.bytesToHex(serializedPacket));
