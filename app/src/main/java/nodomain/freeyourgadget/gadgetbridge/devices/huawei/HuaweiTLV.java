@@ -243,6 +243,15 @@ public class HuaweiTLV {
         return new HuaweiTLV().parse(bytes, 0, bytes.length);
     }
 
+    public List<HuaweiTLV> getObjects(int tag) {
+        List<HuaweiTLV> returnValue = new ArrayList<>();
+        for (TLV tlv : valueMap) {
+            if (tlv.getTag() == (byte) tag)
+                returnValue.add(new HuaweiTLV().parse(tlv.getValue()));
+        }
+        return returnValue;
+    }
+
     public boolean contains(int tag) {
         for (TLV item : valueMap)
             if (item.getTag() == (byte) tag)

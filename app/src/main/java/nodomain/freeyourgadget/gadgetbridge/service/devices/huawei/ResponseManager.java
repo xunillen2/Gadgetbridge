@@ -15,7 +15,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Requ
  * Manages all response data.
  */
 public class ResponseManager {
-    private static final Logger LOG = LoggerFactory.getLogger(HuaweiSupport.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResponseManager.class);
 
     private final List<Request> handlers = Collections.synchronizedList(new ArrayList<Request>());
     private HuaweiPacket receivedPacket;
