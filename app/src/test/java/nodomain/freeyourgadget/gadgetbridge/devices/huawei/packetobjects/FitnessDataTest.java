@@ -138,4 +138,40 @@ public class FitnessDataTest {
         Assert.assertEquals(0x01, stepResponse.containers.get(3).unknownTVs.get(0).tag);
         Assert.assertEquals(0x01, stepResponse.containers.get(3).unknownTVs.get(0).value);
     }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void testActivityReminderRequest() {
+        boolean longSitSwitch = false;
+        byte longSitInterval = 0x00;
+        byte[] longSitStart = {0x01, 0x02};
+        byte[] longSitEnd = {0x03, 0x04};
+        byte cycle = 0x05;
+        HuaweiTLV expectedOutput = new HuaweiTLV()
+                .put(0x81, new HuaweiTLV()
+                        .put(0x02, longSitSwitch)
+                        .put(0x03, longSitInterval)
+                        .put(0x04, longSitStart)
+                        .put(0x05, longSitEnd)
+                        .put(0x06, cycle)
+                );
+
+        Assert.assertEquals(expectedOutput, FitnessData.ActivityReminder.Request.toTlv(
+                longSitSwitch,
+                longSitInterval,
+                longSitStart,
+                longSitEnd,
+                cycle
+        ));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Test
+    public void testTruSleepRequest() {
+        boolean truSleepSwitch = false;
+        HuaweiTLV expectedOutput = new HuaweiTLV()
+                .put(0x01, truSleepSwitch);
+
+        Assert.assertEquals(expectedOutput, FitnessData.TruSleep.Request.toTlv(truSleepSwitch));
+    }
 }
