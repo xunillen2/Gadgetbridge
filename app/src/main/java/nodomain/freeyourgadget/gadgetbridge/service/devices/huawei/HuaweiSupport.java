@@ -114,9 +114,6 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     protected ResponseManager responseManager = new ResponseManager(this);
 
-    private boolean sleepSyncActive = false;
-    private boolean stepSyncActive = false;
-
     private MusicStateSpec musicStateSpec = null;
     private MusicSpec musicSpec = null;
 
