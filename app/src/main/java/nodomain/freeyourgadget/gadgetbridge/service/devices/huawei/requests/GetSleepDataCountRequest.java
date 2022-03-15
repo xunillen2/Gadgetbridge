@@ -5,11 +5,10 @@ import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceBusyAction;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
+
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects.FitnessData;
 
 public class GetSleepDataCountRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataCountRequest.class);

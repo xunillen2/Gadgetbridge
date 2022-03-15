@@ -8,9 +8,8 @@ import java.util.List;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects.FitnessData;
 
 public class GetStepDataRequest extends Request {
 

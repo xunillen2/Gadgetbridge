@@ -6,9 +6,8 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
 
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData.MessageData;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects.FitnessData;
 
 public class GetSleepDataRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataRequest.class);
@@ -30,21 +29,21 @@ public class GetSleepDataRequest extends Request {
         requestedPacket = new HuaweiPacket(
                 this.serviceId,
                 this.commandId,
-                MessageData.Request.toTlv(this.count)
+                FitnessData.MessageData.Request.toTlv(this.count)
         ).encrypt(support.getSecretKey(), support.getIV());
         return requestedPacket.serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
-        MessageData.SleepResponse response = MessageData.SleepResponse.fromTlv(receivedPacket.tlv);
+        FitnessData.MessageData.SleepResponse response = FitnessData.MessageData.SleepResponse.fromTlv(receivedPacket.tlv);
         short receivedCount = response.container.number;
 
         if (receivedCount != this.count) {
             LOG.warn("Counts do not match");
         }
 
-        for (MessageData.SleepResponse.Container.SubContainer subContainer : response.container.containers) {
+        for (FitnessData.MessageData.SleepResponse.Container.SubContainer subContainer : response.container.containers) {
             // TODO: it might make more sense to convert the timestamp in the FitnessData class
             int[] timestampInts = new int[6];
 
