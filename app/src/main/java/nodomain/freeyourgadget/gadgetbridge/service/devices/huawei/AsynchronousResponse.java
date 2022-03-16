@@ -14,7 +14,7 @@ import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventMusicContr
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicStatusRequest;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.MusicControl;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects.MusicControl;
 
 /**
  * Handles responses that are not a reply to a request
@@ -72,26 +72,30 @@ public class AsynchronousResponse {
                 // Send Music Info
                 this.support.sendSetMusic();
             } else if (response.commandId == MusicControl.Control.id) {
-                if (response.tlv.contains(MusicControl.Control.buttonTag)) {
-                    GBDeviceEventMusicControl musicControl = new GBDeviceEventMusicControl();
-                    switch (response.tlv.getByte(MusicControl.Control.buttonTag)) {
-                        case 1:
-                            LOG.debug("Music - Play/Pause button event received");
-                            musicControl.event = GBDeviceEventMusicControl.Event.PLAYPAUSE;
-                            break;
-                        case 3:
-                            LOG.debug("Music - Previous button event received");
-                            musicControl.event = GBDeviceEventMusicControl.Event.PREVIOUS;
-                            break;
-                        case 4:
-                            LOG.debug("Music - Next button event received");
-                            musicControl.event = GBDeviceEventMusicControl.Event.NEXT;
-                        default:
+                MusicControl.Control.Response resp = MusicControl.Control.Response.fromTlv(response.tlv);
+
+                if (resp.buttonPresent) {
+                    if (resp.button != MusicControl.Control.Response.Button.Unknown) {
+                        GBDeviceEventMusicControl musicControl = new GBDeviceEventMusicControl();
+                        switch (resp.button) {
+                            case PlayPause:
+                                LOG.debug("Music - Play/Pause button event received");
+                                musicControl.event = GBDeviceEventMusicControl.Event.PLAYPAUSE;
+                                break;
+                            case Previous:
+                                LOG.debug("Music - Previous button event received");
+                                musicControl.event = GBDeviceEventMusicControl.Event.PREVIOUS;
+                                break;
+                            case Next:
+                                LOG.debug("Music - Next button event received");
+                                musicControl.event = GBDeviceEventMusicControl.Event.NEXT;
+                            default:
+                        }
+                        this.support.evaluateGBDeviceEvent(musicControl);
                     }
-                    this.support.evaluateGBDeviceEvent(musicControl);
                 }
-                if (response.tlv.contains(MusicControl.Control.volumeTag)) {
-                    byte volume = response.tlv.getByte(MusicControl.Control.volumeTag);
+                if (resp.volumePresent) {
+                    byte volume = resp.volume;
                     if (volume > audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)) {
                         LOG.warn("Music - Received volume is too high: 0x"
                                 + Integer.toHexString(volume)
@@ -115,6 +119,7 @@ public class AsynchronousResponse {
                     LOG.debug("Music - Setting volume to: 0x" + Integer.toHexString(volume));
                     audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
                 }
+
                 SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, MusicControl.Control.id, MusicControl.successValue);
                 try {
                     setMusicStatusRequest.perform();
