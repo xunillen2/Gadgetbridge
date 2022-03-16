@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 
-public class FitnessDataTest {
+public class TestFitnessData {
 
     @Test
     public void testMessageCountRequest() {

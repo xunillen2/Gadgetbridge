@@ -6,7 +6,7 @@ public class MusicControl {
     public static final int id = 0x25;
 
     public static final int statusTag = 0x7F;
-    public static final int successValue = 0x0186A0;
+    public static final int successValue = 0x000186A0;
 
     public static class MusicInfoResponse {
         public static final int id = 0x01;
@@ -39,7 +39,7 @@ public class MusicControl {
             public static Response fromTlv(HuaweiTLV input) {
                 Response response = new Response();
                 if (input.contains(0x7F)) {
-                    if (input.getShort(0x7F) == 0x0186A0) {
+                    if (input.getInteger(0x7F) == 0x000186A0) {
                         response.ok = true;
                         response.error = "";
                     } else {
