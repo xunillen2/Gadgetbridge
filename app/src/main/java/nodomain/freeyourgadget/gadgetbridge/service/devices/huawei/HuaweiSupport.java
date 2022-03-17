@@ -130,11 +130,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     @Override
     protected TransactionBuilder initializeDevice(TransactionBuilder builder) {
         String name = gbDevice.getName();
-        LOG.debug("Name: " + name);
+        LOG.debug("Name in init: " + name);
         if (name != null && !name.toLowerCase().startsWith(HuaweiConstants.HU_WATCHGT2E_NAME)) {
             LOG.debug("Change MTU");
-            mtu = 20;
+            this.mtu = 20;
         }
+        LOG.debug("Name after mtu: " + name + " and mtu: " + mtu);
 
         builder.setGattCallback(this);
         builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), true);

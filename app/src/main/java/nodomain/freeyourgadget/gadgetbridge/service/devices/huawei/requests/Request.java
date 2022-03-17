@@ -92,6 +92,7 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
                 .getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_WRITE);
         byte[] request = createRequest();
         int mtu = support.getMtu();
+        LOG.debug("mtu in doPerform: " + mtu);
         if (request.length >= mtu) {
             ByteBuffer buffer = ByteBuffer.wrap(request);
             byte[] data;
