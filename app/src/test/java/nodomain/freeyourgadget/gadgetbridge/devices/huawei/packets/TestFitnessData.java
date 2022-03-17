@@ -1,4 +1,4 @@
-package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects;
+package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets;
 
 import org.junit.Assert;
 import org.junit.Test;

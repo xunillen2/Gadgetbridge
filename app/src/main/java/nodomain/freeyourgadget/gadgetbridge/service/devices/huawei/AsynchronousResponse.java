@@ -14,7 +14,7 @@ import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventMusicContr
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicStatusRequest;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects.MusicControl;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.MusicControl;
 
 /**
  * Handles responses that are not a reply to a request

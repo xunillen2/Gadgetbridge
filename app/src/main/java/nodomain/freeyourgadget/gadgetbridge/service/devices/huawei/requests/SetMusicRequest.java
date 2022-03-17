@@ -11,7 +11,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects.MusicControl;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.MusicControl;
 
 public class SetMusicRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetMusicRequest.class);

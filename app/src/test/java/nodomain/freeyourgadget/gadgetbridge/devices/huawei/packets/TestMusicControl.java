@@ -1,6 +1,6 @@
-package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects;
+package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets;
 
-import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects.MusicControl.Control.Response.Button;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.MusicControl.Control.Response.Button;
 
 import org.junit.Assert;
 import org.junit.Test;

@@ -22,7 +22,7 @@ import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects.FitnessData;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
 
 public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivitySample> {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiSampleProvider.class);

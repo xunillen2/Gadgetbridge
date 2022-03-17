@@ -1,4 +1,4 @@
-package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects;
+package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -8,7 +8,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packetobjects.FitnessData;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
 
 public class GetSleepDataCountRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataCountRequest.class);
