@@ -25,27 +25,33 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.model.Alarm;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Alarms;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Alarms.EventAlarms;
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Alarms.SmartAlarms;
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Alarms.EventAlarmsList;
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Alarms.SmartAlarmsList;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms.EventAlarms;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms.SmartAlarms;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms.EventAlarmsList;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms.SmartAlarmsList;
 
 public class AlarmsRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(AlarmsRequest.class);
 
     private HuaweiTLV alarmTLV;
     private HuaweiTLV eventAlarmTLV = null;
-    private int maxEventAlarm = 4;
+    private final int maxEventAlarm = 4;
+
+    private EventAlarms.Request eventAlarmsRequest;
 
     public AlarmsRequest(HuaweiSupport support, boolean smart) {
         super(support);
         this.serviceId = Alarms.id;
         this.commandId = smart ? SmartAlarms.id : EventAlarms.id;
-        this.alarmTLV = new HuaweiTLV();
-        this.eventAlarmTLV = new HuaweiTLV();
+        if (smart) {
+            this.alarmTLV = new HuaweiTLV();
+            this.eventAlarmTLV = new HuaweiTLV();
+        } else {
+            eventAlarmsRequest = new EventAlarms.Request();
+        }
     }
 
     /*public void listEventAlarm() {
@@ -63,19 +69,15 @@ public class AlarmsRequest extends Request {
     }
 
     public void addEventAlarm(Alarm alarm) {
-        HuaweiTLV eventAlarmDataTLV = new HuaweiTLV()
-            .put(EventAlarms.index, (byte)alarm.getPosition())
-            .put(EventAlarms.setStatus, (alarm.getEnabled() && !alarm.getUnused()))
-            .put(EventAlarms.setStartTime, getTime(alarm))
-            .put(EventAlarms.repeat, (byte)alarm.getRepetition())
-            .put(EventAlarms.alarmName, alarm.getTitle());
-        eventAlarmTLV.put(EventAlarms.separator, eventAlarmDataTLV);
-        if (alarm.getPosition() == maxEventAlarm) {
-            eventAlarmDataTLV = new HuaweiTLV()
-                .put(EventAlarms.index, (byte)(maxEventAlarm + 1));
-            eventAlarmTLV.put(EventAlarms.separator, eventAlarmDataTLV);
-            alarmTLV.put(EventAlarms.start, eventAlarmTLV);
-        }
+        eventAlarmsRequest.addAlarm(
+                (byte) alarm.getPosition(),
+                (alarm.getEnabled() && !alarm.getUnused()),
+                (short) (alarm.getHour() << 8 + (byte) alarm.getMinute()),
+                (byte) alarm.getRepetition(),
+                alarm.getTitle()
+        );
+        if (alarm.getPosition() == maxEventAlarm)
+            alarmTLV = eventAlarmsRequest.toTlv();
     }
 
     public void buildSmartAlarm(Alarm alarm) {
@@ -85,7 +87,7 @@ public class AlarmsRequest extends Request {
             .put(SmartAlarms.setStartTime, getTime(alarm))
             .put(SmartAlarms.repeat, (byte)alarm.getRepetition())
             .put(SmartAlarms.aheadTime, (byte)5);
-        eventAlarmTLV.put(EventAlarms.separator, eventAlarmDataTLV);
+        eventAlarmTLV.put(SmartAlarms.separator, eventAlarmDataTLV);
         alarmTLV.put(SmartAlarms.start, eventAlarmTLV);
     }
     
