@@ -132,10 +132,16 @@ public class GetStepDataRequest extends Request {
                     return null;
                 }
 
-                short value = (short) ((data[i++] & 0xFF) << 8 | (data[i++] & 0xFF));
+                if (bitToCheck == 0x40) {
+                    // TODO: support data from 0x40
+                    LOG.warn("Data announced by 0x40 is currently not supported.");
+                    i++;
+                } else {
+                    short value = (short) ((data[i++] & 0xFF) << 8 | (data[i++] & 0xFF));
 
-                // TODO: maybe not use the checked bit as tag?
-                tagValuePairs.add(new TV(bitToCheck, value));
+                    // TODO: maybe not use the checked bit as tag?
+                    tagValuePairs.add(new TV(bitToCheck, value));
+                }
 
                 /*
                  * 2 is steps
