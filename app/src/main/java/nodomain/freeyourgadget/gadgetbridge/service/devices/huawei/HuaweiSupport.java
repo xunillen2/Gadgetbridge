@@ -177,7 +177,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         if (name != null && (
             name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME) ||
             name.toLowerCase().startsWith(HuaweiConstants.HU_BAND4E_NAME) ||
-            name.toLowerCase().startsWith(HuaweiConstants.HU_WATCHGT2E_NAME)
+            name.toLowerCase().startsWith(HuaweiConstants.HU_WATCHGT2E_NAME) ||
+            name.toLowerCase().startsWith(HuaweiConstants.HU_WATCHGT_NAME)
         )) {
             mtu = 20;
         }

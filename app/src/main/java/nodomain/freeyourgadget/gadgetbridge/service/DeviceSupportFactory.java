@@ -387,6 +387,7 @@ public class DeviceSupportFactory {
                     case HONORBAND5:
                     case HUAWEIBAND6:
                     case HUAWEIWATCHGT2E:
+                    case HUAWEIWATCHGT:
                     case HUAWEIBANDAW70:
                         deviceSupport = new ServiceDeviceSupport(new HuaweiSupport(), EnumSet.noneOf(ServiceDeviceSupport.Flags.class));
                         break;
