@@ -20,14 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.ProductInfo;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
 public class GetProductInformationRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetProductInformationRequest.class);
@@ -35,30 +29,25 @@ public class GetProductInformationRequest extends Request {
     public GetProductInformationRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = ProductInfo.id;
+        this.commandId = DeviceConfig.ProductInfo.id;
     }
 
     @Override
     protected byte[] createRequest() {
-        HuaweiTLV productInfoTLVs = new HuaweiTLV();
-        for (int i = 0; i < 14; i++) {
-            productInfoTLVs.put(i);
-        }
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            productInfoTLVs
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Product Information: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return new DeviceConfig.ProductInfo.Request(support.secretsProvider).serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
         LOG.debug("handle Product Information");
-        getDevice().setFirmwareVersion(receivedPacket.tlv.getString(ProductInfo.softwareVersion));
-        getDevice().setFirmwareVersion2(receivedPacket.tlv.getString(ProductInfo.hardwareVersion));
-        getDevice().setModel(receivedPacket.tlv.getString(ProductInfo.productModel));
-    }
+
+        if (!(receivedPacket instanceof DeviceConfig.ProductInfo.Response)) {
+            // TODO: exception
+            return;
+        }
+
+        getDevice().setFirmwareVersion(((DeviceConfig.ProductInfo.Response) receivedPacket).softwareVersion);
+        getDevice().setFirmwareVersion2(((DeviceConfig.ProductInfo.Response) receivedPacket).hardwareVersion);
+        getDevice().setModel(((DeviceConfig.ProductInfo.Response) receivedPacket).productModel);
+   }
 }

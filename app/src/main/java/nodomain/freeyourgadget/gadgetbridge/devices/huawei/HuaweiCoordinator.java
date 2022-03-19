@@ -52,10 +52,10 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiCoordinator.class);
 
-    public static TreeMap<Integer, byte[]> commandsPerService;
+    private final TreeMap<Integer, byte[]> commandsPerService;
 
     public HuaweiCoordinator() {
-        this.commandsPerService = new TreeMap<Integer, byte[]>();
+        this.commandsPerService = new TreeMap<>();
     }
 
     @NonNull
@@ -174,8 +174,12 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
         return new int[]{};
     }
 
-    public TreeMap<Integer, byte[]> getCommandsPerService() {
-        return commandsPerService;
+//    public TreeMap<Integer, byte[]> getCommandsPerService() {
+//        return commandsPerService;
+//    }
+
+    public void addCommandsForService(int service, byte[] commands) {
+        this.commandsPerService.put(service, commands);
     }
 
     // Print all Services ID and Commands ID

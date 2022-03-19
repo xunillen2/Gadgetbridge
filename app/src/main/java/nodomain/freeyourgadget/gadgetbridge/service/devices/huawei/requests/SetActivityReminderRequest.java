@@ -76,20 +76,14 @@ public class SetActivityReminderRequest extends Request {
         cycle |= ((sharedPrefs.getBoolean(ZeTimeConstants.PREF_INACTIVITY_SA, false) ? 1 : 0) << 5);
         cycle |= ((sharedPrefs.getBoolean(ZeTimeConstants.PREF_INACTIVITY_SU, false) ? 1 : 0) << 6);
 
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            FitnessData.ActivityReminder.Request.toTlv(
-                    longsitSwitch,
-                    (byte) Integer.parseInt(longsitInterval),
-                    start,
-                    end,
-                    (byte) cycle
-            )
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Set Activity Reminder: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return new FitnessData.ActivityReminder.Request(
+                support.secretsProvider,
+                longsitSwitch,
+                (byte) Integer.parseInt(longsitInterval),
+                start,
+                end,
+                (byte) cycle
+        ).serialize();
     }
 
     @Override

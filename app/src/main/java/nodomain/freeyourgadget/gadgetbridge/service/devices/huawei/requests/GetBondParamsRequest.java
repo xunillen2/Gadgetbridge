@@ -19,14 +19,8 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.BondParams;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
 public class GetBondParamsRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetBondParamsRequest.class);
@@ -34,31 +28,25 @@ public class GetBondParamsRequest extends Request {
     public GetBondParamsRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = BondParams.id;
+        this.commandId = DeviceConfig.BondParams.id;
     }
 
     @Override
     protected byte[] createRequest() {
-        requestedPacket = new HuaweiPacket(serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(BondParams.status)
-                .put(BondParams.clientSerial, support.getSerial())
-                .put(BondParams.BTVersion, (byte)0x02)
-                .put(BondParams.maxFrameSize)
-                .put(BondParams.clientMacAddress, support.getMacAddress())
-                .put(BondParams.encryptionCounter)
-        );
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request BondParams: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return new DeviceConfig.BondParams.Request(support.secretsProvider, support.getSerial(), support.getMacAddress()).serialize();
     }
 
     @Override
     protected void processResponse() {
         LOG.debug("handle BondParams");
-        support.encryptionCounter = receivedPacket.tlv.getInteger(BondParams.encryptionCounter) & 0xFFFFFFFFL;
-        int status = receivedPacket.tlv.getByte(BondParams.status);
+
+        if (!(receivedPacket instanceof DeviceConfig.BondParams.Response)) {
+            // TODO: exception
+            return;
+        }
+
+        support.encryptionCounter = ((DeviceConfig.BondParams.Response) receivedPacket).encryptionCounter;
+        int status = ((DeviceConfig.BondParams.Response) receivedPacket).status;
         if (status == 1) {
             stopChain(this);
         }

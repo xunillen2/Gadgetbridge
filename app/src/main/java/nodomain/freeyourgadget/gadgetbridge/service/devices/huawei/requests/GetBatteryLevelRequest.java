@@ -21,14 +21,8 @@ import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventBatteryInfo;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.BatteryLevel;
 
 public class GetBatteryLevelRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetBatteryLevelRequest.class);
@@ -36,26 +30,24 @@ public class GetBatteryLevelRequest extends Request {
     public GetBatteryLevelRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = BatteryLevel.id;
+        this.commandId = DeviceConfig.BatteryLevel.id;
     }
 
     @Override
     protected byte[] createRequest() {
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(BatteryLevel.getStatus)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Battery Level: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return new DeviceConfig.BatteryLevel.Request(support.secretsProvider).serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
         LOG.debug("handle Battery Level");
-        byte batteryLevel = receivedPacket.tlv.getByte(BatteryLevel.getStatus);
+
+        if (!(receivedPacket instanceof DeviceConfig.BatteryLevel.Response)) {
+            // TODO: exception
+            return;
+        }
+
+        byte batteryLevel = ((DeviceConfig.BatteryLevel.Response) receivedPacket).level;
         getDevice().setBatteryLevel(batteryLevel);
 
         GBDeviceEventBatteryInfo batteryInfo = new GBDeviceEventBatteryInfo();

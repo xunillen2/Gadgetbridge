@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
@@ -12,8 +11,8 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
 public class GetSleepDataRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataRequest.class);
 
-    short maxCount;
-    short count;
+    private final short maxCount;
+    private final short count;
 
     public GetSleepDataRequest(HuaweiSupport support, short maxCount, short count) {
         super(support);
@@ -26,17 +25,19 @@ public class GetSleepDataRequest extends Request {
 
     @Override
     protected byte[] createRequest() {
-        requestedPacket = new HuaweiPacket(
-                this.serviceId,
-                this.commandId,
-                FitnessData.MessageData.Request.toTlv(this.count)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        return requestedPacket.serialize();
+        return new FitnessData.MessageData.Request(support.secretsProvider, this.commandId, this.count).serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
-        FitnessData.MessageData.SleepResponse response = FitnessData.MessageData.SleepResponse.fromTlv(receivedPacket.tlv);
+        // FitnessData.MessageData.SleepResponse response = FitnessData.MessageData.SleepResponse.fromTlv(receivedPacket.tlv);
+        if (!(receivedPacket instanceof FitnessData.MessageData.SleepResponse)) {
+            // TODO: exception
+            return;
+        }
+
+        FitnessData.MessageData.SleepResponse response = (FitnessData.MessageData.SleepResponse) receivedPacket;
+
         short receivedCount = response.number;
 
         if (receivedCount != this.count) {

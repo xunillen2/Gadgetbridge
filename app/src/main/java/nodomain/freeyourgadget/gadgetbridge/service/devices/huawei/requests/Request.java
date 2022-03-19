@@ -21,7 +21,6 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,6 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.miband.operations.OperationStatus;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 // Ripped from nodomain.freeyourgadget.gadgetbridge.service.devices.lefun.requests.Request
 
@@ -49,9 +47,8 @@ Add capacity to :
 public class Request extends AbstractBTLEOperation<HuaweiSupport> {
     private static final Logger LOG = LoggerFactory.getLogger(Request.class);
 
-    protected int serviceId;
-    protected int commandId;
-    protected HuaweiPacket requestedPacket = null;
+    protected byte serviceId;
+    protected byte commandId;
     protected HuaweiPacket receivedPacket = null;
     protected HuaweiSupport support;
     protected TransactionBuilder builder = null;
@@ -114,9 +111,9 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
         return null;
     }
 
-    protected void processResponse() throws GBException {}
+    protected void processResponse() throws Exception {}
 
-    public void handleResponse() throws GBException {
+    public void handleResponse() throws Exception, GBException {
         processResponse();
         if (nextRequest != null && !stopChain) {
             try {
@@ -170,23 +167,11 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
      * Handler for responses from the device
      * @param response The response packet
      * @return True if this request handles this response, false otherwise
-     * @throws GBException Thrown if the data cannot be parsed
      */
-    public boolean handleResponse(HuaweiPacket response) throws GBException {
-        if (requestedPacket != null) {
-            if (response.serviceId == requestedPacket.serviceId && response.commandId == requestedPacket.commandId) {
-                receivedPacket = response;
-
-                if (receivedPacket.tlv.contains(HuaweiConstants.TAG_RESULT)) {
-                    byte[] result = receivedPacket.tlv.getBytes(HuaweiConstants.TAG_RESULT);
-                    if (!Arrays.equals(result, HuaweiConstants.RESULT_SUCCESS))
-                        throw new GBException("Packet returned ErrorCode: " + StringUtils.bytesToHex(result));
-                } else if (receivedPacket.tlv.contains(HuaweiConstants.CryptoTags.encryption)) {
-                    receivedPacket.decrypt(support.getSecretKey());
-                }
-
-                return true;
-            }
+    public boolean handleResponse(HuaweiPacket response) {
+        if (response.serviceId == serviceId && response.commandId == commandId) {
+            receivedPacket = response;
+            return true;
         }
         return false;
     }

@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
 
@@ -24,17 +23,17 @@ public class GetStepDataRequest extends Request {
 
     @Override
     protected byte[] createRequest() {
-        requestedPacket = new HuaweiPacket(
-                this.serviceId,
-                this.commandId,
-                FitnessData.MessageData.Request.toTlv(this.count)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        return requestedPacket.serialize();
+        return new FitnessData.MessageData.Request(support.secretsProvider, this.commandId, this.count).serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
-        FitnessData.MessageData.StepResponse response = FitnessData.MessageData.StepResponse.fromTlv(receivedPacket.tlv);
+        if (!(receivedPacket instanceof FitnessData.MessageData.StepResponse)) {
+            // TODO: exception
+            return;
+        }
+
+        FitnessData.MessageData.StepResponse response = (FitnessData.MessageData.StepResponse) receivedPacket;
 
         if (response.number != this.count) {
             LOG.warn("Counts do not match");

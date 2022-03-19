@@ -20,38 +20,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
-import nodomain.freeyourgadget.gadgetbridge.R;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.model.Alarm;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
-import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms.EventAlarms;
-import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms.SmartAlarms;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms.EventAlarmsRequest;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms.SmartAlarmRequest;
 import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms.EventAlarmsList;
 import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms.SmartAlarmsList;
 
 public class AlarmsRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(AlarmsRequest.class);
 
-    private HuaweiTLV alarmTLV;
-    private HuaweiTLV eventAlarmTLV = null;
-    private final int maxEventAlarm = 4;
-
-    private EventAlarms.Request eventAlarmsRequest;
+    private EventAlarmsRequest eventAlarmsRequest = null;
+    private SmartAlarmRequest smartAlarmRequest = null;
 
     public AlarmsRequest(HuaweiSupport support, boolean smart) {
         super(support);
         this.serviceId = Alarms.id;
-        this.commandId = smart ? SmartAlarms.id : EventAlarms.id;
-        if (smart) {
-            this.alarmTLV = new HuaweiTLV();
-            this.eventAlarmTLV = new HuaweiTLV();
-        } else {
-            eventAlarmsRequest = new EventAlarms.Request();
-        }
+        this.commandId = smart ? SmartAlarmRequest.id : EventAlarmsRequest.id;
+        if (!smart)
+            eventAlarmsRequest = new EventAlarmsRequest(support.secretsProvider);
     }
 
     /*public void listEventAlarm() {
@@ -64,10 +53,6 @@ public class AlarmsRequest extends Request {
         alarmTLV.put(SmartAlarmsList.get, (byte)0);
     }*/
 
-    private byte[] getTime(Alarm alarm) {
-        return new byte[]{(byte)alarm.getHour(), (byte)alarm.getMinute()};
-    }
-
     public void addEventAlarm(Alarm alarm) {
         eventAlarmsRequest.addAlarm(
                 (byte) alarm.getPosition(),
@@ -76,31 +61,28 @@ public class AlarmsRequest extends Request {
                 (byte) alarm.getRepetition(),
                 alarm.getTitle()
         );
-        if (alarm.getPosition() == maxEventAlarm)
-            alarmTLV = eventAlarmsRequest.toTlv();
     }
 
     public void buildSmartAlarm(Alarm alarm) {
-        HuaweiTLV eventAlarmDataTLV = new HuaweiTLV()
-            .put(SmartAlarms.index, (byte)1)
-            .put(SmartAlarms.setStatus, (alarm.getEnabled() && !alarm.getUnused()))
-            .put(SmartAlarms.setStartTime, getTime(alarm))
-            .put(SmartAlarms.repeat, (byte)alarm.getRepetition())
-            .put(SmartAlarms.aheadTime, (byte)5);
-        eventAlarmTLV.put(SmartAlarms.separator, eventAlarmDataTLV);
-        alarmTLV.put(SmartAlarms.start, eventAlarmTLV);
+        this.smartAlarmRequest = new SmartAlarmRequest(
+                support.secretsProvider,
+                (alarm.getEnabled() && !alarm.getUnused()),
+                (short) (alarm.getHour() << 8 + (byte) alarm.getMinute()),
+                (byte) alarm.getRepetition(),
+                (byte) 5 // TODO: setting for ahead time
+        );
     }
     
     @Override
     protected byte[] createRequest() {
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            alarmTLV
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Alarm: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        if (eventAlarmsRequest != null) {
+            return eventAlarmsRequest.serialize();
+        } else if (smartAlarmRequest != null) {
+            return smartAlarmRequest.serialize();
+        } else {
+            // TODO: exception
+            return new byte[] {};
+        }
     }
 
     @Override

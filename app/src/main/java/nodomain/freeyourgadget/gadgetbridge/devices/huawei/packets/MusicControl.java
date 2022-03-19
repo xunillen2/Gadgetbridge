@@ -1,64 +1,103 @@
 package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets;
 
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 
 public class MusicControl {
-    public static final int id = 0x25;
+    public static final byte id = 0x25;
 
-    public static final int statusTag = 0x7F;
+    // TODO: should this be in HuaweiConstants?
     public static final int successValue = 0x000186A0;
 
-    public static class MusicInfoResponse {
-        public static final int id = 0x01;
+    public static class MusicInfoResponse extends HuaweiPacket {
+        public static final byte id = 0x01;
+
+        public MusicInfoResponse(SecretsProvider secretsProvider) {
+            super(secretsProvider);
+
+            this.serviceId = MusicControl.id;
+            this.commandId = id;
+        }
+
+        @Override
+        protected void parseTlv() {
+            this.tlv.decrypt(secretsProvider.getSecretKey());
+            // TODO: I don't know if there is more in these messages yet, but this should decrypt
+            //       them in future logs
+        }
+    }
+
+    public static class MusicStatusRequest extends HuaweiPacket {
+        public MusicStatusRequest(SecretsProvider secretsProvider, byte commandId, int returnValue) {
+            super(secretsProvider);
+
+            this.serviceId = MusicControl.id;
+            this.commandId = commandId;
+            this.tlv = new HuaweiTLV()
+                    .put(0x7F, returnValue);
+            this.complete = true;
+        }
     }
 
     public static class MusicInfo {
-        public static final int id = 0x02;
+        public static final byte id = 0x02;
 
-        public static class Request {
-            public static HuaweiTLV toTlv(
+        public static class Request extends HuaweiPacket {
+            public Request(
+                    SecretsProvider secretsProvider,
                     String artistName,
                     String songName,
                     byte playState,
                     byte maxVolume,
                     byte currentVolume
             ) {
-                return new HuaweiTLV()
+                super(secretsProvider);
+                this.serviceId = MusicControl.id;
+                this.commandId = id;
+                this.tlv = new HuaweiTLV()
                         .put(0x01, artistName)
                         .put(0x02, songName)
-                        .put(0x03, playState)
-                        .put(0x04, maxVolume)
-                        .put(0x05, currentVolume);
+                        .put(0x04, playState)
+                        .put(0x05, maxVolume)
+                        .put(0x06, currentVolume);
+                this.complete = true;
             }
         }
 
-        public static class Response {
+        public static class Response extends HuaweiPacket {
             public boolean ok = false;
             public String error = "No input has been parsed yet";
 
-            public static Response fromTlv(HuaweiTLV input) {
-                Response response = new Response();
-                if (input.contains(0x7F)) {
-                    if (input.getInteger(0x7F) == 0x000186A0) {
-                        response.ok = true;
-                        response.error = "";
+            public Response(SecretsProvider secretsProvider) {
+                super(secretsProvider);
+
+                this.serviceId = MusicControl.id;
+                this.commandId = id;
+            }
+
+            @Override
+            protected void parseTlv() {
+                // TODO: use exceptions?
+                if (this.tlv.contains(0x7F)) {
+                    if (this.tlv.getInteger(0x7F) == successValue) {
+                        this.ok = true;
+                        this.error = "";
                     } else {
-                        response.ok = false;
-                        response.error = "Music information error code: " + Integer.toHexString(input.getShort(MusicControl.statusTag));
+                        this.ok = false;
+                        this.error = "Music information error code: " + Integer.toHexString(this.tlv.getInteger(0x7F));
                     }
                 } else {
-                    response.ok = false;
-                    response.error = "Music information response no status tag";
+                    this.ok = false;
+                    this.error = "Music information response no status tag";
                 }
-                return response;
             }
         }
     }
 
     public static class Control {
-        public static final int id = 0x03;
+        public static final byte id = 0x03;
 
-        public static class Response {
+        public static class Response extends HuaweiPacket {
             public enum Button {
                 Unknown,
                 PlayPause,
@@ -73,33 +112,37 @@ public class MusicControl {
 
             public Button button = null;
 
-            public static Response fromTlv(HuaweiTLV input) {
-                Response response = new Response();
+            public Response(SecretsProvider secretsProvider) {
+                super(secretsProvider);
 
-                if (input.contains(0x01)) {
-                    response.buttonPresent = true;
-                    response.rawButton = input.getByte(0x01);
-                    switch (response.rawButton) {
+                this.serviceId = MusicControl.id;
+                this.commandId = id;
+            }
+
+            @Override
+            protected void parseTlv() {
+                if (this.tlv.contains(0x01)) {
+                    this.buttonPresent = true;
+                    this.rawButton = this.tlv.getByte(0x01);
+                    switch (this.rawButton) {
                         case 1:
-                            response.button = Button.PlayPause;
+                            this.button = Button.PlayPause;
                             break;
                         case 3:
-                            response.button = Button.Previous;
+                            this.button = Button.Previous;
                             break;
                         case 4:
-                            response.button = Button.Next;
+                            this.button = Button.Next;
                             break;
                         default:
-                            response.button = Button.Unknown;
+                            this.button = Button.Unknown;
                     }
                 }
 
-                if (input.contains(0x02)) {
-                    response.volumePresent = true;
-                    response.volume = input.getByte(0x02);
+                if (this.tlv.contains(0x02)) {
+                    this.volumePresent = true;
+                    this.volume = this.tlv.getByte(0x02);
                 }
-
-                return response;
             }
         }
     }

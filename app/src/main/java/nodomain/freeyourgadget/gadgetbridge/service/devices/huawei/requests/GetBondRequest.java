@@ -16,20 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
-import java.nio.ByteBuffer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.Bond;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
 public class GetBondRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetBondRequest.class);
@@ -39,26 +30,12 @@ public class GetBondRequest extends Request {
     public GetBondRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = Bond.id;
+        this.commandId = DeviceConfig.BondRequest.id;
     }
 
     @Override
     protected byte[] createRequest() {
-        byte[] iv = support.getIV();
-        byte[] authVersion = new byte[2];
-        System.arraycopy(pastRequest.getValueReturned(), 0, authVersion, 0, 2);
-        requestedPacket = new HuaweiPacket(serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(Bond.bondRequest)
-                .put(Bond.requestCode, (byte)0x00)
-                .put(Bond.clientSerial, support.getSerial())
-                .put(Bond.bondingKey, huaweiCrypto.createBondingKey(support.getDeviceMac(), support.getSecretKey(), iv))
-                .put(Bond.initVector, iv)
-        );
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Bond: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return new DeviceConfig.BondRequest(support.secretsProvider, support.getSerial(), support.getDeviceMac(), huaweiCrypto).serialize();
     }
 
     @Override

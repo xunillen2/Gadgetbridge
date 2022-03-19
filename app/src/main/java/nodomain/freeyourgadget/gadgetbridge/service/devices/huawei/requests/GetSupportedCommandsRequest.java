@@ -22,113 +22,81 @@ Thus, one need to send multiple requests and concat the response.
 Packets should be 240 bytes max */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
-import android.util.Pair;
-
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV.TLV;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.SupportedCommands;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
 public class GetSupportedCommandsRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetSupportedCommandsRequest.class);
 
-    protected ArrayList<HuaweiTLV> commandsListArray;
+    private final ArrayList<HuaweiPacket> commandsRequests;
 
     public GetSupportedCommandsRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = SupportedCommands.id;
-        this.commandsListArray = new ArrayList<HuaweiTLV>();
+        this.commandId = DeviceConfig.SupportedCommands.id;
+        this.commandsRequests = new ArrayList<>();
     }
 
-    public GetSupportedCommandsRequest(HuaweiSupport support, ArrayList<HuaweiTLV> commandsListArray) {
+    public GetSupportedCommandsRequest(HuaweiSupport support, ArrayList<HuaweiPacket> commandsRequests) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = SupportedCommands.id;
-        this.commandsListArray = commandsListArray;
+        this.commandId = DeviceConfig.SupportedCommands.id;
+        this.commandsRequests = commandsRequests;
     }
 
     @Override
     protected byte[] createRequest() {
-        if (commandsListArray.isEmpty()) {
+        if (commandsRequests.isEmpty()) {
             byte[] activatedServices = pastRequest.getValueReturned();
-            byte[] commandsOfService;
-            HuaweiTLV commandsList = new HuaweiTLV();
-            for (int i = 0; i < activatedServices.length; i++) {
-                commandsOfService = createCommands(activatedServices[i]);
-                if ((commandsList.length() + commandsOfService.length + 2)> 208) {
-                    commandsListArray.add(commandsList);
-                    commandsList = new HuaweiTLV();
+            DeviceConfig.SupportedCommands.Request commandsRequest = new DeviceConfig.SupportedCommands.Request(support.secretsProvider);
+            for (byte activatedService : activatedServices) {
+                byte[] commandsForService = createCommands(activatedService);
+                if (!commandsRequest.addCommandsForService(activatedService, commandsForService)) {
+                    commandsRequests.add(commandsRequest);
+                    commandsRequest = new DeviceConfig.SupportedCommands.Request(support.secretsProvider);
+                    commandsRequest.addCommandsForService(activatedService, commandsForService);
                 }
-                commandsList.put(SupportedCommands.serviceId, (byte) activatedServices[i])
-                            .put(SupportedCommands.commands, commandsOfService);
             }
-            commandsListArray.add(commandsList);
         }
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(SupportedCommands.supportedCommands, commandsListArray.remove(0))
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Supported Commands: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return commandsRequests.remove(0).serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
         LOG.debug("handle Supported Commands");
-        HuaweiTLV supportedCommands = receivedPacket.tlv.getObject(SupportedCommands.supportedCommands);
-        if (!commandsListArray.isEmpty()) {
-            GetSupportedCommandsRequest nextRequest = new GetSupportedCommandsRequest(this.support, this.commandsListArray);
+
+        if (!(receivedPacket instanceof DeviceConfig.SupportedCommands.Response)) {
+            // TODO: exception
+            return;
+        }
+
+        for (DeviceConfig.SupportedCommands.Response.CommandsList commandsList : ((DeviceConfig.SupportedCommands.Response) receivedPacket).commandsLists) {
+            support.getCoordinator().addCommandsForService(
+                    commandsList.service,
+                    commandsList.commands
+            );
+        }
+
+        if (!commandsRequests.isEmpty()) {
+            GetSupportedCommandsRequest nextRequest = new GetSupportedCommandsRequest(this.support, this.commandsRequests);
             this.support.addInProgressRequest(nextRequest);
             this.nextRequest(nextRequest);
-            if (commandsListArray.size() == 1) {
+            if (commandsRequests.size() == 1) {
                 nextRequest.setFinalizeReq(new RequestCallback() {
                     @Override
                     public void call() {
-                        HuaweiCoordinator coordinator = (HuaweiCoordinator) DeviceHelper.getInstance().getCoordinator(support.getDevice());
-                        coordinator.printCommandsPerService();
+                        support.getCoordinator().printCommandsPerService();
                     }
                 });
             }
         }
-
-        HuaweiCoordinator coordinator = (HuaweiCoordinator) DeviceHelper.getInstance().getCoordinator(this.support.getDevice());
-        TreeMap<Integer, byte[]> commandsPerService = coordinator.getCommandsPerService();
-        Integer service_id = null;
-        for(TLV tlv : supportedCommands.get()) {
-            if ((int)tlv.getTag() == SupportedCommands.serviceId) {
-                service_id = (int)ByteBuffer.wrap(tlv.getValue()).get();
-            } else if (service_id != null) {
-                ByteBuffer buffer = ByteBuffer.allocate(tlv.getValue().length);
-                for (int i = 0; i < tlv.getValue().length; i++) {
-                    if ((int)tlv.getValue()[i] == 1) buffer.put((byte)(i + 1));
-                    
-                }
-                byte[] commands = new byte[buffer.position()];
-                buffer.rewind();
-                buffer.get(commands);
-                commandsPerService.put(service_id, commands);
-                service_id = null;
-            }
-        }
-
     }
 
     private byte[] createCommands(int service) {

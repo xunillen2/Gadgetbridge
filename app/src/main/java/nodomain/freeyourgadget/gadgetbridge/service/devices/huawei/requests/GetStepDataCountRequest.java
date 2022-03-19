@@ -26,17 +26,17 @@ public class GetStepDataCountRequest extends Request {
 
     @Override
     protected byte[] createRequest() {
-        requestedPacket = new HuaweiPacket(
-                serviceId,
-                commandId,
-                FitnessData.MessageCount.Request.toTlv(this.start, this.end)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        return requestedPacket.serialize();
+        return new FitnessData.MessageCount.Request(support.secretsProvider, this.commandId, this.start, this.end).serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
-        short count = FitnessData.MessageCount.Response.fromTlv(receivedPacket.tlv).count;
+        if (!(receivedPacket instanceof FitnessData.MessageCount.Response)) {
+            // TODO: exception
+            return;
+        }
+
+        short count = ((FitnessData.MessageCount.Response) receivedPacket).count;
 
         if (count > 0) {
             GetStepDataRequest nextRequest = new GetStepDataRequest(this.support, count, (short) 0);

@@ -11,8 +11,8 @@ import java.io.IOException;
 
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventFindPhone;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventMusicControl;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FindPhoneResponse;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicStatusRequest;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.MusicControl;
 
@@ -29,17 +29,19 @@ public class AsynchronousResponse {
     }
 
     public void handleResponse(HuaweiPacket response) {
-        if (response.tlv.contains(HuaweiConstants.CryptoTags.encryption))
-            response.decrypt(support.getSecretKey());
-
         handleFindPhone(response);
         handleMusicControls(response);
     }
 
     private void handleFindPhone(HuaweiPacket response) {
-        if (response.serviceId == 11 && response.commandId == 1 && response.tlv.contains(1)) {
+        if (response.serviceId == FindPhoneResponse.id && response.commandId == FindPhoneResponse.responseId) {
+            if (!(response instanceof FindPhoneResponse)) {
+                // TODO: exception
+                return;
+            }
+
             GBDeviceEventFindPhone findPhoneEvent = new GBDeviceEventFindPhone();
-            if (response.tlv.getByte(1) == 1)
+            if (((FindPhoneResponse) response).start)
                 findPhoneEvent.event = GBDeviceEventFindPhone.Event.START;
             else
                 findPhoneEvent.event = GBDeviceEventFindPhone.Event.STOP;
@@ -72,7 +74,7 @@ public class AsynchronousResponse {
                 // Send Music Info
                 this.support.sendSetMusic();
             } else if (response.commandId == MusicControl.Control.id) {
-                MusicControl.Control.Response resp = MusicControl.Control.Response.fromTlv(response.tlv);
+                MusicControl.Control.Response resp = (MusicControl.Control.Response) response;
 
                 if (resp.buttonPresent) {
                     if (resp.button != MusicControl.Control.Response.Button.Unknown) {

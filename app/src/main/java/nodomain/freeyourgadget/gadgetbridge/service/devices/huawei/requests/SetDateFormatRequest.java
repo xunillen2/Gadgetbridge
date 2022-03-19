@@ -18,27 +18,14 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
 import android.text.format.DateFormat;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.GBPrefs;
-import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.SetDateFormat;
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.Time;
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.Date;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
 public class SetDateFormatRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetDateFormatRequest.class);
@@ -46,51 +33,37 @@ public class SetDateFormatRequest extends Request {
     public SetDateFormatRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = SetDateFormat.id;
+        this.commandId = DeviceConfig.SetDateFormatRequest.id;
     }
 
     @Override
     protected byte[] createRequest() {
-        int time = Time.hours12;
+        int time = DeviceConfig.Time.hours12;
         int date;
         String timeFormat = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getString(DeviceSettingsPreferenceConst.PREF_TIMEFORMAT, "auto");
         if (timeFormat.equals("auto")) {
-            if (DateFormat.is24HourFormat(GBApplication.getContext())) {
-                time = Time.hours24;
-            } else {
-                time = Time.hours12;
-            }
+            if (DateFormat.is24HourFormat(GBApplication.getContext()))
+                time = DeviceConfig.Time.hours24;
         } else if (timeFormat.equals("24h")) {
-            time = Time.hours24;
+            time = DeviceConfig.Time.hours24;
         }
         String dateFormat = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getString(DeviceSettingsPreferenceConst.PREF_DATEFORMAT, "MM/dd/yyyy");
         switch (dateFormat) {
             case "MM/dd/yyyy":
-                date = Date.monthFirst;
+                date = DeviceConfig.Date.monthFirst;
                 break;
             case "dd.MM.yyyy":
             case "dd/MM/yyyy":
-                date = Date.dayFirst;
+                date = DeviceConfig.Date.dayFirst;
                 break;
             default:
-                date = Date.yearFirst;
+                date = DeviceConfig.Date.yearFirst;
         }
-        HuaweiTLV dateFormatTLVs = new HuaweiTLV()
-            .put(SetDateFormat.dateFormat, (byte)date)
-            .put(SetDateFormat.timeFormat, (byte)time);
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(SetDateFormat.setDateFormat, dateFormatTLVs)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Set Date Format: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return new DeviceConfig.SetDateFormatRequest(support.secretsProvider, (byte) date, (byte) time).serialize();
     }
 
     @Override

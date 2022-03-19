@@ -16,21 +16,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
-import java.nio.ByteBuffer;
 import java.util.Calendar;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.SetTime;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
 public class SetTimeRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetTimeRequest.class);
@@ -38,7 +31,7 @@ public class SetTimeRequest extends Request {
     public SetTimeRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = SetTime.id;
+        this.commandId = DeviceConfig.SetTimeRequest.id;
     }
 
     @Override
@@ -48,21 +41,9 @@ public class SetTimeRequest extends Request {
         float zoneOffsetMillis = now.get(Calendar.ZONE_OFFSET);
         float zoneOffsetHour = (zoneOffsetMillis / 1000 / 60 / 60);
         int offsetMinutes = (int)Math.abs(((zoneOffsetHour % 1) * 60.0));
-        int offsetHour = zoneOffsetHour < 0 ? (int)Math.abs(zoneOffsetHour / 1.0) + 128 : (int)(zoneOffsetHour / 1.0);
-        byte[] zoneOffset = ByteBuffer.allocate(2)
-                                .put((byte)offsetHour)
-                                .put((byte)offsetMinutes)
-                                .array();
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(SetTime.timestamp, timestampSec)
-                .put(SetTime.zoneOffset, zoneOffset)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Set Time: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        int offsetHour = zoneOffsetHour < 0 ? (int) Math.abs(zoneOffsetHour / 1.0) + 128 : (int) (zoneOffsetHour / 1.0);
+        short zoneOffset = (short) (offsetHour << 8 + (byte) offsetMinutes);
+        return new DeviceConfig.SetTimeRequest(support.secretsProvider, timestampSec, zoneOffset).serialize();
     }
 
     @Override

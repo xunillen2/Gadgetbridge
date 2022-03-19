@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
@@ -42,27 +41,26 @@ public class SetMusicRequest extends Request {
         byte maxVolume = (byte) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         byte currentVolume = (byte) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 
-        requestedPacket = new HuaweiPacket(
-                this.serviceId,
-                this.commandId,
-                MusicControl.MusicInfo.Request.toTlv(
-                        artistName,
-                        songName,
-                        playState,
-                        maxVolume,
-                        currentVolume
-                )
-        ).encrypt(support.getSecretKey(), support.getIV());
-        return requestedPacket.serialize();
+        return new MusicControl.MusicInfo.Request(
+                support.secretsProvider,
+                artistName,
+                songName,
+                playState,
+                maxVolume,
+                currentVolume
+        ).serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
-        MusicControl.MusicInfo.Response response = MusicControl.MusicInfo.Response.fromTlv(receivedPacket.tlv);
-        if (response.ok) {
-            LOG.debug("Music information acknowledged by band");
+        if (receivedPacket instanceof MusicControl.MusicInfo.Response) {
+            if (((MusicControl.MusicInfo.Response) receivedPacket).ok) {
+                LOG.debug("Music information acknowledged by band");
+            } else {
+                LOG.warn(((MusicControl.MusicInfo.Response) receivedPacket).error);
+            }
         } else {
-            LOG.warn(response.error);
+            LOG.error("MusicInfo response is not of type MusicInfo response");
         }
     }
 }

@@ -3,32 +3,51 @@ package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets;
 import java.util.ArrayList;
 import java.util.List;
 
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 
 public class FitnessData {
 
-    public static final int id = 0x07;
+    public static final byte id = 0x07;
 
     public static class MessageCount {
         public static final int sleepId = 0x0C;
         public static final int stepId = 0x0A;
 
-        public static class Request {
-            public static HuaweiTLV toTlv(int start, int end) {
-                return new HuaweiTLV()
+        public static class Request extends HuaweiPacket {
+            public Request(
+                    SecretsProvider secretsProvider,
+                    byte commandId,
+                    int start,
+                    int end
+            ) {
+                super(secretsProvider);
+
+                this.serviceId = FitnessData.id;
+                this.commandId = commandId;
+
+                this.tlv = new HuaweiTLV()
                         .put(0x81)
                         .put(0x03, start)
                         .put(0x04, end);
+                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
+
+                this.complete = true;
             }
         }
 
-        public static class Response {
+        public static class Response extends HuaweiPacket {
             public short count;
 
-            public static Response fromTlv(HuaweiTLV input) {
-                Response returnValue = new Response();
-                returnValue.count = input.getObject(0x81).getShort(0x02);
-                return returnValue;
+            public Response(SecretsProvider secretsProvider) {
+                super(secretsProvider);
+            }
+
+            @Override
+            protected void parseTlv() {
+                this.tlv.decrypt(secretsProvider.getSecretKey());
+                this.count = this.tlv.getObject(0x81).getShort(0x02);
+                this.complete = true;
             }
         }
     }
@@ -37,18 +56,24 @@ public class FitnessData {
         public static final int sleepId = 0x0D;
         public static final int stepId = 0x0B;
 
-        public static class Request {
-            public static HuaweiTLV toTlv(short count) {
-                return new HuaweiTLV()
-                        .put(
-                                0x81,
-                                new HuaweiTLV()
-                                        .put(0x02, count)
+        public static class Request extends HuaweiPacket {
+            public Request(SecretsProvider secretsProvider, byte commandId, short count) {
+                super(secretsProvider);
+
+                this.serviceId = FitnessData.id;
+                this.commandId = commandId;
+
+                this.tlv = new HuaweiTLV()
+                        .put(0x81, new HuaweiTLV()
+                                .put(0x02, count)
                         );
+                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
+
+                this.complete = true;
             }
         }
 
-        public static class SleepResponse {
+        public static class SleepResponse extends HuaweiPacket {
             public static class SubContainer {
                 public byte type;
                 public byte[] timestamp;
@@ -57,24 +82,32 @@ public class FitnessData {
             public short number;
             public List<SubContainer> containers;
 
-            public static SleepResponse fromTlv(HuaweiTLV input) {
-                HuaweiTLV container = input.getObject(0x81);
+            public SleepResponse(SecretsProvider secretsProvider) {
+                super(secretsProvider);
+
+                this.serviceId = FitnessData.id;
+                this.commandId = sleepId;
+            }
+
+            @Override
+            protected void parseTlv() {
+                this.tlv.decrypt(secretsProvider.getSecretKey());
+
+                HuaweiTLV container = this.tlv.getObject(0x81);
                 List<HuaweiTLV> subContainers = container.getObjects(0x83);
 
-                SleepResponse returnValue = new SleepResponse();
-                returnValue.number = container.getShort(0x02);
-                returnValue.containers = new ArrayList<>();
+                this.number = container.getShort(0x02);
+                this.containers = new ArrayList<>();
                 for (HuaweiTLV subContainerTlv : subContainers) {
                     SubContainer subContainer = new SubContainer();
                     subContainer.type = subContainerTlv.getByte(0x04);
                     subContainer.timestamp = subContainerTlv.getBytes(0x05);
-                    returnValue.containers.add(subContainer);
+                    this.containers.add(subContainer);
                 }
-                return returnValue;
             }
         }
 
-        public static class StepResponse {
+        public static class StepResponse extends HuaweiPacket {
             public static class SubContainer {
                 public static class TV {
                     public final byte tag;
@@ -119,23 +152,31 @@ public class FitnessData {
             public int timestamp;
             public List<SubContainer> containers;
 
-            public static StepResponse fromTlv(HuaweiTLV input) {
-                HuaweiTLV container = input.getObject(0x81);
+            public StepResponse(SecretsProvider secretsProvider) {
+                super(secretsProvider);
+
+                this.serviceId = FitnessData.id;
+                this.commandId = stepId;
+            }
+
+            @Override
+            protected void parseTlv() {
+                this.tlv.decrypt(secretsProvider.getSecretKey());
+
+                HuaweiTLV container = this.tlv.getObject(0x81);
                 List<HuaweiTLV> subContainers = container.getObjects(0x84);
 
-                StepResponse returnValue = new StepResponse();
-                returnValue.number = container.getShort(0x02);
-                returnValue.timestamp = container.getInteger(0x03);
-                returnValue.containers = new ArrayList<>();
+                this.number = container.getShort(0x02);
+                this.timestamp = container.getInteger(0x03);
+                this.containers = new ArrayList<>();
                 for (HuaweiTLV subContainerTlv : subContainers) {
                     SubContainer subContainer = new SubContainer();
                     subContainer.timestampOffset = subContainerTlv.getByte(0x05);
-                    subContainer.timestamp = returnValue.timestamp + 60 * subContainer.timestampOffset;
+                    subContainer.timestamp = this.timestamp + 60 * subContainer.timestampOffset;
                     subContainer.data = subContainerTlv.getBytes(0x06);
                     parseData(subContainer, subContainer.data);
-                    returnValue.containers.add(subContainer);
+                    this.containers.add(subContainer);
                 }
-                return returnValue;
             }
 
             private static void parseData(SubContainer returnValue, byte[] data) {
@@ -192,18 +233,76 @@ public class FitnessData {
         }
     }
 
-    public static class ActivityReminder {
-        public static final int id = 0x07;
+    public static class FitnessTotals {
+        public static final byte id = 0x03;
 
-        public static class Request {
-            public static HuaweiTLV toTlv(
+        public static class Request extends HuaweiPacket {
+            public Request(SecretsProvider secretsProvider) {
+                super(secretsProvider);
+
+                this.serviceId = FitnessData.id;
+                this.commandId = id;
+
+                this.tlv = new HuaweiTLV()
+                        .put(0x01);
+                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
+
+                this.complete = true;
+            }
+        }
+
+        public static class Response extends HuaweiPacket {
+
+            public int totalSteps = 0;
+            public int totalCalories = 0;
+            public int totalDistance = 0;
+
+            public Response(SecretsProvider secretsProvider) {
+                super(secretsProvider);
+
+                this.serviceId = FitnessData.id;
+                this.commandId = id;
+            }
+
+            @Override
+            protected void parseTlv() {
+                this.tlv.decrypt(secretsProvider.getSecretKey());
+
+                HuaweiTLV container = this.tlv.getObject(0x81);
+                List<HuaweiTLV> containers = container.getObjects(0x83);
+
+                for (HuaweiTLV tlv : containers) {
+                    if (tlv.contains(0x05))
+                        totalSteps += tlv.getInteger(0x05);
+                    if (tlv.contains(0x06))
+                        totalCalories += tlv.getShort(0x06);
+                    if (tlv.contains(0x07))
+                        totalDistance += tlv.getInteger(0x07);
+                }
+
+                this.complete = true;
+            }
+        }
+    }
+
+    public static class ActivityReminder {
+        public static final byte id = 0x07;
+
+        public static class Request extends HuaweiPacket {
+            public Request(
+                    SecretsProvider secretsProvider,
                     boolean longSitSwitch,
                     byte longSitInterval,
                     byte[] longSitStart,
                     byte[] longSitEnd,
                     byte cycle
             ) {
-                return new HuaweiTLV()
+                super(secretsProvider);
+
+                this.serviceId = FitnessData.id;
+                this.commandId = id;
+
+                this.tlv = new HuaweiTLV()
                         .put(0x81, new HuaweiTLV()
                                 .put(0x02, longSitSwitch)
                                 .put(0x03, longSitInterval)
@@ -211,17 +310,28 @@ public class FitnessData {
                                 .put(0x05, longSitEnd)
                                 .put(0x06, cycle)
                         );
+                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
+
+                this.complete = true;
             }
         }
     }
 
     public static class TruSleep {
-        public static final int id = 0x16;
+        public static final byte id = 0x16;
 
-        public static class Request {
-            public static HuaweiTLV toTlv(boolean truSleepSwitch) {
-                return new HuaweiTLV()
+        public static class Request extends HuaweiPacket {
+            public Request(SecretsProvider secretsProvider, boolean truSleepSwitch) {
+                super(secretsProvider);
+
+                this.serviceId = FitnessData.id;
+                this.commandId = id;
+
+                this.tlv = new HuaweiTLV()
                         .put(0x01, truSleepSwitch);
+                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
+
+                this.complete = true;
             }
         }
     }

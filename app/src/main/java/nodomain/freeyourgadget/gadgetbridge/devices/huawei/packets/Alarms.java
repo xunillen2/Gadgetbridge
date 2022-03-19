@@ -1,74 +1,97 @@
 package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets;
 
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
+
+// TODO: complete responses
 
 public class Alarms {
 
-    public static final int id = 0x08;
+    public static final byte id = 0x08;
 
-    public static class EventAlarms {
-        public static final int id = 0x01;
+    public static class EventAlarmsRequest extends HuaweiPacket {
+        public static final byte id = 0x01;
 
-        public static class Request {
-            int count;
-            HuaweiTLV alarms;
+        int count;
+        HuaweiTLV alarms;
 
-            public Request() {
-                count = 0;
-                alarms = new HuaweiTLV();
-            }
+        public EventAlarmsRequest(SecretsProvider secretsProvider) {
+            super(secretsProvider);
 
-            public void addAlarm(
-                        byte index,
-                        boolean status,
-                        short startTime,
-                        byte repeat,
-                        String name
-            ) {
-                // TODO: If 4 is a real maximum, we may want to check for that here as well
-                //       Then we should define and throw an exception
+            this.serviceId = Alarms.id;
+            this.commandId = id;
 
-                alarms.put(0x82, new HuaweiTLV()
-                        .put(0x03, index)
-                        .put(0x04, status)
-                        .put(0x05, startTime)
-                        .put(0x06, repeat)
-                        .put(0x07, name)
-                );
-                count += 1;
-            }
+            count = 0;
+            alarms = new HuaweiTLV();
+        }
 
-            public HuaweiTLV toTlv() {
-                // TODO: If 4 is a real maximum, we may want to check for that here as well
-                //       Then we should define and throw an exception
+        public void addAlarm(
+                    byte index,
+                    boolean status,
+                    short startTime,
+                    byte repeat,
+                    String name
+        ) {
+            // TODO: If 4 is a real maximum, we may want to check for that here as well
+            //       Then we should define and throw an exception
 
-                alarms.put(0x82, new HuaweiTLV()
-                        .put(0x03, (byte) (count + 1))
-                );
-                return new HuaweiTLV()
-                        .put(0x81, alarms);
-            }
+            alarms.put(0x82, new HuaweiTLV()
+                    .put(0x03, index)
+                    .put(0x04, status)
+                    .put(0x05, startTime)
+                    .put(0x06, repeat)
+                    .put(0x07, name)
+            );
+            count += 1;
+        }
+
+        @Override
+        public byte[] serialize() {
+            // Finalize the tlv before serializing
+            this.tlv = new HuaweiTLV().put(0x81, this.tlv);
+            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
+            this.complete = true;
+            return super.serialize();
         }
     }
 
-    public static class SmartAlarms {
+    public static class SmartAlarmRequest extends HuaweiPacket {
         public static final int id = 0x02;
-        public static final int index = 0x03; // byte
-        public static final int setStatus = 0x04; // byte
-        public static final int setStartTime = 0x05; //short
-        public static final int repeat = 0x06; // byte
-        public static final int aheadTime = 0x07; // byte default value 5 min
 
-        public static final int start = 0x81;
-        public static final int separator = 0x82;
+        public SmartAlarmRequest(
+                SecretsProvider secretsProvider,
+                boolean status,
+                short startTime,
+                byte repeat,
+                byte aheadTime
+        ) {
+            super(secretsProvider);
+
+            this.serviceId = Alarms.id;
+            this.commandId = id;
+            this.tlv = new HuaweiTLV()
+                    .put(0x81, new HuaweiTLV()
+                            .put(0x82, new HuaweiTLV()
+                                    .put(0x03, (byte) 0x01)
+                                    .put(0x04, status)
+                                    .put(0x05, startTime)
+                                    .put(0x06, repeat)
+                                    .put(0x07, aheadTime)
+                            )
+                    );
+            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
+            this.complete = true;
+        }
     }
 
+    // TODO: refactor
     // getDeviceEventAlarm
     public static class EventAlarmsList {
         public static final int id = 0x03; // byte default value 0
         public static final int get = 0x01; // byte
     }
 
+    // TODO: refactor
     // getDeviceSmartAlarm
     public static class SmartAlarmsList {
         public static final int id = 0x04; // byte default value 0
