@@ -44,7 +44,10 @@ public class HuaweiBandAw70Coordinator extends HuaweiCoordinator{
         try {
             BluetoothDevice device = candidate.getDevice();
             String name = device.getName();
-            if (name != null && (name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME) || name.toLowerCase().startsWith(HuaweiConstants.HU_BAND4E_NAME))) {
+            if (name != null && (
+                name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME) ||
+                name.toLowerCase().startsWith(HuaweiConstants.HU_BAND4E_NAME)
+            )) {
                 return getDeviceType();
             }
         } catch (Exception ex) {

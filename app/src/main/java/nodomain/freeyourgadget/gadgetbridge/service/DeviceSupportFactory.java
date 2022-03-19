@@ -71,7 +71,6 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband5.MiBand
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband6.MiBand6Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppe.ZeppESupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.huaweibandaw70.HuaweiBandAw70Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.id115.ID115Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.itag.ITagSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.jyou.BFH16DeviceSupport;
@@ -387,11 +386,8 @@ public class DeviceSupportFactory {
                     case HONORBAND4:
                     case HONORBAND5:
                     case HUAWEIBAND6:
-                        // TODO: check if these devices also work well without BUSY_CHECKING, like the AW70
-                        deviceSupport = new ServiceDeviceSupport(new HuaweiSupport(), EnumSet.noneOf(ServiceDeviceSupport.Flags.class));
-                        break;
                     case HUAWEIBANDAW70:
-                        deviceSupport = new ServiceDeviceSupport(new HuaweiBandAw70Support(), EnumSet.noneOf(ServiceDeviceSupport.Flags.class));
+                        deviceSupport = new ServiceDeviceSupport(new HuaweiSupport(), EnumSet.noneOf(ServiceDeviceSupport.Flags.class));
                         break;
                     case SONY_WH_1000XM4:
                         deviceSupport = new ServiceDeviceSupport(new SonyHeadphonesSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
