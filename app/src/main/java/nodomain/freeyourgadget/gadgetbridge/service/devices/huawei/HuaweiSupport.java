@@ -125,6 +125,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         addSupportedService(GattService.UUID_SERVICE_DEVICE_INFORMATION);
         addSupportedService(GattService.UUID_SERVICE_HUMAN_INTERFACE_DEVICE);
         addSupportedService(HuaweiConstants.UUID_SERVICE_HUAWEI_SERVICE);
+
     }
 
     @Override
@@ -175,7 +176,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         String name = gbDevice.getName();
         if (name != null && (
             name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME) ||
-            name.toLowerCase().startsWith(HuaweiConstants.HU_BAND4E_NAME)
+            name.toLowerCase().startsWith(HuaweiConstants.HU_BAND4E_NAME) ||
+            name.toLowerCase().startsWith(HuaweiConstants.HU_WATCHGT2E_NAME)
         )) {
             mtu = 20;
         }
