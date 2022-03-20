@@ -31,6 +31,8 @@ import nodomain.freeyourgadget.gadgetbridge.util.CheckSums;
 
 public class HuaweiPacket {
 
+    // TODO: make moment of encrypting/decrypting consistent
+
     public interface SecretsProvider {
         byte[] getSecretKey();
         byte[] getIv();
@@ -66,7 +68,7 @@ public class HuaweiPacket {
 
         responsePacketTypes.put((short) 0x0b01, FindPhoneResponse.class);
 
-        responsePacketTypes.put((short) 0x2501, MusicControl.MusicInfoResponse.class);
+        responsePacketTypes.put((short) 0x2501, MusicControl.MusicStatusResponse.class);
         responsePacketTypes.put((short) 0x2502, MusicControl.MusicInfo.Response.class);
         responsePacketTypes.put((short) 0x2503, MusicControl.Control.Response.class);
     }

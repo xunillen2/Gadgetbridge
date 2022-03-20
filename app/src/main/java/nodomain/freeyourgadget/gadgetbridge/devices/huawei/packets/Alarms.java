@@ -12,7 +12,7 @@ public class Alarms {
     public static class EventAlarmsRequest extends HuaweiPacket {
         public static final byte id = 0x01;
 
-        int count;
+        byte count;
         HuaweiTLV alarms;
 
         public EventAlarmsRequest(SecretsProvider secretsProvider) {
@@ -48,7 +48,10 @@ public class Alarms {
         @Override
         public byte[] serialize() {
             // Finalize the tlv before serializing
-            this.tlv = new HuaweiTLV().put(0x81, this.tlv);
+            this.alarms.put(0x82, new HuaweiTLV()
+                    .put(0x03, (byte) (count + 1))
+            );
+            this.tlv = new HuaweiTLV().put(0x81, this.alarms);
             this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
             this.complete = true;
             return super.serialize();

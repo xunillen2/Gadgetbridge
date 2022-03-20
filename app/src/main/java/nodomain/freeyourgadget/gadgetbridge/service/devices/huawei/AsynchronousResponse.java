@@ -63,9 +63,9 @@ public class AsynchronousResponse {
         if (response.serviceId == MusicControl.id) {
             AudioManager audioManager = (AudioManager) this.support.getContext().getSystemService(Context.AUDIO_SERVICE);
 
-            if (response.commandId == MusicControl.MusicInfoResponse.id) {
+            if (response.commandId == MusicControl.MusicStatusResponse.id) {
                 LOG.debug("Music information requested, sending acknowledgement and music info.");
-                SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, MusicControl.MusicInfoResponse.id, MusicControl.successValue);
+                SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, MusicControl.MusicStatusResponse.id, MusicControl.successValue);
                 try {
                     setMusicStatusRequest.perform();
                 } catch (IOException e) {

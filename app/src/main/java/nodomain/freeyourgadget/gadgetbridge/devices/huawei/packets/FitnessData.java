@@ -11,8 +11,8 @@ public class FitnessData {
     public static final byte id = 0x07;
 
     public static class MessageCount {
-        public static final int sleepId = 0x0C;
-        public static final int stepId = 0x0A;
+        public static final byte sleepId = 0x0C;
+        public static final byte stepId = 0x0A;
 
         public static class Request extends HuaweiPacket {
             public Request(
@@ -53,8 +53,8 @@ public class FitnessData {
     }
 
     public static class MessageData {
-        public static final int sleepId = 0x0D;
-        public static final int stepId = 0x0B;
+        public static final byte sleepId = 0x0D;
+        public static final byte stepId = 0x0B;
 
         public static class Request extends HuaweiPacket {
             public Request(SecretsProvider secretsProvider, byte commandId, short count) {
@@ -152,6 +152,12 @@ public class FitnessData {
             public int timestamp;
             public List<SubContainer> containers;
 
+            private static final List<Byte> singleByteTagList = new ArrayList<>();
+            static {
+                singleByteTagList.add((byte) 0x20);
+                singleByteTagList.add((byte) 0x40);
+            }
+
             public StepResponse(SecretsProvider secretsProvider) {
                 super(secretsProvider);
 
@@ -165,6 +171,13 @@ public class FitnessData {
 
                 HuaweiTLV container = this.tlv.getObject(0x81);
                 List<HuaweiTLV> subContainers = container.getObjects(0x84);
+
+                if (!container.contains(0x02) || !container.contains(0x03)) {
+                    // TODO: exception?
+                    this.number = -1;
+                    this.timestamp = -1;
+                    return;
+                }
 
                 this.number = container.getShort(0x02);
                 this.timestamp = container.getInteger(0x03);
@@ -205,13 +218,25 @@ public class FitnessData {
                 // The greater than zero check is because Java is always signed, so we only check 7 bits
                 for (byte bitToCheck = 1; bitToCheck > 0; bitToCheck <<= 1) {
                     if ((featureBitmap1 & bitToCheck) != 0) {
-                        if (data.length - 2 < i) {
-                            returnValue.parsedData = null;
-                            returnValue.parsedDataError = "Data is too short for selected features.";
-                            return;
-                        }
+                        short value;
 
-                        short value = (short) ((data[i++] & 0xFF) << 8 | (data[i++] & 0xFF));
+                        if (singleByteTagList.contains(bitToCheck)) {
+                            if (data.length - 1 < i) {
+                                returnValue.parsedData = null;
+                                returnValue.parsedDataError = "Data is too short for selected features.";
+                                return;
+                            }
+
+                            value = data[i++];
+                        } else {
+                            if (data.length - 2 < i) {
+                                returnValue.parsedData = null;
+                                returnValue.parsedDataError = "Data is too short for selected features.";
+                                return;
+                            }
+
+                            value = (short) ((data[i++] & 0xFF) << 8 | (data[i++] & 0xFF));
+                        }
 
                         // The bitToCheck is used as tag, which may not be optimal, but works
                         SubContainer.TV tv = new SubContainer.TV(bitToCheck, value);

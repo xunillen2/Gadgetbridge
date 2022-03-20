@@ -9,10 +9,22 @@ public class MusicControl {
     // TODO: should this be in HuaweiConstants?
     public static final int successValue = 0x000186A0;
 
-    public static class MusicInfoResponse extends HuaweiPacket {
+    public static class MusicStatusRequest extends HuaweiPacket {
+        public MusicStatusRequest(SecretsProvider secretsProvider, byte commandId, int returnValue) {
+            super(secretsProvider);
+
+            this.serviceId = MusicControl.id;
+            this.commandId = commandId;
+            this.tlv = new HuaweiTLV()
+                    .put(0x7F, returnValue);
+            this.complete = true;
+        }
+    }
+
+    public static class MusicStatusResponse extends HuaweiPacket {
         public static final byte id = 0x01;
 
-        public MusicInfoResponse(SecretsProvider secretsProvider) {
+        public MusicStatusResponse(SecretsProvider secretsProvider) {
             super(secretsProvider);
 
             this.serviceId = MusicControl.id;
@@ -24,18 +36,6 @@ public class MusicControl {
             this.tlv.decrypt(secretsProvider.getSecretKey());
             // TODO: I don't know if there is more in these messages yet, but this should decrypt
             //       them in future logs
-        }
-    }
-
-    public static class MusicStatusRequest extends HuaweiPacket {
-        public MusicStatusRequest(SecretsProvider secretsProvider, byte commandId, int returnValue) {
-            super(secretsProvider);
-
-            this.serviceId = MusicControl.id;
-            this.commandId = commandId;
-            this.tlv = new HuaweiTLV()
-                    .put(0x7F, returnValue);
-            this.complete = true;
         }
     }
 
@@ -57,9 +57,10 @@ public class MusicControl {
                 this.tlv = new HuaweiTLV()
                         .put(0x01, artistName)
                         .put(0x02, songName)
-                        .put(0x04, playState)
-                        .put(0x05, maxVolume)
-                        .put(0x06, currentVolume);
+                        .put(0x03, playState)
+                        .put(0x04, maxVolume)
+                        .put(0x05, currentVolume);
+                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
                 this.complete = true;
             }
         }

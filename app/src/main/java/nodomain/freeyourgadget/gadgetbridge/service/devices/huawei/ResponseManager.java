@@ -9,9 +9,7 @@ import java.util.List;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Request;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 /**
  * Manages all response data.
@@ -63,17 +61,7 @@ public class ResponseManager {
         else
             receivedPacket = receivedPacket.parse(data);
 
-        if (receivedPacket == null) {
-            // TODO: fix
-            LOG.error("Received packet still null.");
-            return;
-        }
-
         if (receivedPacket.complete) {
-            LOG.error("PACKET TYPE: " + receivedPacket.getClass());
-            LOG.error("Service: " + receivedPacket.serviceId + ", Command: " + receivedPacket.commandId);
-            LOG.error("OBJECT: " + receivedPacket);
-
             Request handler = null;
             synchronized (handlers) {
                 for (Request req : handlers) {
