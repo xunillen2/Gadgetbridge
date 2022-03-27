@@ -57,7 +57,7 @@ public class AlarmsRequest extends Request {
         eventAlarmsRequest.addAlarm(
                 (byte) alarm.getPosition(),
                 (alarm.getEnabled() && !alarm.getUnused()),
-                (short) (alarm.getHour() << 8 + (byte) alarm.getMinute()),
+                (short) (((alarm.getHour() << 8) + (alarm.getMinute() & 0xFF)) & 0xFFFF),
                 (byte) alarm.getRepetition(),
                 alarm.getTitle()
         );

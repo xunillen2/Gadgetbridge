@@ -224,7 +224,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 setActivateOnRotate();
                 setNavigateOnRotate();
                 setActivityReminder();
-                // setTrusleep();
+                setTrusleep();
                 setNotification();
             }
             onSetTime();

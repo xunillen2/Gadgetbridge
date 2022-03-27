@@ -37,6 +37,7 @@ public class GetStepDataRequest extends Request {
 
         if (response.number != this.count) {
             LOG.warn("Counts do not match! Received: " + response.number + ", expected: " + this.count);
+            this.count = response.number; // This stops it from going into a loop
         }
 
         for (FitnessData.MessageData.StepResponse.SubContainer subContainer : response.containers) {

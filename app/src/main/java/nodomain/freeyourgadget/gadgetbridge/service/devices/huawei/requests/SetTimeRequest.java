@@ -54,7 +54,7 @@ public class SetTimeRequest extends Request {
         short zoneOffset = ByteBuffer.allocate(2)
                 .put((byte)offsetHour)
                 .put((byte)offsetMinutes)
-                .getShort();
+                .getShort(0);
 
         return new DeviceConfig.SetTimeRequest(support.secretsProvider, timestampSec, zoneOffset).serialize();
     }
