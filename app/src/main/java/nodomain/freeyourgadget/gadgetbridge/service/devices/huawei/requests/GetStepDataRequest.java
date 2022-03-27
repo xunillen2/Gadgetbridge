@@ -132,9 +132,9 @@ public class GetStepDataRequest extends Request {
                     return null;
                 }
 
-                if (bitToCheck == 0x40) {
-                    // TODO: support data from 0x40
-                    LOG.warn("Data announced by 0x40 is currently not supported.");
+                if (bitToCheck == 0x40 || bitToCheck == 0x20) {
+                    // TODO: support data from 0x40 and 0x20
+                    LOG.warn("Data announced by 0x40 or 0x20 is currently not supported.");
                     i++;
                 } else {
                     short value = (short) ((data[i++] & 0xFF) << 8 | (data[i++] & 0xFF));
