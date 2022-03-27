@@ -166,18 +166,16 @@ public class FitnessData {
             }
 
             @Override
-            protected void parseTlv() {
+            protected void parseTlv() throws ParseException {
                 this.tlv.decrypt(secretsProvider.getSecretKey());
 
                 HuaweiTLV container = this.tlv.getObject(0x81);
                 List<HuaweiTLV> subContainers = container.getObjects(0x84);
 
-                if (!container.contains(0x02) || !container.contains(0x03)) {
-                    // TODO: exception?
-                    this.number = -1;
-                    this.timestamp = -1;
-                    return;
-                }
+                if (!container.contains(0x02))
+                    throw new MissingTagException(0x02);
+                if (!container.contains(0x03))
+                    throw new MissingTagException(0x03);
 
                 this.number = container.getShort(0x02);
                 this.timestamp = container.getInteger(0x03);

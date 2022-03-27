@@ -336,15 +336,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     public boolean onCharacteristicChanged(BluetoothGatt gatt,
                                            BluetoothGattCharacteristic characteristic) {
         byte[] data = characteristic.getValue();
-
-        try {
-            responseManager.handleData(data);
-            return true;
-        } catch (GBException e) {
-            LOG.error("Invalid response received: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
+        responseManager.handleData(data);
+        return true;
     }
 
     public void removeInProgressRequests(Request req) {

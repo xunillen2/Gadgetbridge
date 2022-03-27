@@ -38,6 +38,36 @@ public class HuaweiPacket {
         byte[] getIv();
     }
 
+    public static abstract class ParseException extends Exception {
+        ParseException(String message) {
+            super(message);
+        }
+    }
+
+    public static class LengthMismatchException extends ParseException {
+        LengthMismatchException(String message) {
+            super(message);
+        }
+    }
+
+    public static class MagicMismatchException extends ParseException {
+        MagicMismatchException(String message) {
+            super(message);
+        }
+    }
+
+    public static class ChecksumIncorrectException extends ParseException {
+        ChecksumIncorrectException(String message) {
+            super(message);
+        }
+    }
+
+    public static class MissingTagException extends ParseException {
+        public MissingTagException(int tag) {
+            super("Missing tag: " + Integer.toHexString(tag));
+        }
+    }
+
     protected static final int PACKET_MINIMAL_SIZE = 6;
 
     protected SecretsProvider secretsProvider;
@@ -80,7 +110,7 @@ public class HuaweiPacket {
     /*
      * This function is to convert the Packet into the proper subclass
      */
-    protected HuaweiPacket fromPacket(HuaweiPacket packet) {
+    protected HuaweiPacket fromPacket(HuaweiPacket packet) throws ParseException {
         this.secretsProvider = packet.secretsProvider;
         this.serviceId = packet.serviceId;
         this.commandId = packet.commandId;
@@ -97,11 +127,11 @@ public class HuaweiPacket {
     /*
      * This function is to set up the subclass for easy usage
      */
-    protected void parseTlv() {
+    protected void parseTlv() throws ParseException {
         throw new UnsupportedOperationException();
     }
 
-    public HuaweiPacket parse(byte[] data) {
+    public HuaweiPacket parse(byte[] data) throws ParseException {
         if (partialPacket != null) {
             int newCapacity = partialPacket.length + data.length;
             data = ByteBuffer.allocate(newCapacity)
@@ -113,12 +143,9 @@ public class HuaweiPacket {
         ByteBuffer buffer = ByteBuffer.wrap(data);
 
         if (buffer.capacity() < PACKET_MINIMAL_SIZE) {
-            // TODO: exception
-//            throw new GBException("Packet length mismatch : "
-//                    + String.valueOf(buffer.capacity())
-//                    + " != 6"
-//            );
-            return null;
+            throw new LengthMismatchException("Packet length mismatch : "
+                    + buffer.capacity()
+                    + " != 6");
         }
 
         byte magic = buffer.get();
@@ -133,12 +160,9 @@ public class HuaweiPacket {
         buffer.rewind();
 
         if (magic != HUAWEI_MAGIC) {
-            // TODO: exception
-//            throw new GBException("Magic mismatch : "
-//                    + Integer.toHexString(magic)
-//                    + " != 0x5A"
-//            );
-            return null;
+            throw new MagicMismatchException("Magic mismatch : "
+                    + Integer.toHexString(magic)
+                    + " != 0x5A");
         }
 
         int newPayloadLen = newPayload.length + 1;
@@ -156,13 +180,10 @@ public class HuaweiPacket {
         buffer.get(dataNoCRC, 0, buffer.capacity() - 2);
         short actualChecksum = (short) CheckSums.getCRC16(dataNoCRC, 0x0000);
         if (actualChecksum != expectedChecksum) {
-            // TODO: exception
-//            throw new GBException("Checksum mismatch : "
-//                    + String.valueOf(actualChecksum)
-//                    + " != "
-//                    + String.valueOf(expectedChecksum)
-//            );
-            return null;
+            throw new ChecksumIncorrectException("Checksum mismatch : "
+                    + String.valueOf(actualChecksum)
+                    + " != "
+                    + String.valueOf(expectedChecksum));
         }
 
         if (isSliced == 1 || isSliced == 2 || isSliced == 3) {
@@ -204,10 +225,10 @@ public class HuaweiPacket {
 
         try {
             return packetType.getDeclaredConstructor(SecretsProvider.class).newInstance(secretsProvider).fromPacket(this);
-        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
-            // TODO: exception for new instance failed
+        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException | ParseException e) {
             e.printStackTrace();
-            return null;
+            // The new instance cannot be created, so the packet is returned as "raw packet"
+            return this;
         }
     }
 

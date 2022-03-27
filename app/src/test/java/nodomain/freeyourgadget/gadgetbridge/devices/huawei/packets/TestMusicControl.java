@@ -60,7 +60,7 @@ public class TestMusicControl {
     }
 
     @Test
-    public void testMusicStatusResponse() throws NoSuchFieldException, IllegalAccessException {
+    public void testMusicStatusResponse() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.ParseException {
         byte[] raw = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x2a, (byte) 0x00, (byte) 0x25, (byte) 0x01, (byte) 0x7c, (byte) 0x01, (byte) 0x01, (byte) 0x7d, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7e, (byte) 0x10, (byte) 0x01, (byte) 0x43, (byte) 0xdb, (byte) 0x63, (byte) 0xee, (byte) 0x66, (byte) 0xb0, (byte) 0xcd, (byte) 0xff, (byte) 0x9f, (byte) 0x69, (byte) 0x91, (byte) 0x76, (byte) 0x80, (byte) 0x15, (byte) 0x1e, (byte) 0x52, (byte) 0x46};
 
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
@@ -114,7 +114,7 @@ public class TestMusicControl {
     }
 
     @Test
-    public void testMusicInfoResponse() throws NoSuchFieldException, IllegalAccessException {
+    public void testMusicInfoResponse() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.ParseException {
         byte[] rawOk = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x09, (byte) 0x00, (byte) 0x25, (byte) 0x02, (byte) 0x7f, (byte) 0x04, (byte) 0x00, (byte) 0x01, (byte) 0x86, (byte) 0xA0, (byte) 0xbb, (byte) 0x14};
         byte[] rawErr = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x09, (byte) 0x00, (byte) 0x25, (byte) 0x02, (byte) 0x7f, (byte) 0x04, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x88, (byte) 0xf0};
         byte[] rawMissing = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x03, (byte) 0x00, (byte) 0x25, (byte) 0x02, (byte) 0xb4, (byte) 0x1b};
@@ -155,7 +155,7 @@ public class TestMusicControl {
     }
 
     @Test
-    public void testControlResponse() throws NoSuchFieldException, IllegalAccessException {
+    public void testControlResponse() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.ParseException {
         byte[] emptyInput = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x03, (byte) 0x00, (byte) 0x25, (byte) 0x03, (byte) 0xa4, (byte) 0x3a, };
         byte[] playPauseInput = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x25, (byte) 0x03, (byte) 0x01, (byte) 0x01, (byte) 0x01, (byte) 0xe6, (byte) 0x85};
         byte[] previousInput = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x06, (byte) 0x00, (byte) 0x25, (byte) 0x03, (byte) 0x01, (byte) 0x01, (byte) 0x03, (byte) 0xc6, (byte) 0xc7};

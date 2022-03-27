@@ -60,11 +60,11 @@ public class DeviceConfig {
             }
 
             @Override
-            protected void parseTlv() {
+            protected void parseTlv() throws ParseException {
                 if (this.tlv.contains(0x05)) {
                     this.serverNonce = this.tlv.getBytes(0x05);
                 } else {
-                    // TODO: exception
+                    throw new MissingTagException(0x05);
                 }
             }
         }
@@ -92,11 +92,11 @@ public class DeviceConfig {
             }
 
             @Override
-            protected void parseTlv() {
+            protected void parseTlv() throws ParseException {
                 if (this.tlv.contains(0x02)) {
                     this.supportedServices = this.tlv.getBytes(0x02);
                 } else {
-                    // TODO: exception
+                    throw new MissingTagException(0x02);
                 }
             }
         }

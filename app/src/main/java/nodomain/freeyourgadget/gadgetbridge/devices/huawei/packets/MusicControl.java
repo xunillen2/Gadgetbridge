@@ -78,7 +78,6 @@ public class MusicControl {
 
             @Override
             protected void parseTlv() {
-                // TODO: use exceptions?
                 if (this.tlv.contains(0x7F)) {
                     if (this.tlv.getInteger(0x7F) == successValue) {
                         this.ok = true;

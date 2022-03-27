@@ -21,5 +21,6 @@ public class FindPhoneResponse extends HuaweiPacket {
         if (this.tlv.contains(0x01)) {
             this.start = this.tlv.getBoolean(0x01);
         }
+        // No missing tag exception so it will stop by default
     }
 }

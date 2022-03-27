@@ -1,7 +1,6 @@
 package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -64,7 +63,7 @@ public class TestFitnessData {
     }
 
     @Test
-    public void testMessageCountResponse() throws NoSuchFieldException, IllegalAccessException {
+    public void testMessageCountResponse() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.ParseException {
         byte[] rawSleep = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x2a, (byte) 0x00, (byte) 0x07, (byte) 0x0c, (byte) 0x7c, (byte) 0x01, (byte) 0x01, (byte) 0x7d, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7e, (byte) 0x10, (byte) 0xf6, (byte) 0xfb, (byte) 0xc0, (byte) 0xb6, (byte) 0x4f, (byte) 0x9a, (byte) 0xfa, (byte) 0x77, (byte) 0x53, (byte) 0x28, (byte) 0x7d, (byte) 0x13, (byte) 0xca, (byte) 0x49, (byte) 0xda, (byte) 0xfd, (byte) 0x93, (byte) 0x09};
         byte[] rawStep = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x2a, (byte) 0x00, (byte) 0x07, (byte) 0x0a, (byte) 0x7c, (byte) 0x01, (byte) 0x01, (byte) 0x7d, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7e, (byte) 0x10, (byte) 0xf6, (byte) 0xfb, (byte) 0xc0, (byte) 0xb6, (byte) 0x4f, (byte) 0x9a, (byte) 0xfa, (byte) 0x77, (byte) 0x53, (byte) 0x28, (byte) 0x7d, (byte) 0x13, (byte) 0xca, (byte) 0x49, (byte) 0xda, (byte) 0xfd, (byte) 0xd4, (byte) 0x93};
 
@@ -123,7 +122,7 @@ public class TestFitnessData {
     }
 
     @Test
-    public void testMessageDataSleepResponse() throws NoSuchFieldException, IllegalAccessException {
+    public void testMessageDataSleepResponse() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.ParseException {
         byte[] raw = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x3a, (byte) 0x00, (byte) 0x07, (byte) 0x0d, (byte) 0x7c, (byte) 0x01, (byte) 0x01, (byte) 0x7d, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7e, (byte) 0x20, (byte) 0xa4, (byte) 0x9e, (byte) 0xd8, (byte) 0xd3, (byte) 0x7a, (byte) 0x0e, (byte) 0x51, (byte) 0x55, (byte) 0xc5, (byte) 0x48, (byte) 0x07, (byte) 0x99, (byte) 0xf5, (byte) 0x99, (byte) 0x48, (byte) 0x3e, (byte) 0x41, (byte) 0xed, (byte) 0x16, (byte) 0xf1, (byte) 0x52, (byte) 0xd2, (byte) 0x9f, (byte) 0x38, (byte) 0xe8, (byte) 0xb1, (byte) 0x83, (byte) 0xd6, (byte) 0xcb, (byte) 0x52, (byte) 0xb0, (byte) 0x9f, (byte) 0x48, (byte) 0x05};
 
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
@@ -157,7 +156,7 @@ public class TestFitnessData {
     }
 
     @Test
-    public void testMessageDataStepResponse() throws NoSuchFieldException, IllegalAccessException {
+    public void testMessageDataStepResponse() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.ParseException {
         byte[] raw = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x5a, (byte) 0x00, (byte) 0x07, (byte) 0x0b, (byte) 0x7c, (byte) 0x01, (byte) 0x01, (byte) 0x7d, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7e, (byte) 0x40, (byte) 0xdc, (byte) 0xb7, (byte) 0xf6, (byte) 0xaa, (byte) 0xb2, (byte) 0xf1, (byte) 0x03, (byte) 0x53, (byte) 0x25, (byte) 0x39, (byte) 0xe4, (byte) 0x79, (byte) 0xdd, (byte) 0xbf, (byte) 0x18, (byte) 0x7b, (byte) 0x98, (byte) 0x30, (byte) 0xb7, (byte) 0x4c, (byte) 0x33, (byte) 0xd2, (byte) 0x0c, (byte) 0xa5, (byte) 0xee, (byte) 0xfe, (byte) 0x5f, (byte) 0xa5, (byte) 0x12, (byte) 0x20, (byte) 0xec, (byte) 0x79, (byte) 0x38, (byte) 0xec, (byte) 0x9e, (byte) 0x4d, (byte) 0xfc, (byte) 0xc3, (byte) 0x5c, (byte) 0x59, (byte) 0x67, (byte) 0x51, (byte) 0x4b, (byte) 0xef, (byte) 0x50, (byte) 0x48, (byte) 0xb7, (byte) 0xf8, (byte) 0xc7, (byte) 0xe3, (byte) 0xf7, (byte) 0xdf, (byte) 0x82, (byte) 0xb4, (byte) 0x1a, (byte) 0xb8, (byte) 0x94, (byte) 0x78, (byte) 0x0d, (byte) 0xda, (byte) 0x53, (byte) 0xe3, (byte) 0xbe, (byte) 0xbf, (byte) 0x21, (byte) 0xc2};
 
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
@@ -248,7 +247,7 @@ public class TestFitnessData {
     }
 
     @Test
-    public void testMessageDataStepResponseSingleByte() throws NoSuchFieldException, IllegalAccessException {
+    public void testMessageDataStepResponseSingleByte() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.ParseException {
         byte[] raw = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x3a, (byte) 0x00, (byte) 0x07, (byte) 0x0b, (byte) 0x7c, (byte) 0x01, (byte) 0x01, (byte) 0x7d, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7e, (byte) 0x20, (byte) 0xcf, (byte) 0xa7, (byte) 0x76, (byte) 0x30, (byte) 0x69, (byte) 0xa3, (byte) 0x83, (byte) 0x6e, (byte) 0xd2, (byte) 0x84, (byte) 0x70, (byte) 0xc8, (byte) 0xca, (byte) 0x94, (byte) 0x87, (byte) 0xd2, (byte) 0x0d, (byte) 0x1e, (byte) 0xf5, (byte) 0x60, (byte) 0x72, (byte) 0xa4, (byte) 0xd9, (byte) 0x8f, (byte) 0xf6, (byte) 0xdf, (byte) 0x09, (byte) 0x35, (byte) 0x3c, (byte) 0x86, (byte) 0x62, (byte) 0x00, (byte) 0x0a, (byte) 0x3b};
 
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
@@ -379,16 +378,17 @@ public class TestFitnessData {
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
         tlvField.setAccessible(true);
 
-        HuaweiTLV expectedTlv = new HuaweiTLV()
-                .put(0x81);
-
-        HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
-
-        Assert.assertEquals(0x07, packet.serviceId);
-        Assert.assertEquals(0x0b, packet.commandId);
-        Assert.assertEquals(expectedTlv, tlvField.get(packet));
-        Assert.assertTrue(packet instanceof FitnessData.MessageData.StepResponse);
-
-        // TODO: should probably throw an exception
+        try {
+            new HuaweiPacket(secretsProvider).parse(raw);
+        } catch (HuaweiPacket.ParseException e) {
+            if (e instanceof HuaweiPacket.MissingTagException) {
+                Assert.assertNotNull(e.getMessage());
+                if (!e.getMessage().equals("Missing tag: 2")) {
+                    Assert.fail();
+                }
+            } else {
+                Assert.fail();
+            }
+        }
     }
 }
