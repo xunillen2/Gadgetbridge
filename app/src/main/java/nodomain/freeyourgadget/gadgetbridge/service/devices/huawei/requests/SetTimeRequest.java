@@ -16,7 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
+import java.nio.ByteBuffer;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +39,23 @@ public class SetTimeRequest extends Request {
 
     @Override
     protected byte[] createRequest() {
+        // Thanks to https://stackoverflow.com/a/2453820
         Calendar now = Calendar.getInstance();
         int timestampSec = (int)(now.getTimeInMillis() / 1000);
-        float zoneOffsetMillis = now.get(Calendar.ZONE_OFFSET);
-        float zoneOffsetHour = (zoneOffsetMillis / 1000 / 60 / 60);
-        int offsetMinutes = (int)Math.abs(((zoneOffsetHour % 1) * 60.0));
-        int offsetHour = zoneOffsetHour < 0 ? (int) Math.abs(zoneOffsetHour / 1.0) + 128 : (int) (zoneOffsetHour / 1.0);
-        short zoneOffset = (short) (offsetHour << 8 + (byte) offsetMinutes);
+        TimeZone timeZone = now.getTimeZone();
+        int zoneRawOffset = timeZone.getRawOffset();
+        if(timeZone.inDaylightTime(new Date())){
+            zoneRawOffset = zoneRawOffset + timeZone.getDSTSavings();
+        }
+        int offsetHour = zoneRawOffset / 1000 / 60 / 60;
+        if (offsetHour < 0) {offsetHour += 128;}
+        int offsetMinutes = zoneRawOffset / 1000 / 60 % 60;
+
+        short zoneOffset = ByteBuffer.allocate(2)
+                .put((byte)offsetHour)
+                .put((byte)offsetMinutes)
+                .getShort();
+
         return new DeviceConfig.SetTimeRequest(support.secretsProvider, timestampSec, zoneOffset).serialize();
     }
 

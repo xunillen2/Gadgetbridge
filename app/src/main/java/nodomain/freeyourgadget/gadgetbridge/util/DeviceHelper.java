@@ -91,6 +91,8 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.honorband4.HonorBand4
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.honorband5.HonorBand5Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.huaweibandaw70.HuaweiBandAw70Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.huaweiband6.HuaweiBand6Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.huaweiwatchgt2e.HuaweiWatchGT2eCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.huaweiwatchgt.HuaweiWatchGTCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.id115.ID115Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.itag.ITagCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.jyou.BFH16DeviceCoordinator;
@@ -335,6 +337,8 @@ public class DeviceHelper {
         result.add(new HonorBand5Coordinator());
         result.add(new HuaweiBandAw70Coordinator());
         result.add(new HuaweiBand6Coordinator());
+        result.add(new HuaweiWatchGT2eCoordinator());
+        result.add(new HuaweiWatchGTCoordinator());
         return result;
     }
 

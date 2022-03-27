@@ -97,6 +97,8 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetT
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearLocationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearMessagePushRequest;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
+// TODO: change
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWorkModeRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.serial.GBDeviceProtocol;
 import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
@@ -137,10 +139,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         addSupportedService(GattService.UUID_SERVICE_DEVICE_INFORMATION);
         addSupportedService(GattService.UUID_SERVICE_HUMAN_INTERFACE_DEVICE);
         addSupportedService(HuaweiConstants.UUID_SERVICE_HUAWEI_SERVICE);
+
     }
 
     @Override
     protected TransactionBuilder initializeDevice(TransactionBuilder builder) {
+        setMtu();
         builder.setGattCallback(this);
         builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), true);
         deviceMac = gbDevice.getAddress();
@@ -182,6 +186,18 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         return connect();
     }
 
+    protected void setMtu() {
+        String name = gbDevice.getName();
+        if (name != null && (
+            name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME) ||
+            name.toLowerCase().startsWith(HuaweiConstants.HU_BAND4E_NAME) ||
+            name.toLowerCase().startsWith(HuaweiConstants.HU_WATCHGT2E_NAME) ||
+            name.toLowerCase().startsWith(HuaweiConstants.HU_WATCHGT_NAME)
+        )) {
+            mtu = 20;
+        }
+    }
+    
     protected void initializeDeviceFinalize() {
         TransactionBuilder builder = createTransactionBuilder("Initializing");
         builder.setGattCallback(this);
@@ -415,6 +431,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     setNotification();
                     break;
                 }
+                case HuaweiConstants.PREF_HUAWEI_WORKMODE:
+                    SetWorkModeRequest setWorkModeReq = new SetWorkModeRequest(this);
+                    responseManager.addHandler(setWorkModeReq);
+                    setWorkModeReq.perform();
+                    break;
             }
         } catch (IOException e) {
             GB.toast(getContext(), "Configuration of Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
