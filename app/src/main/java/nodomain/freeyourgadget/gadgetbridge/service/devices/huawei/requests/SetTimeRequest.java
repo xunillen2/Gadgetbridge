@@ -18,6 +18,8 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
 import java.nio.ByteBuffer;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,22 +45,34 @@ public class SetTimeRequest extends Request {
 
     @Override
     protected byte[] createRequest() {
+        // Thanks to https://stackoverflow.com/a/2453820
         Calendar now = Calendar.getInstance();
         int timestampSec = (int)(now.getTimeInMillis() / 1000);
-        float zoneOffsetMillis = now.get(Calendar.ZONE_OFFSET);
+        TimeZone timeZone = now.getTimeZone();
+        int zoneRawOffset = timeZone.getRawOffset();
+        if(timeZone.inDaylightTime(new Date())){
+            zoneRawOffset = zoneRawOffset + timeZone.getDSTSavings();
+        }
+        int offsetHour = zoneRawOffset / 1000 / 60 / 60;
+        if (offsetHour < 0) {offsetHour += 128;}
+        int offsetMinutes = zoneRawOffset / 1000 / 60 % 60;
+
+        /*float zoneOffsetMillis = now.get(Calendar.ZONE_OFFSET);
         float zoneOffsetHour = (zoneOffsetMillis / 1000 / 60 / 60);
         int offsetMinutes = (int)Math.abs(((zoneOffsetHour % 1) * 60.0));
-        int offsetHour = zoneOffsetHour < 0 ? (int)Math.abs(zoneOffsetHour / 1.0) + 128 : (int)(zoneOffsetHour / 1.0);
+        int offsetHour = zoneOffsetHour < 0 ? (int)Math.abs(zoneOffsetHour / 1.0) + 128 : (int)(zoneOffsetHour / 1.0);*/
         byte[] zoneOffset = ByteBuffer.allocate(2)
                                 .put((byte)offsetHour)
                                 .put((byte)offsetMinutes)
                                 .array();
+        //int zoneOffset = TimeZone.getDefault().getDSTSavings();
         requestedPacket = new HuaweiPacket(
             serviceId,
             commandId,
             new HuaweiTLV()
                 .put(SetTime.timestamp, timestampSec)
                 .put(SetTime.zoneOffset, zoneOffset)
+                //.put(SetTime.zoneOffset, new byte[]{0x00, 0x00})
         ).encrypt(support.getSecretKey(), support.getIV());
         byte[] serializedPacket = requestedPacket.serialize();
         LOG.debug("Request Set Time: " + StringUtils.bytesToHex(serializedPacket));
