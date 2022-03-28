@@ -56,27 +56,27 @@ public class Notifications {
             HuaweiTLV subTlv = new HuaweiTLV();
             if (titleContent != null)
                 subTlv.put(0x8D, new HuaweiTLV()
-                        .put(0x0E, 0x03)
+                        .put(0x0E, (byte) 0x03)
                         .put(0x0F, titleEncoding)
                         .put(0x10, titleContent)
                 );
 
             if (senderContent != null)
                 subTlv.put(0x8D, new HuaweiTLV()
-                        .put(0x0E, 0x02)
+                        .put(0x0E, (byte) 0x02)
                         .put(0x0F, senderEncoding)
                         .put(0x10, senderContent)
                 );
 
             if (bodyContent != null)
                 subTlv.put(0x8D, new HuaweiTLV()
-                        .put(0x0E, 0x01)
+                        .put(0x0E, (byte) 0x01)
                         .put(0x0F, bodyEncoding)
                         .put(0x10, bodyContent)
                 );
 
             if (subTlv.length() != 0) {
-                this.tlv.put(0x84, subTlv);
+                this.tlv.put(0x84, new HuaweiTLV().put(0x8C, subTlv));
             } else {
                 this.tlv.put(0x04);
             }

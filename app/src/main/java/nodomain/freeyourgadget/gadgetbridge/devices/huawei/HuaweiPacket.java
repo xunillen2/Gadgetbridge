@@ -188,11 +188,13 @@ public class HuaweiPacket {
 
         if (isSliced == 1 || isSliced == 2 || isSliced == 3) {
             // LOG.debug("IsSliced");
-            int newCapacity = payload.length + newPayload.length;
-            newPayload = ByteBuffer.allocate(newCapacity)
-                    .put(payload)
-                    .put(newPayload)
-                    .array();
+            if (payload != null) {
+                int newCapacity = payload.length + newPayload.length;
+                newPayload = ByteBuffer.allocate(newCapacity)
+                        .put(payload)
+                        .put(newPayload)
+                        .array();
+            }
 
             if (isSliced != 3) {
                 // Sliced packet isn't complete yet

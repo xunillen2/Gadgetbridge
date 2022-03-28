@@ -409,8 +409,13 @@ public class DeviceConfig {
             }
 
             @Override
-            protected void parseTlv() {
-                this.level = this.tlv.getByte(0x01);
+            protected void parseTlv() throws ParseException {
+                if (this.tlv.contains(0x7C) && this.tlv.getByte(0x7C) == 0x01)
+                    this.tlv.decrypt(secretsProvider.getSecretKey());
+                if (this.tlv.contains(0x01))
+                    this.level = this.tlv.getByte(0x01);
+                else
+                    throw new MissingTagException(0x01);
             }
         }
     }
