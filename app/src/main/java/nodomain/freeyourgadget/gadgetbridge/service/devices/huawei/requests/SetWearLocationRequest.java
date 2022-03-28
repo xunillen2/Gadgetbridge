@@ -22,13 +22,8 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.WearLocation;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
 public class SetWearLocationRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetWearLocationRequest.class);
@@ -36,7 +31,7 @@ public class SetWearLocationRequest extends Request {
     public SetWearLocationRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = WearLocation.id;
+        this.commandId = DeviceConfig.WearLocationRequest.id;
     }
 
     @Override
@@ -44,16 +39,8 @@ public class SetWearLocationRequest extends Request {
         String locationString = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getString(DeviceSettingsPreferenceConst.PREF_WEARLOCATION, "left");
-        int location = locationString.equals("left") ? 1 : 0;
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(WearLocation.setStatus, (byte)location)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Set Wear Location: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        byte location = (byte) (locationString.equals("left") ? 1 : 0);
+        return new DeviceConfig.WearLocationRequest(support.secretsProvider, location).serialize();
     }
 
     @Override

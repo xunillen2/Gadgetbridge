@@ -20,13 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.SupportedServices;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
 public class GetSupportedServicesRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetSupportedServicesRequest.class);
@@ -38,27 +33,25 @@ public class GetSupportedServicesRequest extends Request {
     public GetSupportedServicesRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = SupportedServices.id;
+        this.commandId = DeviceConfig.SupportedServices.id;
         this.allSupportedServices = createServices();
     }
 
     @Override
     protected byte[] createRequest() {
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(SupportedServices.services, allSupportedServices)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Supported Services: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return new DeviceConfig.SupportedServices.Request(support.secretsProvider, this.allSupportedServices).serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
         LOG.debug("handle Supported Services");
-        byte[] supportedServices = receivedPacket.tlv.getBytes(SupportedServices.activeServices);
+
+        if (!(receivedPacket instanceof DeviceConfig.SupportedServices.Response)) {
+            // TODO: exception
+            return;
+        }
+
+        byte[] supportedServices = ((DeviceConfig.SupportedServices.Response) receivedPacket).supportedServices;
         byte[] activatedServicesTmp = new byte[MAX_SERVICES];
         int j = 0;
         for (int i = 0; i < MAX_SERVICES; i++) {

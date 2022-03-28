@@ -7,35 +7,29 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationType;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Notifications;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Notifications.NotificationAction;
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Notifications.TextType;
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.Notifications.TextEncoding;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Notifications;
 
 public class SendNotificationRequest extends Request {
 
     private static final Logger LOG = LoggerFactory.getLogger(SendNotificationRequest.class);
 
-    private HuaweiTLV notificationTLV;
+    private HuaweiPacket packet;
     private boolean vibrate;
 
     public SendNotificationRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = Notifications.id;
-        this.commandId = NotificationAction.send;
+        this.commandId = Notifications.NotificationActionRequest.id;
         this.vibrate = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getBoolean(DeviceSettingsPreferenceConst.PREF_VIBRATION_ENABLE, false);
     }
 
-    public static int getNotificationType(NotificationType type) {
+    public static byte getNotificationType(NotificationType type) {
         switch (type.getGenericType()) {
             case "generic_social":
             case "generic_chat":
@@ -51,91 +45,46 @@ public class SendNotificationRequest extends Request {
 
 
     public void buildNotificationTLVFromNotificationSpec(NotificationSpec notificationSpec) {
-        HuaweiTLV notificationTitle = new HuaweiTLV()
-                .put(NotificationAction.textType, (byte) TextType.title)
-                .put(NotificationAction.textEncoding, (byte) TextEncoding.standard)
-                .put(NotificationAction.textContent, notificationSpec.title);
+        String title;
+        if (notificationSpec.title != null)
+            title = notificationSpec.title;
+        else
+            title = notificationSpec.sourceName;
 
-        HuaweiTLV notificationSourceName = new HuaweiTLV()
-                .put(NotificationAction.textType, (byte) TextType.title)
-                .put(NotificationAction.textEncoding, (byte) TextEncoding.standard)
-                .put(NotificationAction.textContent, notificationSpec.sourceName);
-
-        HuaweiTLV notificationSender = new HuaweiTLV()
-                .put(NotificationAction.textType, (byte) TextType.sender)
-                .put(NotificationAction.textEncoding, (byte) TextEncoding.standard)
-                .put(NotificationAction.textContent, notificationSpec.sender);
-
-        HuaweiTLV notificationText = new HuaweiTLV()
-                .put(NotificationAction.textType, (byte) TextType.text)
-                .put(NotificationAction.textEncoding, (byte) TextEncoding.standard)
-                .put(NotificationAction.textContent, notificationSpec.body);
-
-        HuaweiTLV textList = new HuaweiTLV();
-        // TODO Add notification information per type if needed
-        if (notificationSpec.title != null) {
-            textList.put(NotificationAction.textItem, notificationTitle);
-        } else {
-            textList.put(NotificationAction.textItem, notificationSourceName);
-        }
-        textList.put(NotificationAction.textItem, notificationText)
-                .put(NotificationAction.textItem, notificationSender);
-
-        HuaweiTLV notificationTLV = new HuaweiTLV()
-                .put(NotificationAction.notificationId, (short) support.getNotificationId())
-                .put(NotificationAction.notificationType, (byte) getNotificationType(notificationSpec.type))
-                .put(NotificationAction.vibrate, vibrate);
-        if (textList.length() != 0) {
-            notificationTLV.put(NotificationAction.payloadText, new HuaweiTLV().put(NotificationAction.textList, textList));
-        } else {
-            notificationTLV.put(NotificationAction.payloadEmpty);
-        }
-        notificationTLV.put(NotificationAction.sourceAppId, notificationSpec.sourceAppId);
-        this.notificationTLV = notificationTLV;
+        this.packet = new Notifications.NotificationActionRequest(
+                support.secretsProvider,
+                (short) support.getNotificationId(),
+                getNotificationType(notificationSpec.type),
+                vibrate,
+                Notifications.TextEncoding.standard,
+                title,
+                Notifications.TextEncoding.standard,
+                notificationSpec.sender,
+                Notifications.TextEncoding.standard,
+                notificationSpec.body,
+                notificationSpec.sourceAppId
+        );
     }
 
     public void buildNotificationTLVFromCallSpec(CallSpec callSpec) {
-        HuaweiTLV notificationTitle = new HuaweiTLV()
-                .put(NotificationAction.textType, (byte) TextType.title)
-                .put(NotificationAction.textEncoding, (byte) TextEncoding.standard)
-                .put(NotificationAction.textContent, callSpec.name);
-
-        HuaweiTLV notificationSender = new HuaweiTLV()
-                .put(NotificationAction.textType, (byte) TextType.sender)
-                .put(NotificationAction.textEncoding, (byte) TextEncoding.standard)
-                .put(NotificationAction.textContent, callSpec.name);
-
-        HuaweiTLV notificationText = new HuaweiTLV()
-                .put(NotificationAction.textType, (byte) TextType.text)
-                .put(NotificationAction.textEncoding, (byte) TextEncoding.standard)
-                .put(NotificationAction.textContent, callSpec.name);
-
-        HuaweiTLV notificationTLV = new HuaweiTLV()
-                .put(NotificationAction.notificationId, (short) support.getNotificationId())
-                .put(NotificationAction.notificationType, (byte) Notifications.NotificationType.call)
-                // Seems to vibrate even if 0x00 - look in SetNotificationRequest
-                .put(NotificationAction.vibrate, vibrate)
-                .put(NotificationAction.payloadText, new HuaweiTLV().put(NotificationAction.textList, new HuaweiTLV()
-                        .put(NotificationAction.textItem, notificationSender)
-                        .put(NotificationAction.textItem, notificationTitle)
-                        .put(NotificationAction.textItem, notificationText)
-                ));
-
-        this.notificationTLV = notificationTLV;
+        this.packet = new Notifications.NotificationActionRequest(
+                support.secretsProvider,
+                (short) support.getNotificationId(),
+                Notifications.NotificationType.call,
+                vibrate,
+                Notifications.TextEncoding.standard,
+                callSpec.name,
+                Notifications.TextEncoding.standard,
+                callSpec.name,
+                Notifications.TextEncoding.standard,
+                callSpec.name,
+                null
+        );
     }
 
     @Override
     protected byte[] createRequest() {
-        if (notificationTLV != null) {
-            requestedPacket = new HuaweiPacket(
-                    serviceId,
-                    commandId,
-                    notificationTLV
-            ).encrypt(support.getSecretKey(), support.getIV());
-        }
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Send Notification Request: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return this.packet.serialize();
     }
 
     @Override

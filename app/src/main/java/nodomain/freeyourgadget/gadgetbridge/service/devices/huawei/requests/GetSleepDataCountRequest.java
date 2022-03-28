@@ -4,24 +4,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
 
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData.MessageCount;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
 
 public class GetSleepDataCountRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetSleepDataCountRequest.class);
-    private int start = 0;
-    private int end = 0;
+    private final int start;
+    private final int end;
 
     public GetSleepDataCountRequest(HuaweiSupport support, TransactionBuilder builder, int start, int end) {
         super(support);
         this.serviceId = FitnessData.id;
         this.commandId = FitnessData.MessageCount.sleepId;
-
         this.builder = builder;
 
         this.start = start;
@@ -30,22 +26,17 @@ public class GetSleepDataCountRequest extends Request {
 
     @Override
     protected byte[] createRequest() {
-        requestedPacket = new HuaweiPacket(
-                serviceId,
-                commandId,
-                new HuaweiTLV()
-                    .put(MessageCount.requestUnknownTag)
-                    .put(MessageCount.requestStartTag, this.start)
-                    .put(MessageCount.requestEndTag, this.end)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        return requestedPacket.serialize();
+        return new FitnessData.MessageCount.Request(support.secretsProvider, this.commandId, this.start, this.end).serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
-        short count = receivedPacket.tlv
-                .getObject(MessageCount.responseContainerTag)
-                .getShort(MessageCount.responseContainerCountTag);
+        if (!(receivedPacket instanceof FitnessData.MessageCount.Response)) {
+            // TODO: exception
+            return;
+        }
+
+        short count = ((FitnessData.MessageCount.Response) receivedPacket).count;
 
         if (count > 0) {
             GetSleepDataRequest nextRequest = new GetSleepDataRequest(this.support, count, (short) 0);

@@ -7,12 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.MusicControl;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.MusicControl;
 
 public class SetMusicRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetMusicRequest.class);
@@ -43,29 +41,26 @@ public class SetMusicRequest extends Request {
         byte maxVolume = (byte) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         byte currentVolume = (byte) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 
-        requestedPacket = new HuaweiPacket(
-                this.serviceId,
-                this.commandId,
-                new HuaweiTLV()
-                        .put(MusicControl.MusicInfo.artistNameTag, artistName)
-                        .put(MusicControl.MusicInfo.songNameTag, songName)
-                        .put(MusicControl.MusicInfo.playStateTag, playState)
-                        .put(MusicControl.MusicInfo.maxVolumeTag, maxVolume)
-                        .put(MusicControl.MusicInfo.currentVolumeTag, currentVolume)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        return requestedPacket.serialize();
+        return new MusicControl.MusicInfo.Request(
+                support.secretsProvider,
+                artistName,
+                songName,
+                playState,
+                maxVolume,
+                currentVolume
+        ).serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
-        if (receivedPacket.tlv.contains(MusicControl.statusTag)) {
-            if (receivedPacket.tlv.getShort(MusicControl.statusTag) == MusicControl.successValue) {
+        if (receivedPacket instanceof MusicControl.MusicInfo.Response) {
+            if (((MusicControl.MusicInfo.Response) receivedPacket).ok) {
                 LOG.debug("Music information acknowledged by band");
             } else {
-                LOG.debug("Music information error code: " + Integer.toHexString(receivedPacket.tlv.getShort(MusicControl.statusTag)));
+                LOG.warn(((MusicControl.MusicInfo.Response) receivedPacket).error);
             }
         } else {
-            LOG.warn("Music information response no status tag");
+            LOG.error("MusicInfo response is not of type MusicInfo response");
         }
     }
 }

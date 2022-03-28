@@ -22,13 +22,8 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.WorkMode;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.WorkMode.SwitchStatus;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.WorkMode;
 
 public class SetWorkModeRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetWorkModeRequest.class);
@@ -36,7 +31,7 @@ public class SetWorkModeRequest extends Request {
     public SetWorkModeRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = WorkMode.id;
-        this.commandId = SwitchStatus.id;
+        this.commandId = WorkMode.SwitchStatusRequest.id;
     }
 
     @Override
@@ -44,16 +39,8 @@ public class SetWorkModeRequest extends Request {
         String workModeString = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getString(HuaweiConstants.PREF_HUAWEI_WORKMODE, "auto");
-        boolean workMode = workModeString.equals("auto") ? true : false;
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(SwitchStatus.setStatus, workMode)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Set WorkMode: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        boolean workMode = workModeString.equals("auto");
+        return new WorkMode.SwitchStatusRequest(support.secretsProvider, workMode).serialize();
     }
 
     @Override

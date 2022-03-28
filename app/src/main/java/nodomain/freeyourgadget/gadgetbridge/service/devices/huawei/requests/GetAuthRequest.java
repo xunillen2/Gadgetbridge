@@ -24,14 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.Auth;
 
 public class GetAuthRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetAuthRequest.class);
@@ -43,7 +38,7 @@ public class GetAuthRequest extends Request {
     public GetAuthRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = Auth.id;
+        this.commandId = DeviceConfig.Auth.id;
         this.clientNonce = HuaweiCrypto.generateNonce();
     }
 
@@ -57,22 +52,20 @@ public class GetAuthRequest extends Request {
                                         .put(authVersion)
                                         .put(clientNonce)
                                         .array();
-        requestedPacket = new HuaweiPacket(serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(Auth.challenge, challenge)
-                .put(Auth.nonce, nonce)
-        );
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Auth: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return new DeviceConfig.Auth.Request(support.secretsProvider, challenge, nonce).serialize();
     }
 
     @Override
     protected void processResponse() throws GBException {
         LOG.debug("handle Auth");
+
+        if (!(receivedPacket instanceof DeviceConfig.Auth.Response)) {
+            // TODO: exception
+            return;
+        }
+
         byte[] expectedAnswer = huaweiCrypto.digestResponse(clientNonce, serverNonce);
-        byte[] actualAnswer = receivedPacket.tlv.getBytes(Auth.challenge);
+        byte[] actualAnswer = ((DeviceConfig.Auth.Response) receivedPacket).challengeResponse;
         if (!Arrays.equals(expectedAnswer, actualAnswer)) {
             throw new GBException("Challenge answer mismatch : "
                             + StringUtils.bytesToHex(actualAnswer)

@@ -44,7 +44,9 @@ import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.zetime.ZeTimeConstants;
@@ -72,7 +74,6 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetS
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetStepDataCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicRequest;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AlarmsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Request;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Request.RequestCallback;
@@ -95,8 +96,9 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetT
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetTruSleepRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearLocationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWearMessagePushRequest;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
+// TODO: change
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetWorkModeRequest;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.FitnessData;
 import nodomain.freeyourgadget.gadgetbridge.service.serial.GBDeviceProtocol;
 import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
@@ -110,13 +112,25 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     protected static String deviceMac; //get it from GB
     protected String macAddress;
 
-    public static long encryptionCounter = 0;
+    public long encryptionCounter = 0;
     protected int msgId = 0;
 
     protected ResponseManager responseManager = new ResponseManager(this);
 
     private MusicStateSpec musicStateSpec = null;
     private MusicSpec musicSpec = null;
+
+    public HuaweiPacket.SecretsProvider secretsProvider = new HuaweiPacket.SecretsProvider() {
+        @Override
+        public byte[] getSecretKey() {
+            return HuaweiSupport.this.getSecretKey();
+        }
+
+        @Override
+        public byte[] getIv() {
+            return HuaweiSupport.this.getIV();
+        }
+    };
 
     public HuaweiSupport() {
         super(LOG);
@@ -338,15 +352,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     public boolean onCharacteristicChanged(BluetoothGatt gatt,
                                            BluetoothGattCharacteristic characteristic) {
         byte[] data = characteristic.getValue();
-
-        try {
-            responseManager.handleData(data);
-            return true;
-        } catch (GBException e) {
-            LOG.error("Invalid response received: " + e.getMessage());
-            e.printStackTrace();
-            return false;
-        }
+        responseManager.handleData(data);
+        return true;
     }
 
     public void removeInProgressRequests(Request req) {
@@ -883,5 +890,9 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             GB.toast(getContext(), "Faile to configure truSleep", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
         }
+    }
+
+    public HuaweiCoordinator getCoordinator() {
+        return ((HuaweiCoordinator) DeviceHelper.getInstance().getCoordinator(this.getDevice()));
     }
 }

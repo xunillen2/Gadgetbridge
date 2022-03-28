@@ -16,9 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
 import java.util.Locale;
 
 import org.slf4j.Logger;
@@ -29,15 +27,8 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.SettingsActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.LocaleConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.LocaleConfig.SetLocale;
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.LocaleConfig.MeasurementSystem;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.LocaleConfig;
 
 public class SetLocaleRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetLocaleRequest.class);
@@ -45,7 +36,7 @@ public class SetLocaleRequest extends Request {
     public SetLocaleRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = LocaleConfig.id;
-        this.commandId = SetLocale.id;
+        this.commandId = LocaleConfig.SetLocaleRequest.id;
     }
 
     @Override
@@ -56,7 +47,7 @@ public class SetLocaleRequest extends Request {
         if (localeString == null || localeString.equals("auto")) {
             String language = Locale.getDefault().getLanguage();
             String country = Locale.getDefault().getCountry();
-            if (country == "") {
+            if (country.equals("")) {
                 country = language;
             }
             localeString = language + "-" + country.toUpperCase();
@@ -68,17 +59,8 @@ public class SetLocaleRequest extends Request {
             .getPrefs()
             .getString(SettingsActivity.PREF_MEASUREMENT_SYSTEM, getContext().getString(R.string.p_unit_metric));
         LOG.debug("measurementString: " + measurementString);
-        int measurement = measurementString.equals("metric") ? MeasurementSystem.metric : MeasurementSystem.imperial;
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(SetLocale.languageTag, localeString.getBytes(StandardCharsets.UTF_8))
-                .put(SetLocale.measurementSystem, (byte)measurement)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Set Locale: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        byte measurement = measurementString.equals("metric") ? LocaleConfig.MeasurementSystem.metric : LocaleConfig.MeasurementSystem.imperial;
+        return new LocaleConfig.SetLocaleRequest(support.secretsProvider, localeString.getBytes(StandardCharsets.UTF_8), measurement).serialize();
     }
 
     @Override

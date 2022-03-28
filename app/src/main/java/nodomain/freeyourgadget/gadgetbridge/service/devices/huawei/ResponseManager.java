@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Request;
 
@@ -20,9 +19,11 @@ public class ResponseManager {
     private final List<Request> handlers = Collections.synchronizedList(new ArrayList<Request>());
     private HuaweiPacket receivedPacket;
     private final AsynchronousResponse asynchronousResponse;
+    private final HuaweiSupport support;
 
     public ResponseManager(HuaweiSupport support) {
         this.asynchronousResponse = new AsynchronousResponse(support);
+        this.support = support;
     }
 
     /**
@@ -51,13 +52,19 @@ public class ResponseManager {
      * or as an asynchronous request otherwise.
      *
      * @param data The received data
-     * @throws GBException Thrown if the data cannot be parsed
      */
-    public void handleData(byte[] data) throws GBException {
-        if (receivedPacket == null)
-            receivedPacket = new HuaweiPacket().parse(data);
-        else
-            receivedPacket.parse(data);
+    public void handleData(byte[] data) {
+        try {
+            if (receivedPacket == null)
+                receivedPacket = new HuaweiPacket(support.secretsProvider).parse(data);
+            else
+                receivedPacket = receivedPacket.parse(data);
+        } catch (HuaweiPacket.ParseException e) {
+            e.printStackTrace();
+            // Clean up so the next message may be parsed correctly
+            this.receivedPacket = null;
+            return;
+        }
 
         if (receivedPacket.complete) {
             Request handler = null;
@@ -82,7 +89,11 @@ public class ResponseManager {
                     handlers.remove(handler);
                 }
 
-                handler.handleResponse();
+                try {
+                    handler.handleResponse();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             receivedPacket = null;
         }

@@ -22,13 +22,8 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
-
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.ActivateOnRotate;
 
 public class SetActivateOnRotateRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetActivateOnRotateRequest.class);
@@ -36,7 +31,7 @@ public class SetActivateOnRotateRequest extends Request {
     public SetActivateOnRotateRequest(HuaweiSupport support) {
         super(support);
         this.serviceId = DeviceConfig.id;
-        this.commandId = ActivateOnRotate.id;
+        this.commandId = DeviceConfig.ActivateOnRotateRequest.id;
     }
 
     @Override
@@ -44,15 +39,7 @@ public class SetActivateOnRotateRequest extends Request {
         boolean activate = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getBoolean(DeviceSettingsPreferenceConst.PREF_LIFTWRIST_NOSHED, false);
-        requestedPacket = new HuaweiPacket(
-            serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(ActivateOnRotate.setStatus, activate)
-        ).encrypt(support.getSecretKey(), support.getIV());
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request Set Activate On Rotate: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+        return new DeviceConfig.ActivateOnRotateRequest(getSupport().secretsProvider, activate).serialize();
     }
 
     @Override

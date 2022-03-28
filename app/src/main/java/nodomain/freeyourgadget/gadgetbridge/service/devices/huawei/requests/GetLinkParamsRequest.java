@@ -19,19 +19,16 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
-import static nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.services.DeviceConfig.LinkParams;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig.LinkParams;
 
 public class GetLinkParamsRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetLinkParamsRequest.class);
 
-    protected final byte[] serverNonce;
+    private byte[] serverNonce;
 
     public GetLinkParamsRequest(HuaweiSupport support, TransactionBuilder builder) {
         super(support, builder);
@@ -42,27 +39,20 @@ public class GetLinkParamsRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest(){
-        requestedPacket = new HuaweiPacket(serviceId,
-            commandId,
-            new HuaweiTLV()
-                .put(LinkParams.protocolVersion)
-                .put(LinkParams.maxFrameSize)
-                .put(LinkParams.maxLinkSize)
-                .put(LinkParams.connectionInterval)
-        );
-        byte[] serializedPacket = requestedPacket.serialize();
-        LOG.debug("Request LinkParams: " + StringUtils.bytesToHex(serializedPacket));
-        return serializedPacket;
+    protected byte[] createRequest() {
+        return new DeviceConfig.LinkParams.Request(support.secretsProvider).serialize();
     }
 
     @Override
-    protected void processResponse() {
+    protected void processResponse() throws Exception {
         LOG.debug("handle LinkParams");
-        System.arraycopy(receivedPacket.tlv.getBytes(LinkParams.serverNonce),
-                            0, serverNonce,
-                            0, 18
-        );
+
+        if (!(receivedPacket instanceof LinkParams.Response)) {
+            // TODO: exception
+            throw new Exception();
+        }
+
+        this.serverNonce = ((LinkParams.Response) receivedPacket).serverNonce;
     }
 
     @Override
