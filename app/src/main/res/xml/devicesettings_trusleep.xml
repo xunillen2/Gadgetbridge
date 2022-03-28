@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <SwitchPreference
-        android:icon="@drawable/ic_access_time"
         android:defaultValue="false"
+        android:icon="@drawable/ic_access_time"
         android:key="trusleep"
+        android:summary="@string/huawei_trusleep_summary"
         android:title="@string/huawei_trusleep_title"
-        android:summary="@string/huawei_trusleep_summary"/>
+        app:enabled="false" />
 </androidx.preference.PreferenceScreen>
