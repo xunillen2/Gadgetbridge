@@ -38,7 +38,6 @@ public class LocaleConfig {
             this.tlv = new HuaweiTLV()
                     .put(0x01, locale)
                     .put(0x02, measurement);
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
             this.complete = true;
         }

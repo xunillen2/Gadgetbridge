@@ -84,7 +84,6 @@ public class Notifications {
             if (sourceAppId != null)
                 this.tlv.put(0x11, sourceAppId);
 
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
             this.complete = true;
         }
     }
@@ -139,7 +138,6 @@ public class Notifications {
                             .put(0x02, activate)
                             .put(0x03, activate)
                     );
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
             this.complete = true;
         }
@@ -159,7 +157,6 @@ public class Notifications {
 
             this.tlv = new HuaweiTLV()
                     .put(0x01, activate);
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
             this.complete = true;
         }

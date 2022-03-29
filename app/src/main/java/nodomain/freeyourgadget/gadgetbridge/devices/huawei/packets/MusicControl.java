@@ -17,6 +17,7 @@ public class MusicControl {
             this.commandId = commandId;
             this.tlv = new HuaweiTLV()
                     .put(0x7F, returnValue);
+            this.isEncrypted = false;
             this.complete = true;
         }
     }
@@ -33,9 +34,8 @@ public class MusicControl {
 
         @Override
         protected void parseTlv() {
-            this.tlv.decrypt(secretsProvider.getSecretKey());
-            // TODO: I don't know if there is more in these messages yet, but this should decrypt
-            //       them in future logs
+            // TODO: I don't know if there is more in these messages yet, they should be decrypted
+            //       in future logs
         }
     }
 
@@ -60,7 +60,6 @@ public class MusicControl {
                         .put(0x03, playState)
                         .put(0x04, maxVolume)
                         .put(0x05, currentVolume);
-                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
                 this.complete = true;
             }
         }
@@ -74,6 +73,8 @@ public class MusicControl {
 
                 this.serviceId = MusicControl.id;
                 this.commandId = id;
+
+                this.isEncrypted = false;
             }
 
             @Override
@@ -117,6 +118,8 @@ public class MusicControl {
 
                 this.serviceId = MusicControl.id;
                 this.commandId = id;
+
+                this.isEncrypted = false;
             }
 
             @Override

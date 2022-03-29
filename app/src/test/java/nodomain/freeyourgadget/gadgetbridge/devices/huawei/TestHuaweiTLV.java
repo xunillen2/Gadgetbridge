@@ -459,9 +459,10 @@ public class TestHuaweiTLV {
         HuaweiTLV huaweiTLV = new HuaweiTLV();
         huaweiTLV.valueMap = input;
 
-        huaweiTLV.encrypt(key, iv);
+        HuaweiTLV encryptedTlv = huaweiTLV.encrypt(key, iv);
 
-        Assert.assertEquals(expectedValueMap, huaweiTLV.valueMap);
+        Assert.assertEquals(input, huaweiTLV.valueMap);
+        Assert.assertEquals(expectedValueMap, encryptedTlv.valueMap);
     }
 
     /**

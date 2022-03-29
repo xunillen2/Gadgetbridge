@@ -14,6 +14,8 @@ public class FindPhoneResponse extends HuaweiPacket {
 
         this.serviceId = id;
         this.commandId = responseId;
+
+        this.isEncrypted = false;
     }
 
     @Override
