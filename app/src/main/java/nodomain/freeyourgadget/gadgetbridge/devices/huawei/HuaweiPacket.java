@@ -120,12 +120,11 @@ public class HuaweiPacket {
         this.payload = packet.payload;
         this.complete = packet.complete;
 
-        if (this.isEncrypted) {
-            // Next check is necessary to prevent decrypting unknown packets that cannot be decrypted
-            if (this.tlv.contains(0x7C) && this.tlv.getBoolean(0x7C)) {
-                this.tlv.decrypt(secretsProvider.getSecretKey());
-            } else {
-                // TODO: potentially a log message?
+        if (this.tlv.contains(0x7C) && this.tlv.getBoolean(0x7C)) {
+            this.tlv.decrypt(secretsProvider.getSecretKey());
+        } else {
+            if (this.isEncrypted) {
+                // TODO: potentially a log message? We expect it to be encrypted, but it isn't.
             }
         }
 
