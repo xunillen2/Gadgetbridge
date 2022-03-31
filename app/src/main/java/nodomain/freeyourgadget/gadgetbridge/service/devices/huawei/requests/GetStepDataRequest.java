@@ -63,13 +63,13 @@ public class GetStepDataRequest extends Request {
             } else {
                 LOG.error(subContainer.parsedDataError);
             }
+        }
 
-            if (count + 1 < maxCount) {
-                GetStepDataRequest nextRequest = new GetStepDataRequest(this.support, this.maxCount, (short) (this.count + 1));
-                nextRequest.setFinalizeReq(this.finalizeReq);
-                this.support.addInProgressRequest(nextRequest);
-                this.nextRequest(nextRequest);
-            }
+        if (count + 1 < maxCount) {
+            GetStepDataRequest nextRequest = new GetStepDataRequest(this.support, this.maxCount, (short) (this.count + 1));
+            nextRequest.setFinalizeReq(this.finalizeReq);
+            this.support.addInProgressRequest(nextRequest);
+            this.nextRequest(nextRequest);
         }
     }
 }
