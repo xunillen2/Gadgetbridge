@@ -31,8 +31,6 @@ import nodomain.freeyourgadget.gadgetbridge.util.CheckSums;
 
 public class HuaweiPacket {
 
-    // TODO: make moment of encrypting/decrypting consistent
-
     public interface SecretsProvider {
         byte[] getSecretKey();
         byte[] getIv();
@@ -81,6 +79,9 @@ public class HuaweiPacket {
 
     public boolean complete = false;
 
+    // Encryption is enabled by default, packets which don't use it must disable it
+    protected boolean isEncrypted = true;
+
     private static final HashMap<Short, Class<? extends HuaweiPacket>> responsePacketTypes = new HashMap<>();
     static {
         responsePacketTypes.put((short) 0x0101, DeviceConfig.LinkParams.Response.class);
@@ -118,6 +119,15 @@ public class HuaweiPacket {
         this.partialPacket = packet.partialPacket;
         this.payload = packet.payload;
         this.complete = packet.complete;
+
+        if (this.isEncrypted) {
+            // Next check is necessary to prevent decrypting unknown packets that cannot be decrypted
+            if (this.tlv.contains(0x7C) && this.tlv.getBoolean(0x7C)) {
+                this.tlv.decrypt(secretsProvider.getSecretKey());
+            } else {
+                // TODO: potentially a log message?
+            }
+        }
 
         this.parseTlv();
 
@@ -226,7 +236,7 @@ public class HuaweiPacket {
             return this;
 
         try {
-            return packetType.getDeclaredConstructor(SecretsProvider.class).newInstance(secretsProvider).fromPacket(this);
+             return packetType.getDeclaredConstructor(SecretsProvider.class).newInstance(secretsProvider).fromPacket(this);
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException | ParseException e) {
             e.printStackTrace();
             // The new instance cannot be created, so the packet is returned as "raw packet"
@@ -241,8 +251,14 @@ public class HuaweiPacket {
         //       - tlv
         // TODO: maybe use the complete flag to know if it can be serialized?
 
+        HuaweiTLV serializableTlv;
+        if (this.isEncrypted)
+            serializableTlv = this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
+        else
+            serializableTlv = this.tlv;
+
         int headerLength = 4; // Magic + (bodyLength + 1) + 0x00
-        byte[] serializedTLV = this.tlv.serialize();
+        byte[] serializedTLV = serializableTlv.serialize();
         int bodyLength = 2 + serializedTLV.length;
         ByteBuffer buffer = ByteBuffer.allocate(headerLength + bodyLength);
         buffer.put((byte) 0x5A);

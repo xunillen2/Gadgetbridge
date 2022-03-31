@@ -46,6 +46,7 @@ public class DeviceConfig {
                         .put(0x03)
                         .put(0x04);
                 this.complete = true;
+                this.isEncrypted = false;
             }
         }
 
@@ -57,6 +58,7 @@ public class DeviceConfig {
 
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
+                this.isEncrypted = false;
             }
 
             @Override
@@ -79,7 +81,6 @@ public class DeviceConfig {
 
                 this.tlv = new HuaweiTLV()
                         .put(0x01, allSupportedServices);
-                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
                 this.complete = true;
             }
         }
@@ -89,6 +90,7 @@ public class DeviceConfig {
 
             public Response(SecretsProvider secretsProvider) {
                 super(secretsProvider);
+                this.isEncrypted = false;
             }
 
             @Override
@@ -129,7 +131,6 @@ public class DeviceConfig {
             public byte[] serialize() {
                 this.tlv = new HuaweiTLV()
                         .put(0x81, this.tlv);
-                this.tlv.encrypt(this.secretsProvider.getSecretKey(), this.secretsProvider.getIv());
                 this.complete = true;
                 return super.serialize();
             }
@@ -148,6 +149,8 @@ public class DeviceConfig {
 
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
+
+                this.isEncrypted = false;
             }
 
             @Override
@@ -199,7 +202,6 @@ public class DeviceConfig {
                             .put(0x02, dateFormat)
                             .put(0x03, timeFormat)
                     );
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
             this.complete = true;
         }
     }
@@ -220,7 +222,6 @@ public class DeviceConfig {
             this.tlv = new HuaweiTLV()
                     .put(0x01, timestamp)
                     .put(0x02, zoneOffset);
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
             this.complete = true;
         }
     }
@@ -240,7 +241,6 @@ public class DeviceConfig {
                 for (int i = 0; i < 14; i++) {
                     this.tlv.put(i);
                 }
-                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
                 this.complete = true;
             }
         }
@@ -266,6 +266,8 @@ public class DeviceConfig {
 
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
+
+                this.isEncrypted = false;
             }
 
             @Override
@@ -298,6 +300,7 @@ public class DeviceConfig {
                     .put(0x05, clientSerial)
                     .put(0x06, huaweiCrypto.createBondingKey(mac, secretsProvider.getSecretKey(), iv))
                     .put(0x07, iv);
+            this.isEncrypted = false;
             this.complete = true;
         }
     }
@@ -323,6 +326,7 @@ public class DeviceConfig {
                         .put(0x05)
                         .put(0x07, mac)
                         .put(0x09);
+                this.isEncrypted = false;
                 this.complete = true;
             }
         }
@@ -336,6 +340,8 @@ public class DeviceConfig {
 
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
+
+                this.isEncrypted = false;
             }
 
             @Override
@@ -363,6 +369,7 @@ public class DeviceConfig {
                 this.tlv = new HuaweiTLV()
                         .put(0x01, challenge)
                         .put(0x02, nonce);
+                this.isEncrypted = false;
                 this.complete = true;
             }
         }
@@ -375,6 +382,8 @@ public class DeviceConfig {
 
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
+
+                this.isEncrypted = false;
             }
 
             @Override
@@ -396,7 +405,6 @@ public class DeviceConfig {
 
                 this.tlv = new HuaweiTLV()
                         .put(0x01);
-                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
                 this.complete = true;
             }
         }
@@ -406,6 +414,9 @@ public class DeviceConfig {
 
             public Response(SecretsProvider secretsProvider) {
                 super(secretsProvider);
+
+                // This differs per watch, so we handle it ourselves in parseTlv
+                this.isEncrypted = false;
             }
 
             @Override
@@ -431,7 +442,6 @@ public class DeviceConfig {
 
             this.tlv = new HuaweiTLV()
                     .put(0x01, activate);
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
             this.complete = true;
         }
@@ -448,7 +458,6 @@ public class DeviceConfig {
 
             this.tlv = new HuaweiTLV()
                     .put(0x01, (byte) 0x01);
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
             this.complete = true;
         }
@@ -465,7 +474,6 @@ public class DeviceConfig {
 
             this.tlv = new HuaweiTLV()
                     .put(0x01, navigate);
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
             this.complete = true;
         }
@@ -482,7 +490,6 @@ public class DeviceConfig {
 
             this.tlv = new HuaweiTLV()
                     .put(0x01, location);
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
             this.complete = true;
         }

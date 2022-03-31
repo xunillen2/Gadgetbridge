@@ -299,13 +299,13 @@ public class HuaweiTLV {
         return msg.substring(0, msg.length() - 3);
     }
 
-    public void encrypt(byte[] key, byte[] iv) {
+    public HuaweiTLV encrypt(byte[] key, byte[] iv) {
         byte[] serializedTLV = serialize();
         byte[] encryptedTLV = HuaweiCrypto.encrypt(serializedTLV, key, iv);
-        this.valueMap = new ArrayList<>();
-        put(CryptoTags.encryption, (byte)1);
-        put(CryptoTags.initVector, iv);
-        put(CryptoTags.cipherText, encryptedTLV);
+        return new HuaweiTLV()
+                .put(CryptoTags.encryption, (byte) 0x01)
+                .put(CryptoTags.initVector, iv)
+                .put(CryptoTags.cipherText, encryptedTLV);
     }
 
     public void decrypt(byte[] key) {

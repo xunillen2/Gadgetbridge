@@ -52,7 +52,6 @@ public class Alarms {
                     .put(0x03, (byte) (count + 1))
             );
             this.tlv = new HuaweiTLV().put(0x81, this.alarms);
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
             this.complete = true;
             return super.serialize();
         }
@@ -82,7 +81,6 @@ public class Alarms {
                                     .put(0x07, aheadTime)
                             )
                     );
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
             this.complete = true;
         }
     }

@@ -30,7 +30,6 @@ public class FitnessData {
                         .put(0x81)
                         .put(0x03, start)
                         .put(0x04, end);
-                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
                 this.complete = true;
             }
@@ -45,7 +44,6 @@ public class FitnessData {
 
             @Override
             protected void parseTlv() {
-                this.tlv.decrypt(secretsProvider.getSecretKey());
                 this.count = this.tlv.getObject(0x81).getShort(0x02);
                 this.complete = true;
             }
@@ -67,7 +65,6 @@ public class FitnessData {
                         .put(0x81, new HuaweiTLV()
                                 .put(0x02, count)
                         );
-                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
                 this.complete = true;
             }
@@ -91,8 +88,6 @@ public class FitnessData {
 
             @Override
             protected void parseTlv() {
-                this.tlv.decrypt(secretsProvider.getSecretKey());
-
                 HuaweiTLV container = this.tlv.getObject(0x81);
                 List<HuaweiTLV> subContainers = container.getObjects(0x83);
 
@@ -167,8 +162,6 @@ public class FitnessData {
 
             @Override
             protected void parseTlv() throws ParseException {
-                this.tlv.decrypt(secretsProvider.getSecretKey());
-
                 HuaweiTLV container = this.tlv.getObject(0x81);
                 List<HuaweiTLV> subContainers = container.getObjects(0x84);
 
@@ -268,7 +261,6 @@ public class FitnessData {
 
                 this.tlv = new HuaweiTLV()
                         .put(0x01);
-                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
                 this.complete = true;
             }
@@ -289,8 +281,6 @@ public class FitnessData {
 
             @Override
             protected void parseTlv() {
-                this.tlv.decrypt(secretsProvider.getSecretKey());
-
                 HuaweiTLV container = this.tlv.getObject(0x81);
                 List<HuaweiTLV> containers = container.getObjects(0x83);
 
@@ -333,7 +323,6 @@ public class FitnessData {
                                 .put(0x05, longSitEnd)
                                 .put(0x06, cycle)
                         );
-                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
                 this.complete = true;
             }
@@ -352,7 +341,6 @@ public class FitnessData {
 
                 this.tlv = new HuaweiTLV()
                         .put(0x01, truSleepSwitch);
-                this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
                 this.complete = true;
             }
