@@ -42,7 +42,6 @@ public class WorkMode {
 
             this.tlv = new HuaweiTLV()
                     .put(0x01, autoWorkMode);
-            this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
 
             this.complete = true;
         }
