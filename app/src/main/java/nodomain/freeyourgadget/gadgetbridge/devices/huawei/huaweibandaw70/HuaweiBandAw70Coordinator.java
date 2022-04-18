@@ -72,4 +72,9 @@ public class HuaweiBandAw70Coordinator extends HuaweiCoordinator{
         };
     }
 
+    // TODO: remove when supported for other Huawei bands
+    @Override
+    public boolean supportsActivityTracks() {
+        return true;
+    }
 }

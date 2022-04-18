@@ -58,9 +58,11 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.CalendarEventSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
+import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
+import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes;
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLEDeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
@@ -71,6 +73,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Stop
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetFitnessTotalsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSleepDataCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetStepDataCountRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetAw70WorkoutCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AlarmsRequest;
@@ -518,6 +521,16 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             return;
         }
 
+        if (dataTypes == RecordedDataTypes.TYPE_ACTIVITY) {
+            fetchActivityData();
+        } else if (dataTypes == RecordedDataTypes.TYPE_GPS_TRACKS) {
+            fetchWorkoutData();
+        } else {
+            LOG.warn("Recorded data type {} not implemented yet.", dataTypes);
+        }
+    }
+
+    private void fetchActivityData() {
         int sleepStart = 0;
         int stepStart = 0;
         int end = (int) (System.currentTimeMillis() / 1000);
@@ -592,6 +605,35 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         } catch (IOException e) {
             handleSyncFinished();
             e.printStackTrace();
+        }
+    }
+
+    private void fetchWorkoutData() {
+        // TODO: actually set start when possible
+        int start = 946684800;
+        int end = (int) (System.currentTimeMillis() / 1000);
+
+        if (this.getCoordinator().getDeviceType() == DeviceType.HUAWEIBANDAW70) {
+            final GetAw70WorkoutCountRequest getAw70WorkoutCountRequest = new GetAw70WorkoutCountRequest(this, start, end);
+            getAw70WorkoutCountRequest.setFinalizeReq(new RequestCallback() {
+                @Override
+                public void call() {
+                    handleSyncFinished();
+                }
+            });
+
+            try {
+                responseManager.addHandler(getAw70WorkoutCountRequest);
+                getAw70WorkoutCountRequest.perform();
+            } catch (IOException e) {
+                handleSyncFinished();
+                e.printStackTrace();
+            }
+        } else {
+            // TODO: non-aw70 bands
+
+            LOG.warn("Workout synchronization is not supported on non-aw70 bands yet.");
+            GB.toast(getContext(), "Workout synchronization is not supported on non-aw70 bands yet.", Toast.LENGTH_SHORT, GB.ERROR);
         }
     }
 
