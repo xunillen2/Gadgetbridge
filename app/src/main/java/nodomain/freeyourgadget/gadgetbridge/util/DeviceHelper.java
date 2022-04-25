@@ -87,6 +87,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huami.miband2.MiBand2HRXCoor
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.miband3.MiBand3Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.miband4.MiBand4Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.miband5.MiBand5Coordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.honorband3.HonorBand3Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.honorband4.HonorBand4Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.honorband5.HonorBand5Coordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.huaweibandaw70.HuaweiBandAw70Coordinator;
@@ -339,6 +340,7 @@ public class DeviceHelper {
         result.add(new HuaweiBand6Coordinator());
         result.add(new HuaweiWatchGT2eCoordinator());
         result.add(new HuaweiWatchGTCoordinator());
+        result.add(new HonorBand3Coordinator());
         return result;
     }
 

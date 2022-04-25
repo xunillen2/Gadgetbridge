@@ -39,6 +39,7 @@ public final class HuaweiConstants {
         public static final int cipherText = 126;
     }
 
+    public static final String HO_BAND3_NAME = "honor band 3-";
     public static final String HO_BAND4_NAME = "honor band 4-";
     public static final String HO_BAND5_NAME = "honor band 5-";
     public static final String HU_BAND3E_NAME = "huawei band 3e-";
