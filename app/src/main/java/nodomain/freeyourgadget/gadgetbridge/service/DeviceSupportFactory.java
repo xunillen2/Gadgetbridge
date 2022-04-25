@@ -383,6 +383,7 @@ public class DeviceSupportFactory {
                         break;
                     case SONY_WH_1000XM3:
                         deviceSupport = new ServiceDeviceSupport(new SonyHeadphonesSupport(), EnumSet.of(ServiceDeviceSupport.Flags.BUSY_CHECKING));
+                    case HONORBAND3:
                     case HONORBAND4:
                     case HONORBAND5:
                     case HUAWEIBAND6:
