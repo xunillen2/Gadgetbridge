@@ -18,6 +18,14 @@
 -keepclassmembers class nodomain.freeyourgadget.gadgetbridge.service.devices.pebble.webview.JSInterface {
     public *;
 }
+# Required for reflection in BangleJSDeviceSupport
+-keepclassmembers class nodomain.freeyourgadget.gadgetbridge.model.CallSpec {
+    public static *;
+}
+# Required for reflection in method GattCharacteristic.initDebugMap()
+-keepclassmembers class nodomain.freeyourgadget.gadgetbridge.service.btle.GattCharacteristic {
+    public static *;
+}
 -keepattributes JavascriptInterface
 
 # https://github.com/tony19/logback-android/issues/29

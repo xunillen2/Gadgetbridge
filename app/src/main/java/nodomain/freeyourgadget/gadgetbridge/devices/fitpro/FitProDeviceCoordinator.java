@@ -63,7 +63,8 @@ public class FitProDeviceCoordinator extends AbstractDeviceCoordinator {
             if (name != null && (
                     name.startsWith("M6") ||
                     name.startsWith("M4") ||
-                    name.equals("LH716"))
+                    name.equals("LH716")  ||
+                    name.equals("Fit1900"))
             ) {
                 return DeviceType.FITPRO;
             }
@@ -173,7 +174,7 @@ public class FitProDeviceCoordinator extends AbstractDeviceCoordinator {
     public int[] getSupportedDeviceSpecificSettings(GBDevice device) {
         return new int[]{
                 R.xml.devicesettings_liftwrist_display_no_on,
-                R.xml.devicesettings_longsit_extended,
+                R.xml.devicesettings_inactivity_extended,
                 R.xml.devicesettings_donotdisturb_no_auto,
                 R.xml.devicesettings_sleep_time,
                 R.xml.devicesettings_wearlocation,

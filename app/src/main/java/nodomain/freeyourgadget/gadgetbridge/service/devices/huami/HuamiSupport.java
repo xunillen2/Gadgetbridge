@@ -72,6 +72,7 @@ import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventVersionInf
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.SampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.ActivateDisplayOnLift;
+import nodomain.freeyourgadget.gadgetbridge.devices.huami.ActivateDisplayOnLiftSensitivity;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.DisconnectNotificationSetting;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiCoordinator;
@@ -129,6 +130,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.common.SimpleNotific
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.actions.StopNotificationAction;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband2.Mi2NotificationStrategy;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband2.Mi2TextNotificationStrategy;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband5.MiBand5Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.operations.FetchActivityOperation;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.operations.InitOperation;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.operations.InitOperation2021;
@@ -147,9 +149,27 @@ import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.Version;
 
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_ACTIVATE_DISPLAY_ON_LIFT;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_ALLOW_HIGH_MTU;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_BT_CONNECTED_ADVERTISEMENT;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_DATEFORMAT;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_DISPLAY_ON_LIFT_SENSITIVITY;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_DISPLAY_ON_LIFT_START;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_DISPLAY_ON_LIFT_END;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_DISCONNECT_NOTIFICATION;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_DISCONNECT_NOTIFICATION_START;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_DISCONNECT_NOTIFICATION_END;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_START;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_END;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_LIFT_WRIST;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_INACTIVITY_ENABLE;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_INACTIVITY_START;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_INACTIVITY_END;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_INACTIVITY_THRESHOLD;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_INACTIVITY_DND;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_INACTIVITY_DND_START;
+import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_INACTIVITY_DND_END;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_LANGUAGE;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_RESERVER_ALARMS_CALENDAR;
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_RESERVER_REMINDERS_CALENDAR;
@@ -160,6 +180,7 @@ import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.Dev
 import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst.PREF_BUTTON_ACTION_SELECTION_BROADCAST;
 import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst.PREF_BUTTON_ACTION_SELECTION_FITNESS_APP_START;
 import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst.PREF_BUTTON_ACTION_SELECTION_FITNESS_APP_STOP;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst.PREF_BUTTON_ACTION_SELECTION_FITNESS_APP_TOGGLE;
 import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst.PREF_BUTTON_ACTION_SELECTION_OFF;
 import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst.PREF_DEVICE_ACTION_FELL_SLEEP_BROADCAST;
 import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst.PREF_DEVICE_ACTION_FELL_SLEEP_SELECTION;
@@ -170,6 +191,7 @@ import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst.PREF
 import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst.PREF_DEVICE_ACTION_WOKE_UP_BROADCAST;
 import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst.PREF_DEVICE_ACTION_WOKE_UP_SELECTION;
 import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiService.DISPLAY_ITEM_BIT_CLOCK;
+import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiService.ENDPOINT_DISPLAY;
 import static nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiService.ENDPOINT_DISPLAY_ITEMS;
 import static nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst.DEFAULT_VALUE_VIBRATION_COUNT;
 import static nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst.DEFAULT_VALUE_VIBRATION_PROFILE;
@@ -1421,6 +1443,9 @@ public class HuamiSupport extends AbstractBTLEDeviceSupport {
             case PREF_BUTTON_ACTION_SELECTION_FITNESS_APP_STOP:
                 OpenTracksController.stopRecording(this.getContext());
                 break;
+            case PREF_BUTTON_ACTION_SELECTION_FITNESS_APP_TOGGLE:
+                OpenTracksController.toggleRecording(this.getContext());
+                break;
             default:
                 handleMediaButton(buttonPreference);
         }
@@ -1439,6 +1464,9 @@ public class HuamiSupport extends AbstractBTLEDeviceSupport {
                 break;
             case PREF_BUTTON_ACTION_SELECTION_FITNESS_APP_STOP:
                 OpenTracksController.stopRecording(this.getContext());
+                break;
+            case PREF_BUTTON_ACTION_SELECTION_FITNESS_APP_TOGGLE:
+                OpenTracksController.toggleRecording(this.getContext());
                 break;
             default:
                 handleMediaButton(deviceAction);
@@ -2208,14 +2236,17 @@ public class HuamiSupport extends AbstractBTLEDeviceSupport {
                 case MiBandConst.PREF_MI2_GOAL_NOTIFICATION:
                     setGoalNotification(builder);
                     break;
-                case HuamiConst.PREF_ACTIVATE_DISPLAY_ON_LIFT:
-                case HuamiConst.PREF_DISPLAY_ON_LIFT_START:
-                case HuamiConst.PREF_DISPLAY_ON_LIFT_END:
+                case PREF_ACTIVATE_DISPLAY_ON_LIFT:
+                case PREF_DISPLAY_ON_LIFT_START:
+                case PREF_DISPLAY_ON_LIFT_END:
                     setActivateDisplayOnLiftWrist(builder);
                     break;
-                case HuamiConst.PREF_DISCONNECT_NOTIFICATION:
-                case HuamiConst.PREF_DISCONNECT_NOTIFICATION_START:
-                case HuamiConst.PREF_DISCONNECT_NOTIFICATION_END:
+                case PREF_DISPLAY_ON_LIFT_SENSITIVITY:
+                    setActivateDisplayOnLiftWristSensitivity(builder);
+                    break;
+                case PREF_DISCONNECT_NOTIFICATION:
+                case PREF_DISCONNECT_NOTIFICATION_START:
+                case PREF_DISCONNECT_NOTIFICATION_END:
                     setDisconnectNotification(builder);
                     break;
                 case HuamiConst.PREF_DISPLAY_ITEMS:
@@ -2232,19 +2263,19 @@ public class HuamiSupport extends AbstractBTLEDeviceSupport {
                 case ActivityUser.PREF_USER_STEPS_GOAL:
                     setFitnessGoal(builder);
                     break;
-                case MiBandConst.PREF_DO_NOT_DISTURB:
-                case MiBandConst.PREF_DO_NOT_DISTURB_START:
-                case MiBandConst.PREF_DO_NOT_DISTURB_END:
-                case MiBandConst.PREF_DO_NOT_DISTURB_LIFT_WRIST:
+                case PREF_DO_NOT_DISTURB:
+                case PREF_DO_NOT_DISTURB_START:
+                case PREF_DO_NOT_DISTURB_END:
+                case PREF_DO_NOT_DISTURB_LIFT_WRIST:
                     setDoNotDisturb(builder);
                     break;
-                case MiBandConst.PREF_MI2_INACTIVITY_WARNINGS:
-                case MiBandConst.PREF_MI2_INACTIVITY_WARNINGS_THRESHOLD:
-                case MiBandConst.PREF_MI2_INACTIVITY_WARNINGS_START:
-                case MiBandConst.PREF_MI2_INACTIVITY_WARNINGS_END:
-                case MiBandConst.PREF_MI2_INACTIVITY_WARNINGS_DND:
-                case MiBandConst.PREF_MI2_INACTIVITY_WARNINGS_DND_START:
-                case MiBandConst.PREF_MI2_INACTIVITY_WARNINGS_DND_END:
+                case PREF_INACTIVITY_ENABLE:
+                case PREF_INACTIVITY_THRESHOLD:
+                case PREF_INACTIVITY_START:
+                case PREF_INACTIVITY_END:
+                case PREF_INACTIVITY_DND:
+                case PREF_INACTIVITY_DND_START:
+                case PREF_INACTIVITY_DND_END:
                     setInactivityWarnings(builder);
                     break;
                 case SettingsActivity.PREF_MEASUREMENT_SYSTEM:
@@ -2642,6 +2673,23 @@ public class HuamiSupport extends AbstractBTLEDeviceSupport {
         return this;
     }
 
+    protected HuamiSupport setActivateDisplayOnLiftWristSensitivity(TransactionBuilder builder) {
+        final ActivateDisplayOnLiftSensitivity sensitivity = HuamiCoordinator.getDisplayOnLiftSensitivity(gbDevice.getAddress());
+        LOG.info("Setting activate display on lift wrist sensitivity to " + sensitivity);
+
+        switch (sensitivity) {
+            case SENSITIVE:
+                writeToConfiguration(builder, HuamiService.COMMAND_DISPLAY_ON_LIFT_WRIST_SPEED_SENSITIVE);
+                break;
+            case NORMAL:
+            default:
+                writeToConfiguration(builder, HuamiService.COMMAND_DISPLAY_ON_LIFT_WRIST_SPEED_NORMAL);
+                break;
+        }
+
+        return this;
+    }
+
     protected HuamiSupport setDisplayItems(TransactionBuilder builder) {
         SharedPreferences prefs = GBApplication.getDeviceSpecificSharedPrefs(gbDevice.getAddress());
         Set<String> pages = prefs.getStringSet(HuamiConst.PREF_DISPLAY_ITEMS, new HashSet<>(Arrays.asList(getContext().getResources().getStringArray(R.array.pref_mi2_display_items_default))));
@@ -2800,8 +2848,8 @@ public class HuamiSupport extends AbstractBTLEDeviceSupport {
 
 
         if (sounds != null) {
-            final String[] soundOrder = new String[]{"button", "calls", "alarm", "notifications", "inactivity_warning", "sms", "goal"};
-            byte[] command = new byte[]{0x3c, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 7, 0, 0};
+            final String[] soundOrder = new String[]{"button", "calls", "alarm", "notifications", "inactivity_warning", "sms", "email", "goal"};
+            byte[] command = new byte[]{0x3c, 0, 0, 0, 1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0, 5, 0, 0, 6, 0, 0, 7, 0, 0};
             int i = 3;
             for (String sound : soundOrder) {
                 if (sounds.contains(sound)) {
