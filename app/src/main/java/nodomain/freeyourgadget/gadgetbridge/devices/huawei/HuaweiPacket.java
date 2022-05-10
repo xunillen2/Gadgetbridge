@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Calls;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FindPhoneResponse;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
@@ -91,6 +92,8 @@ public class HuaweiPacket {
         responsePacketTypes.put((short) 0x0113, DeviceConfig.Auth.Response.class);
         responsePacketTypes.put((short) 0x0108, DeviceConfig.BatteryLevel.Response.class);
         responsePacketTypes.put((short) 0x011D, DeviceConfig.DndPriority.Response.class);
+
+        responsePacketTypes.put((short) 0x0401, Calls.AnswerCallResponse.class);
 
         responsePacketTypes.put((short) 0x0703, FitnessData.FitnessTotals.Response.class);
         responsePacketTypes.put((short) 0x070A, FitnessData.MessageCount.Response.class);
