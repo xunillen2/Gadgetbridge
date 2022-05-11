@@ -67,6 +67,7 @@ public class HonorBand4Coordinator extends HuaweiCoordinator{
     @Override
     public int[] getSupportedDeviceSpecificSettings(GBDevice device) {
         return new int[]{
+                R.xml.devicesettings_donotdisturb_allday_liftwirst,
                 R.xml.devicesettings_trusleep,
                 R.xml.devicesettings_notifications_enable,
                 R.xml.devicesettings_vibrations_enable,
