@@ -1,6 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Build;
 
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventCallControl;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventFindPhone;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventMusicControl;
@@ -142,6 +144,8 @@ public class AsynchronousResponse {
                 return;
             }
 
+            SharedPreferences prefs = GBApplication.getDeviceSpecificSharedPrefs(support.getDevice().getAddress());
+
             GBDeviceEventCallControl callControlEvent = new GBDeviceEventCallControl();
             switch (((Calls.AnswerCallResponse) response).action) {
                 case UNKNOWN:
@@ -150,10 +154,22 @@ public class AsynchronousResponse {
                 case CALL_ACCEPT:
                     callControlEvent.event = GBDeviceEventCallControl.Event.ACCEPT;
                     LOG.info("Accepted call");
+
+                    if (!prefs.getBoolean("enable_call_accept", true)) {
+                        LOG.info("Disabled accepting calls, ignoring");
+                        return;
+                    }
+
                     break;
                 case CALL_REJECT:
                     callControlEvent.event = GBDeviceEventCallControl.Event.REJECT;
                     LOG.info("Rejected call");
+
+                    if (!prefs.getBoolean("enable_call_reject", true)) {
+                        LOG.info("Disabled rejecting calls, ignoring");
+                        return;
+                    }
+
                     break;
             }
             support.evaluateGBDeviceEvent(callControlEvent);

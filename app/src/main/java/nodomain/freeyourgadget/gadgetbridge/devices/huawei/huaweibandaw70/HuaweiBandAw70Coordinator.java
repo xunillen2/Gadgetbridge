@@ -68,6 +68,7 @@ public class HuaweiBandAw70Coordinator extends HuaweiCoordinator{
                 R.xml.devicesettings_rotatewrist_cycleinfo,
                 R.xml.devicesettings_dateformat,
                 R.xml.devicesettings_timeformat,
+                R.xml.devicesettings_allow_accept_reject_calls,
         };
     }
 
