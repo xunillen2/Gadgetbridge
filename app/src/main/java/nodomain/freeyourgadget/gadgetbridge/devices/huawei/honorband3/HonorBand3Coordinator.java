@@ -64,7 +64,7 @@ public class HonorBand3Coordinator extends HuaweiCoordinator{
                 R.xml.devicesettings_trusleep,
                 R.xml.devicesettings_notifications_enable,
                 R.xml.devicesettings_vibrations_enable,
-                R.xml.devicesettings_longsit_sheduled,
+                R.xml.devicesettings_inactivity_sheduled,
                 R.xml.devicesettings_liftwrist_display_noshed,
                 R.xml.devicesettings_rotatewrist_cycleinfo,
                 R.xml.devicesettings_wearlocation,

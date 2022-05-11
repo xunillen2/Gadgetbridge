@@ -18,22 +18,16 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
 import android.content.SharedPreferences;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.zetime.ZeTimeConstants;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiUtil;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
-import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
+import nodomain.freeyourgadget.gadgetbridge.util.AlarmUtils;
 
 public class SetActivityReminderRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(SetActivityReminderRequest.class);
@@ -46,35 +40,23 @@ public class SetActivityReminderRequest extends Request {
 
     @Override
     protected byte[] createRequest() {
-        SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(this.support.getDevice().getAddress());
+        SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(support.deviceMac);
 
-        boolean longsitSwitch = sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_LONGSIT_SWITCH, false);
-        String longsitInterval = sharedPrefs.getString(DeviceSettingsPreferenceConst.PREF_LONGSIT_PERIOD, "60");
-        String longsitStart = sharedPrefs.getString(DeviceSettingsPreferenceConst.PREF_LONGSIT_START, "08:00");
-        String longsitEnd = sharedPrefs.getString(DeviceSettingsPreferenceConst.PREF_LONGSIT_END, "23:00");
-        Calendar startCalendar = Calendar.getInstance();
-        Calendar endCalendar = Calendar.getInstance();
-        DateFormat df = new SimpleDateFormat("HH:mm");
-        try {
-            startCalendar.setTime(df.parse(longsitStart));
-            endCalendar.setTime(df.parse(longsitEnd));
-        } catch (ParseException e) {
-            LOG.debug("settings error: " + e);
-        }
-        byte[] start = new byte[]{
-            (byte)startCalendar.get(Calendar.HOUR_OF_DAY),
-            (byte)startCalendar.get(Calendar.MINUTE)};
-        byte[] end = new byte[]{
-            (byte)endCalendar.get(Calendar.HOUR_OF_DAY),
-            (byte)endCalendar.get(Calendar.MINUTE)};
-        int cycle = (1 << 7); // set inactivity active: set bit 7
-        cycle |= (sharedPrefs.getBoolean(ZeTimeConstants.PREF_INACTIVITY_MO, false) ? 1 : 0);
-        cycle |= ((sharedPrefs.getBoolean(ZeTimeConstants.PREF_INACTIVITY_TU, false) ? 1 : 0) << 1);
-        cycle |= ((sharedPrefs.getBoolean(ZeTimeConstants.PREF_INACTIVITY_WE, false) ? 1 : 0) << 2);
-        cycle |= ((sharedPrefs.getBoolean(ZeTimeConstants.PREF_INACTIVITY_TH, false) ? 1 : 0) << 3);
-        cycle |= ((sharedPrefs.getBoolean(ZeTimeConstants.PREF_INACTIVITY_FR, false) ? 1 : 0) << 4);
-        cycle |= ((sharedPrefs.getBoolean(ZeTimeConstants.PREF_INACTIVITY_SA, false) ? 1 : 0) << 5);
-        cycle |= ((sharedPrefs.getBoolean(ZeTimeConstants.PREF_INACTIVITY_SU, false) ? 1 : 0) << 6);
+        boolean longsitSwitch = sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_INACTIVITY_ENABLE, false);
+        String longsitInterval = sharedPrefs.getString(DeviceSettingsPreferenceConst.PREF_INACTIVITY_THRESHOLD, "60");
+        String longsitStart = sharedPrefs.getString(DeviceSettingsPreferenceConst.PREF_INACTIVITY_START, "06:00");
+        String longsitEnd = sharedPrefs.getString(DeviceSettingsPreferenceConst.PREF_INACTIVITY_END, "23:00");
+        byte[] start = HuaweiUtil.timeToByte(longsitStart);
+        byte[] end = HuaweiUtil.timeToByte(longsitEnd);
+        int cycle = AlarmUtils.createRepetitionMask(
+                sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_INACTIVITY_MO, false),
+                sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_INACTIVITY_TU, false),
+                sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_INACTIVITY_WE, false),
+                sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_INACTIVITY_TH, false),
+                sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_INACTIVITY_FR, false),
+                sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_INACTIVITY_SA, false),
+                sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_INACTIVITY_SU, false)
+        );
 
         return new FitnessData.ActivityReminder.Request(
                 support.secretsProvider,

@@ -49,7 +49,6 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
-import nodomain.freeyourgadget.gadgetbridge.devices.zetime.ZeTimeConstants;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.entities.Alarm;
@@ -109,7 +108,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     protected int mtu = 65535;
     private boolean needsAuth = false;
-    protected static String deviceMac; //get it from GB
+    public static String deviceMac; //get it from GB
     protected String macAddress;
 
     public long encryptionCounter = 0;
@@ -410,17 +409,17 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     setNavigateOnRotate();
                     break;
                 }
-                case DeviceSettingsPreferenceConst.PREF_LONGSIT_SWITCH:
-                case DeviceSettingsPreferenceConst.PREF_LONGSIT_PERIOD:
-                case DeviceSettingsPreferenceConst.PREF_LONGSIT_START:
-                case DeviceSettingsPreferenceConst.PREF_LONGSIT_END:
-                case ZeTimeConstants.PREF_INACTIVITY_MO:
-                case ZeTimeConstants.PREF_INACTIVITY_TU:
-                case ZeTimeConstants.PREF_INACTIVITY_WE:
-                case ZeTimeConstants.PREF_INACTIVITY_TH:
-                case ZeTimeConstants.PREF_INACTIVITY_FR:
-                case ZeTimeConstants.PREF_INACTIVITY_SA:
-                case ZeTimeConstants.PREF_INACTIVITY_SU: {
+                case DeviceSettingsPreferenceConst.PREF_INACTIVITY_ENABLE:
+                case DeviceSettingsPreferenceConst.PREF_INACTIVITY_THRESHOLD:
+                case DeviceSettingsPreferenceConst.PREF_INACTIVITY_START:
+                case DeviceSettingsPreferenceConst.PREF_INACTIVITY_END:
+                case DeviceSettingsPreferenceConst.PREF_INACTIVITY_MO:
+                case DeviceSettingsPreferenceConst.PREF_INACTIVITY_TU:
+                case DeviceSettingsPreferenceConst.PREF_INACTIVITY_WE:
+                case DeviceSettingsPreferenceConst.PREF_INACTIVITY_TH:
+                case DeviceSettingsPreferenceConst.PREF_INACTIVITY_FR:
+                case DeviceSettingsPreferenceConst.PREF_INACTIVITY_SA:
+                case DeviceSettingsPreferenceConst.PREF_INACTIVITY_SU: {
                     setActivityReminder();
                     break;
                 }
