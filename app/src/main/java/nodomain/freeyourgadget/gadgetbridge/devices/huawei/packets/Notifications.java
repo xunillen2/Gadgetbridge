@@ -95,6 +95,7 @@ public class Notifications {
         public static final byte sms = 0x02;
         public static final byte weChat = 0x03;
         public static final byte qq = 0x0B;
+        public static final byte stopNotification = 0x0C; // To stop showing a (call) notification
         public static final byte missedCall = 0x0E;
         public static final byte email = 0x0F;
         public static final byte generic = 0x7F;

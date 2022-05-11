@@ -35,7 +35,6 @@ import java.util.Random;
 import java.util.UUID;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
-import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.SettingsActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
@@ -68,6 +67,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceBusyAction;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateAction;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.GattService;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.StopNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetFitnessTotalsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSleepDataCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetStepDataCountRequest;
@@ -740,6 +740,18 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 sendNotificationReq.buildNotificationTLVFromCallSpec(callSpec);
                 responseManager.addHandler(sendNotificationReq);
                 sendNotificationReq.perform();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (
+                callSpec.command == CallSpec.CALL_ACCEPT ||
+                callSpec.command == CallSpec.CALL_START ||
+                callSpec.command == CallSpec.CALL_REJECT ||
+                callSpec.command == CallSpec.CALL_END
+        ) {
+            StopNotificationRequest stopNotificationRequest = new StopNotificationRequest(this);
+            try {
+                stopNotificationRequest.perform();
             } catch (IOException e) {
                 e.printStackTrace();
             }
