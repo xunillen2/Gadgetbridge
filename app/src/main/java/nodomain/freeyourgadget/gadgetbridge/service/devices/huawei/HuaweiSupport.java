@@ -215,7 +215,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 // Workaround to enable PREF_HUAWEI_ROTATE_WRIST_TO_SWITCH_INFO preference
                 SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
                 SharedPreferences.Editor editor = sharedPrefs.edit();
-                editor.putString(HuamiConst.PREF_ACTIVATE_DISPLAY_ON_LIFT, "p_on");
+                editor.putString(DeviceSettingsPreferenceConst.PREF_ACTIVATE_DISPLAY_ON_LIFT, "p_on");
                 editor.apply();
                 initializeAlarms();
                 // getAlarms();
