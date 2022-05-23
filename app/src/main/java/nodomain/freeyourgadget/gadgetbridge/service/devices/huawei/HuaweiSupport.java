@@ -668,7 +668,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         }
 
         if (this.getCoordinator().getDeviceType() == DeviceType.HUAWEIBANDAW70) {
-            final GetAw70WorkoutCountRequest getAw70WorkoutCountRequest = new GetAw70WorkoutCountRequest(this, start, end);
+            TransactionBuilder transactionBuilder = createTransactionBuilder("FetchWorkoutData");
+            // TODO: maybe use a different string from the other synchronization
+            transactionBuilder.add(new SetDeviceBusyAction(getDevice(), getContext().getString(R.string.busy_task_fetch_activity_data), getContext()));
+
+            final GetAw70WorkoutCountRequest getAw70WorkoutCountRequest = new GetAw70WorkoutCountRequest(this, transactionBuilder, start, end);
             getAw70WorkoutCountRequest.setFinalizeReq(new RequestCallback() {
                 @Override
                 public void call() {

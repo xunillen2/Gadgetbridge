@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Aw70Workout;
+import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 
 public class GetAw70WorkoutCountRequest extends Request {
@@ -12,11 +13,12 @@ public class GetAw70WorkoutCountRequest extends Request {
     private int start = 0;
     private int end = 0;
 
-    public GetAw70WorkoutCountRequest(HuaweiSupport support, int start, int end) {
+    public GetAw70WorkoutCountRequest(HuaweiSupport support, TransactionBuilder builder, int start, int end) {
         super(support);
 
         this.serviceId = Aw70Workout.id;
         this.commandId = Aw70Workout.WorkoutCount.id;
+        this.builder = builder;
 
         this.start = start;
         this.end = end;

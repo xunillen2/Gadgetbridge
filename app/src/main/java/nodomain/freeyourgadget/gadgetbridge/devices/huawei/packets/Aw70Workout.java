@@ -397,6 +397,16 @@ public class Aw70Workout {
                 public byte type = -1;
                 public int pace = -1;
                 public short correction = 0;
+
+                @Override
+                public String toString() {
+                    return "Block{" +
+                            "distance=" + distance +
+                            ", type=" + type +
+                            ", pace=" + pace +
+                            ", correction=" + correction +
+                            '}';
+                }
             }
 
             public short workoutNumber;

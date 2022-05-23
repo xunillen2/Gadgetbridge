@@ -3,6 +3,7 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.List;
 
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Aw70Workout;
@@ -53,6 +54,7 @@ public class GetAw70WorkoutPaceRequest extends Request {
         LOG.info("Workout  : " + ((Aw70Workout.WorkoutPace.Response) receivedPacket).workoutNumber);
         LOG.info("Pace     : " + ((Aw70Workout.WorkoutPace.Response) receivedPacket).paceNumber);
         LOG.info("Block num: " + ((Aw70Workout.WorkoutPace.Response) receivedPacket).blocks.size());
+        LOG.info("Blocks   : " + Arrays.toString(((Aw70Workout.WorkoutPace.Response) receivedPacket).blocks.toArray()));
 
         if (this.workoutNumbers.paceCount > this.number + 1) {
             GetAw70WorkoutPaceRequest nextRequest = new GetAw70WorkoutPaceRequest(
