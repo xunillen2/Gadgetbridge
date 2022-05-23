@@ -170,12 +170,24 @@ public class Aw70Workout {
                 public short dataCount;
                 public byte dataLength;
                 public short bitmap; // TODO: can this be enum-like?
+
+                @Override
+                public String toString() {
+                    return "Header{" +
+                            "workoutNumber=" + workoutNumber +
+                            ", dataNumber=" + dataNumber +
+                            ", timestamp=" + timestamp +
+                            ", interval=" + interval +
+                            ", dataCount=" + dataCount +
+                            ", dataLength=" + dataLength +
+                            ", bitmap=" + bitmap +
+                            '}';
+                }
             }
 
             public static class Data {
-                // If unknown data is encountered, this flag is set and the remainder is no longer
-                // parsed. It is advisable to log the rawHeader/rawData in this case.
-                public byte unknownData = 0;
+                // If unknown data is encountered, the whole tlv will be in here so it can be parsed again later
+                public byte[] unknownData = null;
 
                 public short speed = -1;
 
@@ -188,6 +200,26 @@ public class Aw70Workout {
                 public byte midFootLanding = -1;
                 public byte backFootLanding = -1;
                 public byte eversionAngle = -1;
+
+                public int timestamp = -1; // Calculated timestamp for this data point
+
+                @Override
+                public String toString() {
+                    return "Data{" +
+                            "unknownData=" + unknownData +
+                            ", speed=" + speed +
+                            ", cadence=" + cadence +
+                            ", stepLength=" + stepLength +
+                            ", groundContactTime=" + groundContactTime +
+                            ", impact=" + impact +
+                            ", swingAngle=" + swingAngle +
+                            ", foreFootLanding=" + foreFootLanding +
+                            ", midFootLanding=" + midFootLanding +
+                            ", backFootLanding=" + backFootLanding +
+                            ", eversionAngle=" + eversionAngle +
+                            ", timestamp=" + timestamp +
+                            '}';
+                }
             }
 
             private final byte[] bitmapLengths = {1, 2, 1, 2, 2, 4, -1, 2};
@@ -275,6 +307,7 @@ public class Aw70Workout {
                 buf = ByteBuffer.wrap(this.rawData);
                 for (short i = 0; i < header.dataCount; i++) {
                     Data data = new Data();
+                    data.timestamp = header.timestamp + header.interval * i;
                     outerDataLoop:
                     for (byte j = 0; j < 16; j++) {
                         if ((header.bitmap & (1 << j)) != 0) {
@@ -316,14 +349,14 @@ public class Aw70Workout {
                                                     data.eversionAngle = buf.get();
                                                     break;
                                                 default:
-                                                    data.unknownData = 1;
+                                                    data.unknownData = this.tlv.serialize();
                                                     break outerDataLoop;
                                             }
                                         }
                                     }
                                     break;
                                 default:
-                                    data.unknownData = 1;
+                                    data.unknownData = this.tlv.serialize();
                                     break outerDataLoop;
                             }
                         }

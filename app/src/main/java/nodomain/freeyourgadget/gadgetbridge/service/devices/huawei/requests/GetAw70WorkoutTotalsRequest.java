@@ -47,7 +47,6 @@ public class GetAw70WorkoutTotalsRequest extends Request {
             LOG.error("Incorrect workout number!");
         }
 
-        // TODO: handle data
         LOG.info("Workout {} totals:", this.workoutNumbers.workoutNumber);
         LOG.info("Number  : " + ((Aw70Workout.WorkoutTotals.Response) receivedPacket).number);
         LOG.info("Status  : " + ((Aw70Workout.WorkoutTotals.Response) receivedPacket).status);
@@ -60,14 +59,16 @@ public class GetAw70WorkoutTotalsRequest extends Request {
         LOG.info("Duration: " + ((Aw70Workout.WorkoutTotals.Response) receivedPacket).duration);
         LOG.info("Type    : " + ((Aw70Workout.WorkoutTotals.Response) receivedPacket).type);
 
+        Long databaseId = this.support.addWorkoutTotalsData((Aw70Workout.WorkoutTotals.Response) receivedPacket);
+
         // Create the next request
-        // TODO: commented until the other requests are actually used
         if (this.workoutNumbers.dataCount > 0) {
             GetAw70WorkoutDataRequest nextRequest = new GetAw70WorkoutDataRequest(
                     this.support,
                     this.workoutNumbers,
                     this.remainder,
-                    (short) 0
+                    (short) 0,
+                    databaseId
             );
             nextRequest.setFinalizeReq(this.finalizeReq);
             this.support.addInProgressRequest(nextRequest);

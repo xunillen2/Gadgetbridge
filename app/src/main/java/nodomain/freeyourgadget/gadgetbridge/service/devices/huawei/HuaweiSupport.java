@@ -24,16 +24,21 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.JsonObject;
+
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import de.greenrobot.dao.query.QueryBuilder;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.SettingsActivity;
@@ -47,8 +52,15 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiSampleProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Aw70Workout;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
+import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary;
+import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummaryDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySample;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutDataSample;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutDataSampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySample;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.entities.Alarm;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
@@ -609,9 +621,51 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     }
 
     private void fetchWorkoutData() {
-        // TODO: actually set start when possible
-        int start = 946684800;
+        int start = 0;
         int end = (int) (System.currentTimeMillis() / 1000);
+
+        SharedPreferences sharedPreferences = GBApplication.getDeviceSpecificSharedPrefs(getDevice().getAddress());
+        long prefLastSyncTime = sharedPreferences.getLong("lastSportsActivityTimeMillis", 0);
+        if (prefLastSyncTime != 0) {
+            start = (int) (prefLastSyncTime / 1000);
+
+            // Reset for next calls
+            sharedPreferences.edit().putLong("lastSportsActivityTimeMillis", 0).apply();
+        } else {
+            try (DBHandler db = GBApplication.acquireDB()) {
+                Long userId = DBHelper.getUser(db.getDaoSession()).getId();
+                Long deviceId = DBHelper.getDevice(getDevice(), db.getDaoSession()).getId();
+
+                QueryBuilder qb1 = db.getDaoSession().getHuaweiWorkoutSummarySampleDao().queryBuilder().where(
+                        HuaweiWorkoutSummarySampleDao.Properties.DeviceId.eq(deviceId),
+                        HuaweiWorkoutSummarySampleDao.Properties.UserId.eq(userId)
+                ).orderDesc(
+                        HuaweiWorkoutSummarySampleDao.Properties.StartTimestamp
+                ).limit(1);
+
+                List<HuaweiWorkoutSummarySample> samples1 = qb1.list();
+                if (!samples1.isEmpty())
+                    start = samples1.get(0).getEndTimestamp();
+
+                QueryBuilder qb2 = db.getDaoSession().getBaseActivitySummaryDao().queryBuilder().where(
+                        BaseActivitySummaryDao.Properties.DeviceId.eq(deviceId),
+                        BaseActivitySummaryDao.Properties.UserId.eq(userId)
+                ).orderDesc(
+                        BaseActivitySummaryDao.Properties.StartTime
+                ).limit(1);
+
+                List<BaseActivitySummary> samples2 = qb2.list();
+                if (!samples2.isEmpty())
+                    start = Math.min(start, (int) (samples2.get(0).getEndTime().getTime() / 1000L));
+
+                start = start + 1;
+            } catch (Exception e) {
+                LOG.warn("Exception for getting start time, using 01/01/2000 - 00:00:00.");
+            }
+
+            if (start == 0 || start == 1)
+                start = 946684800;
+        }
 
         if (this.getCoordinator().getDeviceType() == DeviceType.HUAWEIBANDAW70) {
             final GetAw70WorkoutCountRequest getAw70WorkoutCountRequest = new GetAw70WorkoutCountRequest(this, start, end);
@@ -887,6 +941,132 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         LOG.debug("FITNESS total distance: " + distance + " m");
 
         // TODO: potentially do more with this, maybe through realtime data?
+    }
+
+    public Long addWorkoutTotalsData(Aw70Workout.WorkoutTotals.Response packet) {
+        try (DBHandler db = GBApplication.acquireDB()) {
+            Long userId = DBHelper.getUser(db.getDaoSession()).getId();
+            Long deviceId = DBHelper.getDevice(getDevice(), db.getDaoSession()).getId();
+
+            // Avoid duplicates
+            QueryBuilder qb = db.getDaoSession().getHuaweiWorkoutSummarySampleDao().queryBuilder().where(
+                    HuaweiWorkoutSummarySampleDao.Properties.UserId.eq(userId),
+                    HuaweiWorkoutSummarySampleDao.Properties.DeviceId.eq(deviceId),
+                    HuaweiWorkoutSummarySampleDao.Properties.WorkoutNumber.eq(packet.number),
+                    HuaweiWorkoutSummarySampleDao.Properties.StartTimestamp.eq(packet.startTime),
+                    HuaweiWorkoutSummarySampleDao.Properties.EndTimestamp.eq(packet.endTime)
+            );
+            List<HuaweiWorkoutSummarySample> results = qb.build().list();
+            Long workoutId = null;
+            if (!results.isEmpty())
+                workoutId = results.get(0).getWorkoutId();
+
+            HuaweiWorkoutSummarySample summarySample = new HuaweiWorkoutSummarySample(
+                    workoutId,
+                    deviceId,
+                    userId,
+                    packet.number,
+                    packet.status,
+                    packet.startTime,
+                    packet.endTime,
+                    packet.calories,
+                    packet.distance,
+                    packet.stepCount,
+                    packet.totalTime,
+                    packet.duration,
+                    packet.type
+            );
+            db.getDaoSession().getHuaweiWorkoutSummarySampleDao().insertOrReplace(summarySample);
+
+            Date start = new Date(packet.startTime * 1000L);
+            Date end = new Date(packet.endTime * 1000L);
+
+            // Avoid duplicates
+            QueryBuilder qb2 = db.getDaoSession().getBaseActivitySummaryDao().queryBuilder().where(
+                    BaseActivitySummaryDao.Properties.UserId.eq(userId),
+                    BaseActivitySummaryDao.Properties.DeviceId.eq(deviceId),
+                    BaseActivitySummaryDao.Properties.StartTime.eq(start),
+                    BaseActivitySummaryDao.Properties.EndTime.eq(end)
+            );
+            List<BaseActivitySummary> results2 = qb2.build().list();
+            Long id = null;
+            if (!results2.isEmpty())
+                id = results2.get(0).getId();
+
+            JSONObject jsonObject = new JSONObject();
+
+            JSONObject calories = new JSONObject();
+            calories.put("value", packet.calories);
+            calories.put("unit", "calories_unit");
+            jsonObject.put("caloriesBurnt", calories);
+
+            JSONObject distance = new JSONObject();
+            distance.put("value", packet.distance);
+            distance.put("unit", "meters");
+            jsonObject.put("distanceMeters", distance);
+
+            JSONObject steps = new JSONObject();
+            steps.put("value", packet.stepCount);
+            steps.put("unit", "steps_unit");
+            jsonObject.put("steps", steps);
+
+            JSONObject time = new JSONObject();
+            time.put("value", packet.duration);
+            time.put("unit", "seconds");
+            jsonObject.put("activeSeconds", time);
+
+            BaseActivitySummary summary = new BaseActivitySummary(
+                    id,
+                    "Workout " + packet.number,
+                    start,
+                    end,
+                    packet.type, // TODO: may not be correct
+                    null,
+                    null,
+                    null,
+                    null,
+                    deviceId,
+                    userId,
+                    jsonObject.toString(),
+                    null
+            );
+            db.getDaoSession().getBaseActivitySummaryDao().insertOrReplace(summary);
+
+            return summarySample.getWorkoutId();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void addWorkoutSampleData(Long workoutId, List<Aw70Workout.WorkoutData.Response.Data> dataList) {
+        if (workoutId == null) {
+            return;
+        }
+
+        try (DBHandler db = GBApplication.acquireDB()) {
+            HuaweiWorkoutDataSampleDao dao = db.getDaoSession().getHuaweiWorkoutDataSampleDao();
+
+            for (Aw70Workout.WorkoutData.Response.Data data : dataList) {
+                HuaweiWorkoutDataSample dataSample = new HuaweiWorkoutDataSample(
+                        workoutId,
+                        data.timestamp,
+                        data.speed,
+                        data.cadence,
+                        data.groundContactTime,
+                        data.impact,
+                        data.swingAngle,
+                        data.foreFootLanding,
+                        data.midFootLanding,
+                        data.backFootLanding,
+                        data.eversionAngle,
+                        data.unknownData
+                );
+                dao.insertOrReplace(dataSample);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void setWearLocation() {

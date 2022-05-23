@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -46,9 +47,13 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiSettingsCustomi
 import nodomain.freeyourgadget.gadgetbridge.devices.InstallHandler;
 import nodomain.freeyourgadget.gadgetbridge.devices.SampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.AbstractActivitySample;
+import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummaryDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.Device;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutDataSampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySample;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 
 public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
@@ -90,6 +95,18 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
         long deviceId = device.getId();
         QueryBuilder<?> qb = session.getHuaweiActivitySampleDao().queryBuilder();
         qb.where(HuaweiActivitySampleDao.Properties.DeviceId.eq(deviceId)).buildDelete().executeDeleteWithoutDetachingEntities();
+
+        QueryBuilder<HuaweiWorkoutSummarySample> qb2 = session.getHuaweiWorkoutSummarySampleDao().queryBuilder();
+        List<HuaweiWorkoutSummarySample> workouts = qb2.where(HuaweiWorkoutSummarySampleDao.Properties.DeviceId.eq(deviceId)).build().list();
+        for (HuaweiWorkoutSummarySample sample : workouts) {
+            session.getHuaweiWorkoutDataSampleDao().queryBuilder().where(
+                    HuaweiWorkoutDataSampleDao.Properties.WorkoutId.eq(sample.getWorkoutId())
+            ).buildDelete().executeDeleteWithoutDetachingEntities();
+        }
+
+        session.getHuaweiWorkoutSummarySampleDao().queryBuilder().where(HuaweiWorkoutSummarySampleDao.Properties.DeviceId.eq(deviceId)).buildDelete().executeDeleteWithoutDetachingEntities();
+
+        session.getBaseActivitySummaryDao().queryBuilder().where(BaseActivitySummaryDao.Properties.DeviceId.eq(deviceId)).buildDelete().executeDeleteWithoutDetachingEntities();
     }
 
     @Override

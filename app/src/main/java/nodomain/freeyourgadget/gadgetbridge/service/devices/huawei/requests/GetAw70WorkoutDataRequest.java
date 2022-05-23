@@ -15,6 +15,7 @@ public class GetAw70WorkoutDataRequest extends Request {
     Aw70Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers;
     List<Aw70Workout.WorkoutCount.Response.WorkoutNumbers> remainder;
     short number;
+    Long databaseId;
 
     /**
      * Request to get workout totals
@@ -23,7 +24,7 @@ public class GetAw70WorkoutDataRequest extends Request {
      * @param remainder The numbers of the remainder if the workouts to get
      * @param number The number of this data request
      */
-    public GetAw70WorkoutDataRequest(HuaweiSupport support, Aw70Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers, List<Aw70Workout.WorkoutCount.Response.WorkoutNumbers> remainder, short number) {
+    public GetAw70WorkoutDataRequest(HuaweiSupport support, Aw70Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers, List<Aw70Workout.WorkoutCount.Response.WorkoutNumbers> remainder, short number, Long databaseId) {
         super(support);
 
         this.serviceId = Aw70Workout.id;
@@ -32,6 +33,8 @@ public class GetAw70WorkoutDataRequest extends Request {
         this.workoutNumbers = workoutNumbers;
         this.remainder = remainder;
         this.number = number;
+
+        this.databaseId = databaseId;
     }
 
     @Override
@@ -56,20 +59,27 @@ public class GetAw70WorkoutDataRequest extends Request {
             LOG.error("Incorrect data number!");
         }
 
-        // TODO: handle data
         LOG.info("Workout {} data {}:", this.workoutNumbers.workoutNumber, this.number);
         LOG.info("Workout : " + ((Aw70Workout.WorkoutData.Response) receivedPacket).workoutNumber);
         LOG.info("Data num: " + ((Aw70Workout.WorkoutData.Response) receivedPacket).dataNumber);
         LOG.info("Header  : " + Arrays.toString(((Aw70Workout.WorkoutData.Response) receivedPacket).rawHeader));
+        LOG.info("Header  : " + ((Aw70Workout.WorkoutData.Response) receivedPacket).header);
         LOG.info("Data    : " + Arrays.toString(((Aw70Workout.WorkoutData.Response) receivedPacket).rawData));
+        LOG.info("Data    : " + Arrays.toString(((Aw70Workout.WorkoutData.Response) receivedPacket).dataList.toArray()));
         LOG.info("Bitmap  : " + ((Aw70Workout.WorkoutData.Response) receivedPacket).innerBitmap);
+
+        this.support.addWorkoutSampleData(
+                this.databaseId,
+                ((Aw70Workout.WorkoutData.Response) receivedPacket).dataList
+        );
 
         if (this.workoutNumbers.dataCount > this.number + 1) {
             GetAw70WorkoutDataRequest nextRequest = new GetAw70WorkoutDataRequest(
                     this.support,
                     this.workoutNumbers,
                     this.remainder,
-                    (short) (this.number + 1)
+                    (short) (this.number + 1),
+                    databaseId
             );
             nextRequest.setFinalizeReq(this.finalizeReq);
             this.support.addInProgressRequest(nextRequest);
