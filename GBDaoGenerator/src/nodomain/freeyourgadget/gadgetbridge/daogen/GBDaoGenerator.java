@@ -43,7 +43,7 @@ public class GBDaoGenerator {
 
 
     public static void main(String[] args) throws Exception {
-        final Schema schema = new Schema(41, MAIN_PACKAGE + ".entities");
+        final Schema schema = new Schema(42, MAIN_PACKAGE + ".entities");
 
         Entity userAttributes = addUserAttributes(schema);
         Entity user = addUserInfo(schema, userAttributes);
@@ -86,6 +86,7 @@ public class GBDaoGenerator {
 
         Entity huaweiWorkoutSummary = addHuaweiWorkoutSummarySample(schema, user, device);
         addHuaweiWorkoutDataSample(schema, user, device, huaweiWorkoutSummary);
+        addHuaweiWorkoutPaceSample(schema, user, device, huaweiWorkoutSummary);
 
         addHybridHRActivitySample(schema, user, device);
         addCalendarSyncState(schema, device);
@@ -730,8 +731,6 @@ public class GBDaoGenerator {
     private static Entity addHuaweiWorkoutDataSample(Schema schema, Entity user, Entity device, Entity summaryEntity) {
         Entity workoutDataSample = addEntity(schema, "HuaweiWorkoutDataSample");
 
-        // workoutDataSample.setSuperclass("AbstractActivitySample");
-        // workoutDataSample.addImport(MAIN_PACKAGE + ".devices.SampleProvider");
         workoutDataSample.setJavaDoc(""); // TODO: write javadoc
 
         Property id = workoutDataSample.addLongProperty("workoutId").primaryKey().notNull().getProperty();
@@ -751,5 +750,21 @@ public class GBDaoGenerator {
         workoutDataSample.addByteArrayProperty("dataErrorHex");
 
         return workoutDataSample;
+    }
+
+    private static Entity addHuaweiWorkoutPaceSample(Schema schema, Entity user, Entity device, Entity summaryEntity) {
+        Entity workoutPaceSample = addEntity(schema, "HuaweiWorkoutPaceSample");
+
+        workoutPaceSample.setJavaDoc(""); // TODO: write javadoc
+
+        Property id = workoutPaceSample.addLongProperty("workoutId").primaryKey().notNull().getProperty();
+        workoutPaceSample.addToOne(summaryEntity, id);
+
+        workoutPaceSample.addIntProperty("distance").notNull().primaryKey();
+        workoutPaceSample.addByteProperty("type").notNull().primaryKey();
+        workoutPaceSample.addIntProperty("pace").notNull();
+        workoutPaceSample.addIntProperty("correction").notNull();
+
+        return workoutPaceSample;
     }
 }

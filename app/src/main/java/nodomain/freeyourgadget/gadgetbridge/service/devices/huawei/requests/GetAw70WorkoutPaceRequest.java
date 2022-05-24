@@ -15,8 +15,9 @@ public class GetAw70WorkoutPaceRequest extends Request {
     Aw70Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers;
     List<Aw70Workout.WorkoutCount.Response.WorkoutNumbers> remainder;
     short number;
+    Long databaseId;
 
-    public GetAw70WorkoutPaceRequest(HuaweiSupport support, Aw70Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers, List<Aw70Workout.WorkoutCount.Response.WorkoutNumbers> remainder, short number) {
+    public GetAw70WorkoutPaceRequest(HuaweiSupport support, Aw70Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers, List<Aw70Workout.WorkoutCount.Response.WorkoutNumbers> remainder, short number, Long databaseId) {
         super(support);
 
         this.serviceId = Aw70Workout.id;
@@ -25,6 +26,8 @@ public class GetAw70WorkoutPaceRequest extends Request {
         this.workoutNumbers = workoutNumbers;
         this.remainder = remainder;
         this.number = number;
+
+        this.databaseId = databaseId;
     }
 
     @Override
@@ -49,19 +52,21 @@ public class GetAw70WorkoutPaceRequest extends Request {
             LOG.error("Incorrect pace number!");
         }
 
-        // TODO: handle data
         LOG.info("Workout {} pace {}:", this.workoutNumbers.workoutNumber, this.number);
         LOG.info("Workout  : " + ((Aw70Workout.WorkoutPace.Response) receivedPacket).workoutNumber);
         LOG.info("Pace     : " + ((Aw70Workout.WorkoutPace.Response) receivedPacket).paceNumber);
         LOG.info("Block num: " + ((Aw70Workout.WorkoutPace.Response) receivedPacket).blocks.size());
         LOG.info("Blocks   : " + Arrays.toString(((Aw70Workout.WorkoutPace.Response) receivedPacket).blocks.toArray()));
 
+        support.addWorkoutPaceData(this.databaseId, ((Aw70Workout.WorkoutPace.Response) receivedPacket).blocks);
+
         if (this.workoutNumbers.paceCount > this.number + 1) {
             GetAw70WorkoutPaceRequest nextRequest = new GetAw70WorkoutPaceRequest(
                     this.support,
                     this.workoutNumbers,
                     this.remainder,
-                    (short) (this.number + 1)
+                    (short) (this.number + 1),
+                    this.databaseId
             );
             nextRequest.setFinalizeReq(this.finalizeReq);
             this.support.addInProgressRequest(nextRequest);

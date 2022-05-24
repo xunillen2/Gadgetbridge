@@ -59,6 +59,8 @@ import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummaryDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutDataSample;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutDataSampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutPaceSample;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutPaceSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySample;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
@@ -1044,9 +1046,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     }
 
     public void addWorkoutSampleData(Long workoutId, List<Aw70Workout.WorkoutData.Response.Data> dataList) {
-        if (workoutId == null) {
+        if (workoutId == null)
             return;
-        }
 
         try (DBHandler db = GBApplication.acquireDB()) {
             HuaweiWorkoutDataSampleDao dao = db.getDaoSession().getHuaweiWorkoutDataSampleDao();
@@ -1067,6 +1068,28 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                         data.unknownData
                 );
                 dao.insertOrReplace(dataSample);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addWorkoutPaceData(Long workoutId, List<Aw70Workout.WorkoutPace.Response.Block> paceList) {
+        if (workoutId == null)
+            return;
+
+        try (DBHandler db = GBApplication.acquireDB()) {
+            HuaweiWorkoutPaceSampleDao dao = db.getDaoSession().getHuaweiWorkoutPaceSampleDao();
+
+            for (Aw70Workout.WorkoutPace.Response.Block block : paceList) {
+                HuaweiWorkoutPaceSample paceSample = new HuaweiWorkoutPaceSample(
+                        workoutId,
+                        block.distance,
+                        block.type,
+                        block.pace,
+                        block.correction
+                );
+                dao.insertOrReplace(paceSample);
             }
         } catch (Exception e) {
             e.printStackTrace();

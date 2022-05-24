@@ -89,7 +89,8 @@ public class GetAw70WorkoutDataRequest extends Request {
                     this.support,
                     this.workoutNumbers,
                     this.remainder,
-                    (short) 0
+                    (short) 0,
+                    this.databaseId
             );
             nextRequest.setFinalizeReq(this.finalizeReq);
             this.support.addInProgressRequest(nextRequest);
