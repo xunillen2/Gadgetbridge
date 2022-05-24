@@ -180,7 +180,7 @@ public abstract class HuaweiCoordinator extends AbstractDeviceCoordinator {
 
     @Override
     public boolean supportsActivityTracks() {
-        return false;
+        return true;
     }
 
     @Override

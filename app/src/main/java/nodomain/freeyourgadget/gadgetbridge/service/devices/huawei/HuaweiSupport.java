@@ -669,31 +669,24 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 start = 946684800;
         }
 
-        if (this.getCoordinator().getDeviceType() == DeviceType.HUAWEIBANDAW70) {
-            TransactionBuilder transactionBuilder = createTransactionBuilder("FetchWorkoutData");
-            // TODO: maybe use a different string from the other synchronization
-            transactionBuilder.add(new SetDeviceBusyAction(getDevice(), getContext().getString(R.string.busy_task_fetch_activity_data), getContext()));
+        TransactionBuilder transactionBuilder = createTransactionBuilder("FetchWorkoutData");
+        // TODO: maybe use a different string from the other synchronization
+        transactionBuilder.add(new SetDeviceBusyAction(getDevice(), getContext().getString(R.string.busy_task_fetch_activity_data), getContext()));
 
-            final GetAw70WorkoutCountRequest getAw70WorkoutCountRequest = new GetAw70WorkoutCountRequest(this, transactionBuilder, start, end);
-            getAw70WorkoutCountRequest.setFinalizeReq(new RequestCallback() {
-                @Override
-                public void call() {
-                    handleSyncFinished();
-                }
-            });
-
-            try {
-                responseManager.addHandler(getAw70WorkoutCountRequest);
-                getAw70WorkoutCountRequest.perform();
-            } catch (IOException e) {
+        final GetAw70WorkoutCountRequest getAw70WorkoutCountRequest = new GetAw70WorkoutCountRequest(this, transactionBuilder, start, end);
+        getAw70WorkoutCountRequest.setFinalizeReq(new RequestCallback() {
+            @Override
+            public void call() {
                 handleSyncFinished();
-                e.printStackTrace();
             }
-        } else {
-            // TODO: non-aw70 bands
+        });
 
-            LOG.warn("Workout synchronization is not supported on non-aw70 bands yet.");
-            GB.toast(getContext(), "Workout synchronization is not supported on non-aw70 bands yet.", Toast.LENGTH_SHORT, GB.ERROR);
+        try {
+            responseManager.addHandler(getAw70WorkoutCountRequest);
+            getAw70WorkoutCountRequest.perform();
+        } catch (IOException e) {
+            handleSyncFinished();
+            e.printStackTrace();
         }
     }
 
