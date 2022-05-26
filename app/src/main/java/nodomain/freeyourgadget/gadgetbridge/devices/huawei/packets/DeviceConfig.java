@@ -447,6 +447,58 @@ public class DeviceConfig {
         }
     }
 
+    public static class DndDeleteRequest extends HuaweiPacket {
+        public static final int id = 0x0B;
+
+        public DndDeleteRequest(HuaweiPacket.SecretsProvider secretsProvider) {
+            super(secretsProvider);
+
+            this.serviceId = DeviceConfig.id;
+            this.commandId = id;
+
+            this.tlv = new HuaweiTLV()
+                .put(0x81, new HuaweiTLV()
+                    .put(0x02, (byte) 0x01)
+                );
+            this.complete = true;
+        }
+    }
+
+    public static class DndAddRequest extends HuaweiPacket {
+        public static final int id = 0x0C;
+
+        public DndAddRequest(
+            HuaweiPacket.SecretsProvider secretsProvider,
+            boolean dndEnable,
+            byte[] start,
+            byte[] end,
+            int cycle,
+            int dndPriority,
+            boolean statusLiftWrist,
+            boolean statusDndLiftWrist
+        ) {
+            super(secretsProvider);
+
+            this.serviceId = DeviceConfig.id;
+            this.commandId = id;
+
+            HuaweiTLV dndPacket = new HuaweiTLV()
+                    .put(0x02, (byte) 0x01)
+                    .put(0x03, dndEnable)
+                    .put(0x04, (byte) 0x00)
+                    .put(0x05, start)
+                    .put(0x06, end)
+                    .put(0x07, (byte) cycle);
+
+            if (dndPriority == 0x14) {
+                dndPacket.put(0x08, (short) ((statusLiftWrist && statusDndLiftWrist) ? dndPriority : 0x00));
+            }
+            this.tlv = new HuaweiTLV()
+                    .put(0x81, dndPacket);
+            this.complete = true;
+        }
+    }
+
     public static class FactoryResetRequest extends HuaweiPacket {
         public static final byte id = 0x0D;
 
@@ -492,6 +544,36 @@ public class DeviceConfig {
                     .put(0x01, location);
 
             this.complete = true;
+        }
+    }
+
+    public static class DndPriority {
+        public static final int id = 0x1D;
+
+        public static class Request extends HuaweiPacket {
+            public Request(HuaweiPacket.SecretsProvider secretsProvider) {
+                super(secretsProvider);
+
+                this.serviceId = DeviceConfig.id;
+                this.commandId = id;
+
+                this.tlv = new HuaweiTLV()
+                    .put(0x01);
+                this.complete = true;
+            }
+        }
+
+        public static class Response extends HuaweiPacket {
+            public int priority;
+
+            public Response(SecretsProvider secretsProvider) {
+                super(secretsProvider);
+            }
+
+            @Override
+            protected void parseTlv() {
+                this.priority = (int) this.tlv.getShort(0x01);
+            }
         }
     }
 

@@ -672,6 +672,7 @@
     <string name="mi2_prefs_do_not_disturb_start">Start time</string>
     <string name="mi2_prefs_do_not_disturb_end">End time</string>
     <string name="mi2_prefs_do_not_disturb_lift_wrist">Activate display upon lift during Do Not Disturb</string>
+    <string name="do_not_disturb_lift_wrist_summary">Only if activate display upon lift enabled</string>
     <string name="mi3_prefs_band_screen_unlock">Band screen unlock"</string>
     <string name="mi3_prefs_band_screen_unlock_summary">Swipe up to unlock the band\'s screen</string>
     <string name="mi3_prefs_night_mode">Night mode</string>
@@ -845,6 +846,7 @@
     <string name="mi3_night_mode_sunset">At sunset</string>
     <string name="mi2_dnd_automatic">Automatic (sleep detection)</string>
     <string name="mi2_dnd_scheduled">Scheduled (time interval)</string>
+    <string name="dnd_all_day">All day</string>
     <string name="maximum_duration">Duration</string>
     <string name="discovery_attempting_to_pair">Attempting to pair with %1$s</string>
     <string name="discovery_bonding_failed_immediately">Bonding with %1$s failed immediately.</string>
@@ -1563,6 +1565,14 @@
     <string name="pref_activity_recognition_mode_none">none</string>
     <string name="pref_activity_recognition_mode_ask">ask</string>
     <string name="pref_activity_recognition_mode_auto">auto</string>
+    <string name="pref_repetitions">Repetitions</string>
+    <string name="pref_monday">Monday</string>
+    <string name="pref_tuesday">Tuesday</string>
+    <string name="pref_wednesday">Wednesday</string>
+    <string name="pref_thursday">Thursday</string>
+    <string name="pref_friday">Friday</string>
+    <string name="pref_saturday">Saturday</string>
+    <string name="pref_sunday">Sunday</string>
 
     <string name="menuitem_menu">Menu</string>
     <string name="fossil_hr_button_config_info">Some buttons cannot be configured because their functions are hard-coded in the watch firmware.\n\nWarning: long-pressing the upper button when a watchface from the official Fossil app is installed will also toggle between showing/hiding widgets.</string>

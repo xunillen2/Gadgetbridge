@@ -51,5 +51,6 @@ public final class HuaweiConstants {
     public static final String PREF_HUAWEI_ADDRESS = "huawei_address";
     public static final String PREF_HUAWEI_WORKMODE = "workmode";
     public static final String PREF_HUAWEI_TRUSLEEP = "trusleep";
+    public static final String PREF_HUAWEI_DND_PRIORITY = "do_not_disturb_priority"; // SharedPref for 0x01 0x1D
 
 }

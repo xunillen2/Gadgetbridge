@@ -386,6 +386,13 @@ public class DeviceSpecificSettingsFragment extends PreferenceFragmentCompat imp
         addPreferenceHandlerFor(PREF_DO_NOT_DISTURB);
         addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_START);
         addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_END);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_MO);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_TU);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_WE);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_TH);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_FR);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_SA);
+        addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_SU);
         addPreferenceHandlerFor(PREF_DO_NOT_DISTURB_LIFT_WRIST);
         addPreferenceHandlerFor(PREF_FIND_PHONE);
         addPreferenceHandlerFor(PREF_FIND_PHONE_DURATION);
