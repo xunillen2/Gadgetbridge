@@ -51,26 +51,24 @@ public class HuaweiSettingsCustomizer implements DeviceSpecificSettingsCustomize
 
     @Override
     public void onPreferenceChange(final Preference preference, final DeviceSpecificSettingsHandler handler) {
-        if (device.getType().getKey() >= 450 && device.getType().getKey() < 460) {
-            if (preference.getKey().equals(PREF_DO_NOT_DISTURB)) {
-                final String dndState = ((ListPreference) preference).getValue();
-                final XTimePreference dndStart = (XTimePreference) handler.findPreference(PREF_DO_NOT_DISTURB_START);
-                final XTimePreference dndEnd = (XTimePreference) handler.findPreference(PREF_DO_NOT_DISTURB_END);
-                final SwitchPreference dndLifWrist = (SwitchPreference) handler.findPreference(PREF_DO_NOT_DISTURB_LIFT_WRIST);
-                SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(device.getAddress());
-                boolean statusLiftWrist = sharedPrefs.getBoolean(PREF_LIFTWRIST_NOSHED, false);
+        if (preference.getKey().equals(PREF_DO_NOT_DISTURB)) {
+            final String dndState = ((ListPreference) preference).getValue();
+            final XTimePreference dndStart = (XTimePreference) handler.findPreference(PREF_DO_NOT_DISTURB_START);
+            final XTimePreference dndEnd = (XTimePreference) handler.findPreference(PREF_DO_NOT_DISTURB_END);
+            final SwitchPreference dndLifWrist = (SwitchPreference) handler.findPreference(PREF_DO_NOT_DISTURB_LIFT_WRIST);
+            SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(device.getAddress());
+            boolean statusLiftWrist = sharedPrefs.getBoolean(PREF_LIFTWRIST_NOSHED, false);
 
-                dndStart.setEnabled(false);
-                dndEnd.setEnabled(false);
-                dndLifWrist.setEnabled(true);
-                if (dndState.equals("scheduled")) {
-                    dndStart.setEnabled(true);
-                    dndEnd.setEnabled(true);
-                }
-                if (!statusLiftWrist || dndState.equals("off")) {
-                    dndLifWrist.setChecked(false);
-                    dndLifWrist.setEnabled(false);
-                }
+            dndStart.setEnabled(false);
+            dndEnd.setEnabled(false);
+            dndLifWrist.setEnabled(true);
+            if (dndState.equals("scheduled")) {
+                dndStart.setEnabled(true);
+                dndEnd.setEnabled(true);
+            }
+            if (!statusLiftWrist || dndState.equals("off")) {
+                dndLifWrist.setChecked(false);
+                dndLifWrist.setEnabled(false);
             }
         }
     }
