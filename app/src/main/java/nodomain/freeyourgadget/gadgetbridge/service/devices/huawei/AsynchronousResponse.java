@@ -1,6 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Build;
 
@@ -9,9 +10,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import nodomain.freeyourgadget.gadgetbridge.GBApplication;
+import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventCallControl;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventFindPhone;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventMusicControl;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Calls;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FindPhoneResponse;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicStatusRequest;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.MusicControl;
@@ -31,6 +35,7 @@ public class AsynchronousResponse {
     public void handleResponse(HuaweiPacket response) {
         handleFindPhone(response);
         handleMusicControls(response);
+        handleCallControls(response);
     }
 
     private void handleFindPhone(HuaweiPacket response) {
@@ -129,6 +134,45 @@ public class AsynchronousResponse {
                     e.printStackTrace();
                 }
             }
+        }
+    }
+
+    private void handleCallControls(HuaweiPacket response) {
+        if (response.serviceId == Calls.id && response.commandId == Calls.AnswerCallResponse.id) {
+            if (!(response instanceof Calls.AnswerCallResponse)) {
+                // TODO: exception
+                return;
+            }
+
+            SharedPreferences prefs = GBApplication.getDeviceSpecificSharedPrefs(support.getDevice().getAddress());
+
+            GBDeviceEventCallControl callControlEvent = new GBDeviceEventCallControl();
+            switch (((Calls.AnswerCallResponse) response).action) {
+                case UNKNOWN:
+                    LOG.info("Unknown action for call");
+                    return;
+                case CALL_ACCEPT:
+                    callControlEvent.event = GBDeviceEventCallControl.Event.ACCEPT;
+                    LOG.info("Accepted call");
+
+                    if (!prefs.getBoolean("enable_call_accept", true)) {
+                        LOG.info("Disabled accepting calls, ignoring");
+                        return;
+                    }
+
+                    break;
+                case CALL_REJECT:
+                    callControlEvent.event = GBDeviceEventCallControl.Event.REJECT;
+                    LOG.info("Rejected call");
+
+                    if (!prefs.getBoolean("enable_call_reject", true)) {
+                        LOG.info("Disabled rejecting calls, ignoring");
+                        return;
+                    }
+
+                    break;
+            }
+            support.evaluateGBDeviceEvent(callControlEvent);
         }
     }
 }

@@ -75,6 +75,7 @@ public class HonorBand5Coordinator extends HuaweiCoordinator{
                 R.xml.devicesettings_huawei,
                 R.xml.devicesettings_dateformat,
                 R.xml.devicesettings_timeformat,
+                R.xml.devicesettings_allow_accept_reject_calls,
         };
     }
 
