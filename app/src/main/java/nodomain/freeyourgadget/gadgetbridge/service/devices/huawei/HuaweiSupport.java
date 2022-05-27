@@ -80,11 +80,14 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetA
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetBatteryLevelRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetBondParamsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetBondRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetDndPriorityRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetLinkParamsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetProductInformationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSupportedCommandsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSupportedServicesRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendDndAddRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendFactoryResetRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendDndDeleteRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetActivateOnRotateRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetActivityReminderRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetDateFormatRequest;
@@ -226,6 +229,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 setActivityReminder();
                 setTrusleep();
                 setNotification();
+                initDnd();
             }
             onSetTime();
             getBatteryLevel();
@@ -383,7 +387,6 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     @Override
     public void onSendConfiguration(String config) {
         try {
-            // SharedPreferences prefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
             switch (config) {
                 case DeviceSettingsPreferenceConst.PREF_DATEFORMAT:
                 case DeviceSettingsPreferenceConst.PREF_TIMEFORMAT: {
@@ -436,6 +439,20 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     responseManager.addHandler(setWorkModeReq);
                     setWorkModeReq.perform();
                     break;
+                case DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB:
+                case DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_START:
+                case DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_END:
+                case DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_LIFT_WRIST:
+                case DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_MO:
+                case DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_TU:
+                case DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_WE:
+                case DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_TH:
+                case DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_FR:
+                case DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_SA:
+                case DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_SU: {
+                    setDnd();
+                    break;
+                }
             }
         } catch (IOException e) {
             GB.toast(getContext(), "Configuration of Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
@@ -853,6 +870,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             SetActivateOnRotateRequest setActivateOnRotateReq = new SetActivateOnRotateRequest(this);
             responseManager.addHandler(setActivateOnRotateReq);
             setActivateOnRotateReq.perform();
+            SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
+            boolean statusDndLiftWrist = sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_LIFT_WRIST, false);
+            if (statusDndLiftWrist) {
+                setDnd();
+            }
         } catch (IOException e) {
             GB.toast(getContext(), "Faile to configure Activate on Rotate", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
@@ -894,5 +916,36 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     public HuaweiCoordinator getCoordinator() {
         return ((HuaweiCoordinator) DeviceHelper.getInstance().getCoordinator(this.getDevice()));
+    }
+
+    public void initDnd() {
+        try {
+            GetDndPriorityRequest GetDndPriorityReq = new GetDndPriorityRequest(this);
+            SendDndDeleteRequest sendDndDeleteReq = new SendDndDeleteRequest(this);
+            SendDndAddRequest sendDndAddReq = new SendDndAddRequest(this);
+            GetDndPriorityReq.nextRequest(sendDndDeleteReq);
+            sendDndDeleteReq.nextRequest(sendDndAddReq);
+            responseManager.addHandler(GetDndPriorityReq);
+            responseManager.addHandler(sendDndDeleteReq);
+            responseManager.addHandler(sendDndAddReq);
+            GetDndPriorityReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Faile to init DND", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
+    }
+
+    public void setDnd() {
+        try {
+            SendDndDeleteRequest sendDndDeleteReq = new SendDndDeleteRequest(this);
+            SendDndAddRequest sendDndAddReq = new SendDndAddRequest(this);
+            sendDndDeleteReq.nextRequest(sendDndAddReq);
+            responseManager.addHandler(sendDndDeleteReq);
+            responseManager.addHandler(sendDndAddReq);
+            sendDndDeleteReq.perform();
+        } catch (IOException e) {
+            GB.toast(getContext(), "Faile to set DND", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
     }
 }

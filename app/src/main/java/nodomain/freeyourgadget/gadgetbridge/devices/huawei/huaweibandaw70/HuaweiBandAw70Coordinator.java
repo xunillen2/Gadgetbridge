@@ -60,6 +60,7 @@ public class HuaweiBandAw70Coordinator extends HuaweiCoordinator{
     public int[] getSupportedDeviceSpecificSettings(GBDevice device) {
         return new int[]{
                 R.xml.devicesettings_workmode,
+                R.xml.devicesettings_donotdisturb_allday_liftwirst,
                 R.xml.devicesettings_notifications_enable,
                 R.xml.devicesettings_vibrations_enable,
                 R.xml.devicesettings_inactivity_sheduled,
