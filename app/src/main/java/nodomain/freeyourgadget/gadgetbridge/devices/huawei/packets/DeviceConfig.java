@@ -33,11 +33,8 @@ public class DeviceConfig {
         public static final byte id = 0x01;
 
         public static class Request extends HuaweiPacket {
-            public Request(
-                    SecretsProvider secretsProvider
-            ) {
+            public Request(SecretsProvider secretsProvider) {
                 super(secretsProvider);
-
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
                 this.tlv = new HuaweiTLV()
@@ -55,7 +52,6 @@ public class DeviceConfig {
 
             public Response(SecretsProvider secretsProvider) {
                 super(secretsProvider);
-
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
                 this.isEncrypted = false;
@@ -78,7 +74,8 @@ public class DeviceConfig {
         public static class Request extends HuaweiPacket {
             public Request(SecretsProvider secretsProvider, byte[] allSupportedServices) {
                 super(secretsProvider);
-
+                this.serviceId = DeviceConfig.id;
+                this.commandId = id;
                 this.tlv = new HuaweiTLV()
                         .put(0x01, allSupportedServices);
                 this.complete = true;
@@ -90,7 +87,6 @@ public class DeviceConfig {
 
             public Response(SecretsProvider secretsProvider) {
                 super(secretsProvider);
-                this.isEncrypted = false;
             }
 
             @Override
@@ -112,10 +108,8 @@ public class DeviceConfig {
                     SecretsProvider secretsProvider
             ) {
                 super(secretsProvider);
-
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
-
                 this.tlv = new HuaweiTLV();
             }
 
@@ -146,20 +140,25 @@ public class DeviceConfig {
 
             public Response(SecretsProvider secretsProvider) {
                 super(secretsProvider);
-
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
-
                 this.isEncrypted = false;
             }
 
             @Override
-            protected void parseTlv() {
+            protected void parseTlv() throws ParseException {
                 this.commandsLists = new ArrayList<>();
-
                 CommandsList commandsList = null;
+                HuaweiTLV containerTLV = this.tlv.getObject(0x81);
 
-                for (HuaweiTLV.TLV tlv : this.tlv.getObject(0x81).get()) {
+                if (!containerTLV.contains(0x02)) {
+                    throw new MissingTagException(0x02);
+                }
+                if (!containerTLV.contains(0x04)) {
+                    throw new MissingTagException(0x04);
+                }
+
+                for (HuaweiTLV.TLV tlv : containerTLV.get()) {
                     if ((int) tlv.getTag() == 0x02) {
                         commandsList = new CommandsList();
                         commandsList.service = (int) ByteBuffer.wrap(tlv.getValue()).get();
@@ -173,6 +172,7 @@ public class DeviceConfig {
                             if ((int) tlv.getValue()[i] == 1)
                                 buffer.put((byte) (i + 1));
                         }
+                        commandsList.commands = new byte[buffer.position()];
                         ((ByteBuffer) buffer.rewind()).get(commandsList.commands);
                         this.commandsLists.add(commandsList);
                     } else {
@@ -193,10 +193,8 @@ public class DeviceConfig {
                 byte timeFormat
         ) {
             super(secretsProvider);
-
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
-
             this.tlv = new HuaweiTLV()
                     .put(0x81, new HuaweiTLV()
                             .put(0x02, dateFormat)
@@ -215,10 +213,8 @@ public class DeviceConfig {
                 short zoneOffset
         ) {
             super(secretsProvider);
-
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
-
             this.tlv = new HuaweiTLV()
                     .put(0x01, timestamp)
                     .put(0x02, zoneOffset);
@@ -233,12 +229,10 @@ public class DeviceConfig {
 
             public Request(SecretsProvider secretsProvider) {
                 super(secretsProvider);
-
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
-
                 this.tlv = new HuaweiTLV();
-                for (int i = 0; i < 14; i++) {
+                for (int i = 1; i < 14; i++) {
                     this.tlv.put(i);
                 }
                 this.complete = true;
@@ -263,18 +257,25 @@ public class DeviceConfig {
 
             public Response(SecretsProvider secretsProvider) {
                 super(secretsProvider);
-
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
-
                 this.isEncrypted = false;
             }
 
             @Override
-            protected void parseTlv() {
+            protected void parseTlv() throws ParseException {
+                if (!this.tlv.contains(0x03)) {
+                    throw new MissingTagException(0x03);
+                }
+                if (!this.tlv.contains(0x07)) {
+                    throw new MissingTagException(0x07);
+                }
+                if (!this.tlv.contains(0x0A)) {
+                    throw new MissingTagException(0x0A);
+                }
                 this.hardwareVersion = this.tlv.getString(0x03);
                 this.softwareVersion = this.tlv.getString(0x07);
-                this.productModel = this.tlv.getString(0x0A);
+                this.productModel = this.tlv.getString(0x0A).trim();
             }
         }
     }
@@ -288,10 +289,8 @@ public class DeviceConfig {
                 HuaweiCrypto huaweiCrypto
         ) {
             super(secretsProvider);
-
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
-
             byte[] iv = secretsProvider.getIv();
 
             this.tlv = new HuaweiTLV()
