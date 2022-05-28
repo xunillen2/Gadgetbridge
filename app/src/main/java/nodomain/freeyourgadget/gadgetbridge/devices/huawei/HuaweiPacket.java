@@ -86,6 +86,7 @@ public class HuaweiPacket {
     private static final HashMap<Short, Class<? extends HuaweiPacket>> responsePacketTypes = new HashMap<>();
     static {
         responsePacketTypes.put((short) 0x0101, DeviceConfig.LinkParams.Response.class);
+        responsePacketTypes.put((short) 0x0102, DeviceConfig.SupportedServices.Response.class);
         responsePacketTypes.put((short) 0x0103, DeviceConfig.SupportedCommands.Response.class);
         responsePacketTypes.put((short) 0x0107, DeviceConfig.ProductInfo.Response.class);
         responsePacketTypes.put((short) 0x010F, DeviceConfig.BondParams.Response.class);
@@ -240,7 +241,7 @@ public class HuaweiPacket {
 
         try {
              return packetType.getDeclaredConstructor(SecretsProvider.class).newInstance(secretsProvider).fromPacket(this);
-        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException | ParseException e) {
+        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
             // The new instance cannot be created, so the packet is returned as "raw packet"
             return this;
