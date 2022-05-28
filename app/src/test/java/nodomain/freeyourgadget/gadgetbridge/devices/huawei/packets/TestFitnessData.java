@@ -217,10 +217,13 @@ public class TestFitnessData {
         Assert.assertArrayEquals(new byte[] {0x0e, 0x00, 0x01, 0x00, 0x02, 0x00, 0x03}, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).data);
         Assert.assertEquals(0xCAFEBF67, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).timestamp);
         Assert.assertEquals(3, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).parsedData.size());
+        Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).parsedData.get(0).bitmap);
         Assert.assertEquals(0x02, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).parsedData.get(0).tag);
         Assert.assertEquals(0x01, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).parsedData.get(0).value);
+        Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).parsedData.get(1).bitmap);
         Assert.assertEquals(0x04, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).parsedData.get(1).tag);
         Assert.assertEquals(0x02, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).parsedData.get(1).value);
+        Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).parsedData.get(2).bitmap);
         Assert.assertEquals(0x08, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).parsedData.get(2).tag);
         Assert.assertEquals(0x03, ((FitnessData.MessageData.StepResponse) packet).containers.get(2).parsedData.get(2).value);
         Assert.assertEquals("", ((FitnessData.MessageData.StepResponse) packet).containers.get(2).parsedDataError);
@@ -233,6 +236,7 @@ public class TestFitnessData {
         Assert.assertArrayEquals(new byte[] {0x01, 0x00, 0x01}, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).data);
         Assert.assertEquals(0xCAFEBF67, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).timestamp);
         Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).parsedData.size());
+        Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).parsedData.get(0).bitmap);
         Assert.assertEquals(0x01, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).parsedData.get(0).tag);
         Assert.assertEquals(0x01, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).parsedData.get(0).value);
         Assert.assertEquals("", ((FitnessData.MessageData.StepResponse) packet).containers.get(3).parsedDataError);
@@ -240,6 +244,7 @@ public class TestFitnessData {
         Assert.assertEquals(-1, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).calories);
         Assert.assertEquals(-1, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).distance);
         Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).unknownTVs.size());
+        Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).unknownTVs.get(0).bitmap);
         Assert.assertEquals(0x01, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).unknownTVs.get(0).tag);
         Assert.assertEquals(0x01, ((FitnessData.MessageData.StepResponse) packet).containers.get(3).unknownTVs.get(0).value);
     }
@@ -280,6 +285,7 @@ public class TestFitnessData {
         Assert.assertArrayEquals(new byte[] {0x20, 0x01}, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).data);
         Assert.assertEquals(0x02, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).timestamp);
         Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).parsedData.size());
+        Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).parsedData.get(0).bitmap);
         Assert.assertEquals(0x20, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).parsedData.get(0).tag);
         Assert.assertEquals(0x01, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).parsedData.get(0).value);
         Assert.assertEquals("", ((FitnessData.MessageData.StepResponse) packet).containers.get(0).parsedDataError);
@@ -287,6 +293,7 @@ public class TestFitnessData {
         Assert.assertEquals(-1, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).calories);
         Assert.assertEquals(-1, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).distance);
         Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).unknownTVs.size());
+        Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).unknownTVs.get(0).bitmap);
         Assert.assertEquals(0x20, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).unknownTVs.get(0).tag);
         Assert.assertEquals(0x01, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).unknownTVs.get(0).value);
 
@@ -294,6 +301,7 @@ public class TestFitnessData {
         Assert.assertArrayEquals(new byte[] {0x40, 0x02}, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).data);
         Assert.assertEquals(0x3e, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).timestamp);
         Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).parsedData.size());
+        Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).parsedData.get(0).bitmap);
         Assert.assertEquals(0x40, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).parsedData.get(0).tag);
         Assert.assertEquals(0x02, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).parsedData.get(0).value);
         Assert.assertEquals("", ((FitnessData.MessageData.StepResponse) packet).containers.get(1).parsedDataError);
@@ -301,6 +309,7 @@ public class TestFitnessData {
         Assert.assertEquals(-1, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).calories);
         Assert.assertEquals(-1, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).distance);
         Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).unknownTVs.size());
+        Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).unknownTVs.get(0).bitmap);
         Assert.assertEquals(0x40, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).unknownTVs.get(0).tag);
         Assert.assertEquals(0x02, ((FitnessData.MessageData.StepResponse) packet).containers.get(1).unknownTVs.get(0).value);
     }
@@ -388,5 +397,44 @@ public class TestFitnessData {
                 Assert.fail();
             }
         }
+    }
+
+    @Test
+    public void testSpoData() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.ParseException {
+        byte[] raw = {(byte) 0x5a, (byte) 0x00, (byte) 0x3a, (byte) 0x00, (byte) 0x07, (byte) 0x0b, (byte) 0x7c, (byte) 0x01, (byte) 0x01, (byte) 0x7d, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7e, (byte) 0x20, (byte) 0x30, (byte) 0xdf, (byte) 0x42, (byte) 0xc9, (byte) 0x79, (byte) 0x91, (byte) 0x36, (byte) 0x3d, (byte) 0x80, (byte) 0x6b, (byte) 0x99, (byte) 0xd3, (byte) 0x3f, (byte) 0xbf, (byte) 0x1f, (byte) 0x1e, (byte) 0xc1, (byte) 0x0b, (byte) 0xbf, (byte) 0xcd, (byte) 0xae, (byte) 0x38, (byte) 0x89, (byte) 0x60, (byte) 0x60, (byte) 0xf7, (byte) 0x93, (byte) 0x84, (byte) 0x3a, (byte) 0x09, (byte) 0xd3, (byte) 0x77, (byte) 0x1e, (byte) 0xb9};
+
+        Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
+        tlvField.setAccessible(true);
+
+        HuaweiTLV expectedTlv = new HuaweiTLV().put(0x81, new HuaweiTLV()
+                .put(0x02, (short) 0x1337)
+                .put(0x03, 0xCAFEBEEF)
+                .put(0x84, new HuaweiTLV()
+                        .put(0x05, (byte) 0x00)
+                        .put(0x06, new byte[] {(byte) 0x80, 0x01, 0x42})
+                )
+        );
+
+        HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+
+        Assert.assertEquals(0x07, packet.serviceId);
+        Assert.assertEquals(0x0b, packet.commandId);
+        Assert.assertEquals(expectedTlv, tlvField.get(packet));
+        Assert.assertTrue(packet.complete);
+        Assert.assertTrue(packet instanceof FitnessData.MessageData.StepResponse);
+
+        Assert.assertEquals(0x1337, ((FitnessData.MessageData.StepResponse) packet).number);
+        Assert.assertEquals(0xCAFEBEEF, ((FitnessData.MessageData.StepResponse) packet).timestamp);
+        Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.size());
+
+        Assert.assertEquals(0x00, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).timestampOffset);
+        Assert.assertArrayEquals(new byte[] {(byte) 0x80, 0x01, 0x42}, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).data);
+        Assert.assertEquals(0xCAFEBEEF, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).timestamp);
+        Assert.assertEquals(1, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).parsedData.size());
+        Assert.assertEquals(2, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).parsedData.get(0).bitmap);
+        Assert.assertEquals(0x01, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).parsedData.get(0).tag);
+        Assert.assertEquals(0x42, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).parsedData.get(0).value);
+        Assert.assertEquals("", ((FitnessData.MessageData.StepResponse) packet).containers.get(0).parsedDataError);
+        Assert.assertEquals(0, ((FitnessData.MessageData.StepResponse) packet).containers.get(0).unknownTVs.size());
     }
 }

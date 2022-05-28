@@ -47,6 +47,7 @@ public class GetStepDataRequest extends Request {
                 short steps = (short) subContainer.steps;
                 short calories = (short) subContainer.calories;
                 short distance = (short) subContainer.distance;
+                byte spo = (byte) subContainer.spo;
 
                 if (steps == -1)
                     steps = 0;
@@ -59,7 +60,7 @@ public class GetStepDataRequest extends Request {
                     LOG.warn("Unknown tag in step data: " + tv);
                 }
 
-                this.support.addStepData(dataTimestamp, steps, calories, distance);
+                this.support.addStepData(dataTimestamp, steps, calories, distance, spo);
             } else {
                 LOG.error(subContainer.parsedDataError);
             }

@@ -105,10 +105,12 @@ public class FitnessData {
         public static class StepResponse extends HuaweiPacket {
             public static class SubContainer {
                 public static class TV {
+                    public final byte bitmap;
                     public final byte tag;
                     public final short value;
 
-                    public TV(byte tag, short value) {
+                    public TV(byte bitmap, byte tag, short value) {
+                        this.bitmap = bitmap;
                         this.tag = tag;
                         this.value = value;
                     }
@@ -116,7 +118,8 @@ public class FitnessData {
                     @Override
                     public String toString() {
                         return "TV{" +
-                                "tag=" + tag +
+                                "bitmap=" + bitmap +
+                                ", tag=" + tag +
                                 ", value=" + value +
                                 '}';
                     }
@@ -140,6 +143,8 @@ public class FitnessData {
                 public int calories = -1;
                 public int distance = -1;
 
+                public int spo = -1;
+
                 public List<TV> unknownTVs = null;
             }
 
@@ -147,10 +152,10 @@ public class FitnessData {
             public int timestamp;
             public List<SubContainer> containers;
 
-            private static final List<Byte> singleByteTagList = new ArrayList<>();
+            private static final List<Byte> singleByteTagListBitmap1 = new ArrayList<>();
             static {
-                singleByteTagList.add((byte) 0x20);
-                singleByteTagList.add((byte) 0x40);
+                singleByteTagListBitmap1.add((byte) 0x20);
+                singleByteTagListBitmap1.add((byte) 0x40);
             }
 
             public StepResponse(SecretsProvider secretsProvider) {
@@ -211,7 +216,7 @@ public class FitnessData {
                     if ((featureBitmap1 & bitToCheck) != 0) {
                         short value;
 
-                        if (singleByteTagList.contains(bitToCheck)) {
+                        if (singleByteTagListBitmap1.contains(bitToCheck)) {
                             if (data.length - 1 < i) {
                                 returnValue.parsedData = null;
                                 returnValue.parsedDataError = "Data is too short for selected features.";
@@ -230,7 +235,7 @@ public class FitnessData {
                         }
 
                         // The bitToCheck is used as tag, which may not be optimal, but works
-                        SubContainer.TV tv = new SubContainer.TV(bitToCheck, value);
+                        SubContainer.TV tv = new SubContainer.TV((byte) 1, bitToCheck, value);
                         returnValue.parsedData.add(tv);
 
                         if (bitToCheck == 0x02)
@@ -244,7 +249,28 @@ public class FitnessData {
                     }
                 }
 
-                // TODO: second bitmap
+                if (featureBitmap2 != 0) {
+                    // We want to check 8 bits here, and java is java, so we use a short
+                    for (short bitToCheck = 1; bitToCheck < 0x0100; bitToCheck <<= 1) {
+                        if ((featureBitmap2 & bitToCheck) != 0) {
+                            if (data.length - 1 < i) {
+                                returnValue.parsedData = null;
+                                returnValue.parsedDataError = "Data is too short for selected features.";
+                                return;
+                            }
+
+                            byte value = data[i++];
+
+                            SubContainer.TV tv = new SubContainer.TV((byte) 2, (byte) bitToCheck, value);
+                            returnValue.parsedData.add(tv);
+
+                            if (bitToCheck == 0x01)
+                                returnValue.spo = value;
+                            else
+                                returnValue.unknownTVs.add(tv);
+                        }
+                    }
+                }
             }
         }
     }

@@ -168,7 +168,8 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
                 sample.getRawIntensity(),
                 sample.getSteps(),
                 sample.getCalories(),
-                sample.getDistance()
+                sample.getDistance(),
+                sample.getSpo()
         );
         sampleCopy.setProvider(sample.getProvider());
         return sampleCopy;
@@ -182,6 +183,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
         end.setSteps(ActivitySample.NOT_MEASURED);
         end.setCalories(ActivitySample.NOT_MEASURED);
         end.setDistance(ActivitySample.NOT_MEASURED);
+        end.setSpo(ActivitySample.NOT_MEASURED);
         end.setOtherTimestamp(start.getTimestamp());
 
         getSampleDao().insertOrReplace(start);
@@ -198,6 +200,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
             end.setSteps(ActivitySample.NOT_MEASURED);
             end.setCalories(ActivitySample.NOT_MEASURED);
             end.setDistance(ActivitySample.NOT_MEASURED);
+            end.setSpo(ActivitySample.NOT_MEASURED);
             end.setOtherTimestamp(start.getTimestamp());
 
             newSamples.add(start);
@@ -317,6 +320,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
                     endOutOfBoundsSample.setSteps(ActivitySample.NOT_MEASURED);
                     endOutOfBoundsSample.setCalories(ActivitySample.NOT_MEASURED);
                     endOutOfBoundsSample.setDistance(ActivitySample.NOT_MEASURED);
+                    endOutOfBoundsSample.setSpo(ActivitySample.NOT_MEASURED);
                     endOutOfBoundsSample.setOtherTimestamp(sample.getTimestamp());
                     endOutOfBoundsSamples.add(endOutOfBoundsSample);
                 }
@@ -331,6 +335,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
                             (byte) 0x00,
                             ActivitySample.NOT_MEASURED,
                             0,
+                            ActivitySample.NOT_MEASURED,
                             ActivitySample.NOT_MEASURED,
                             ActivitySample.NOT_MEASURED,
                             ActivitySample.NOT_MEASURED
@@ -375,6 +380,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
                         preSample.setSteps(ActivitySample.NOT_MEASURED);
                         preSample.setCalories(ActivitySample.NOT_MEASURED);
                         preSample.setDistance(ActivitySample.NOT_MEASURED);
+                        preSample.setSpo(ActivitySample.NOT_MEASURED);
                         preSample.setOtherTimestamp(sample.getTimestamp());
                         processedSamples.add(0, preSample);
                     } else {
@@ -400,6 +406,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
                         (byte) 0x00,
                         ActivitySample.NOT_MEASURED,
                         0,
+                        ActivitySample.NOT_MEASURED,
                         ActivitySample.NOT_MEASURED,
                         ActivitySample.NOT_MEASURED,
                         ActivitySample.NOT_MEASURED

@@ -811,6 +811,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     1,
                     ActivitySample.NOT_MEASURED,
                     ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED,
                     ActivitySample.NOT_MEASURED
             );
             activitySample.setProvider(sampleProvider);
@@ -821,7 +822,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         }
     }
 
-    public void addStepData(int timestamp, short steps, short calories, short distance) {
+    public void addStepData(int timestamp, short steps, short calories, short distance, byte spo) {
         try (DBHandler db = GBApplication.acquireDB()) {
             Long userId = DBHelper.getUser(db.getDaoSession()).getId();
             Long deviceId = DBHelper.getDevice(getDevice(), db.getDaoSession()).getId();
@@ -837,7 +838,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     1,
                     steps,
                     calories,
-                    distance
+                    distance,
+                    spo
             );
             activitySample.setProvider(sampleProvider);
 
