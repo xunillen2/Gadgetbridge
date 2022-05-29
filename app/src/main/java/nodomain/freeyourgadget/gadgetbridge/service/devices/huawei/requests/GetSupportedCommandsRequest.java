@@ -52,7 +52,7 @@ public class GetSupportedCommandsRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
+    protected byte[] createRequest() throws RequestCreationException {
         if (commandsRequests.isEmpty()) {
             byte[] activatedServices = pastRequest.getValueReturned();
             DeviceConfig.SupportedCommands.Request commandsRequest = new DeviceConfig.SupportedCommands.Request(support.secretsProvider);
@@ -65,7 +65,12 @@ public class GetSupportedCommandsRequest extends Request {
                 }
             }
         }
-        return commandsRequests.remove(0).serialize();
+        try {
+            return commandsRequests.remove(0).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

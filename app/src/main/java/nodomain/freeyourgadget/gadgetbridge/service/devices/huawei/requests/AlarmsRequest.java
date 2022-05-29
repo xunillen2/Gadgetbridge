@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.model.Alarm;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Alarms;
@@ -74,14 +75,18 @@ public class AlarmsRequest extends Request {
     }
     
     @Override
-    protected byte[] createRequest() {
-        if (eventAlarmsRequest != null) {
-            return eventAlarmsRequest.serialize();
-        } else if (smartAlarmRequest != null) {
-            return smartAlarmRequest.serialize();
-        } else {
-            // TODO: exception
-            return new byte[] {};
+    protected byte[] createRequest() throws RequestCreationException {
+        try {
+            if (eventAlarmsRequest != null) {
+                return eventAlarmsRequest.serialize();
+            } else if (smartAlarmRequest != null) {
+                return smartAlarmRequest.serialize();
+            } else {
+                throw new RequestCreationException();
+            }
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
         }
     }
 

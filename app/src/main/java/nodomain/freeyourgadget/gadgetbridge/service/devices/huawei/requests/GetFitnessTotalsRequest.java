@@ -1,6 +1,7 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 
@@ -14,8 +15,13 @@ public class GetFitnessTotalsRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
-        return new FitnessData.FitnessTotals.Request(support.secretsProvider).serialize();
+    protected byte[] createRequest() throws RequestCreationException {
+        try {
+            return new FitnessData.FitnessTotals.Request(support.secretsProvider).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

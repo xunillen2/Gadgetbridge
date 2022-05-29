@@ -23,7 +23,7 @@ public class TestFitnessData {
     };
 
     @Test
-    public void testMessageCountRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testMessageCountRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         int startSleep = 0x00000000;
         int endSleep = 0x01020304;
         int startStep = 0x01020304;
@@ -91,7 +91,7 @@ public class TestFitnessData {
     }
 
     @Test
-    public void testMessageDataRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testMessageDataRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiTLV.CryptoException, HuaweiPacket.CryptoException {
         short count = 0x1337;
 
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
@@ -316,7 +316,7 @@ public class TestFitnessData {
 
     @SuppressWarnings("ConstantConditions")
     @Test
-    public void testActivityReminderRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testActivityReminderRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiTLV.CryptoException, HuaweiPacket.CryptoException {
         boolean longSitSwitch = false;
         byte longSitInterval = 0x00;
         byte[] longSitStart = {0x01, 0x02};
@@ -356,7 +356,7 @@ public class TestFitnessData {
 
     @SuppressWarnings("ConstantConditions")
     @Test
-    public void testTruSleepRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testTruSleepRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiTLV.CryptoException, HuaweiPacket.CryptoException {
         boolean truSleepSwitch = false;
 
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");

@@ -23,7 +23,7 @@ public class TestAlarms {
     };
 
     @Test
-    public void testEventAlarmsRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testEventAlarmsRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
         tlvField.setAccessible(true);
 
@@ -91,7 +91,7 @@ public class TestAlarms {
     }
 
     @Test
-    public void testSmartAlarmRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testSmartAlarmRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
         tlvField.setAccessible(true);
 

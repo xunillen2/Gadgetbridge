@@ -19,6 +19,7 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
@@ -32,8 +33,13 @@ public class GetBondParamsRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
-        return new DeviceConfig.BondParams.Request(support.secretsProvider, support.getSerial(), support.getMacAddress()).serialize();
+    protected byte[] createRequest() throws RequestCreationException {
+        try {
+            return new DeviceConfig.BondParams.Request(support.secretsProvider, support.getSerial(), support.getMacAddress()).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

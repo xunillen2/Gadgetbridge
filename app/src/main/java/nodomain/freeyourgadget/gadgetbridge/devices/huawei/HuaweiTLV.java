@@ -25,10 +25,17 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
@@ -40,6 +47,8 @@ public class HuaweiTLV {
         HuaweiTLV huaweiTLV = (HuaweiTLV) o;
         return Objects.equals(valueMap, huaweiTLV.valueMap);
     }
+
+    public static class CryptoException extends Exception { }
 
     public static class TLV {
         private final byte tag;
@@ -299,19 +308,29 @@ public class HuaweiTLV {
         return msg.substring(0, msg.length() - 3);
     }
 
-    public HuaweiTLV encrypt(byte[] key, byte[] iv) {
-        byte[] serializedTLV = serialize();
-        byte[] encryptedTLV = HuaweiCrypto.encrypt(serializedTLV, key, iv);
-        return new HuaweiTLV()
-                .put(CryptoTags.encryption, (byte) 0x01)
-                .put(CryptoTags.initVector, iv)
-                .put(CryptoTags.cipherText, encryptedTLV);
+    public HuaweiTLV encrypt(byte[] key, byte[] iv) throws CryptoException {
+        try {
+            byte[] serializedTLV = serialize();
+            byte[] encryptedTLV = HuaweiCrypto.encrypt(serializedTLV, key, iv);
+            return new HuaweiTLV()
+                    .put(CryptoTags.encryption, (byte) 0x01)
+                    .put(CryptoTags.initVector, iv)
+                    .put(CryptoTags.cipherText, encryptedTLV);
+        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+            e.printStackTrace();
+            throw new CryptoException();
+        }
     }
 
-    public void decrypt(byte[] key) {
-        byte[] decryptedTLV = HuaweiCrypto.decrypt(getBytes(CryptoTags.cipherText), key, getBytes(CryptoTags.initVector));
-        this.valueMap = new ArrayList<>();
-        parse(decryptedTLV);
+    public void decrypt(byte[] key) throws CryptoException {
+        try {
+            byte[] decryptedTLV = HuaweiCrypto.decrypt(getBytes(CryptoTags.cipherText), key, getBytes(CryptoTags.initVector));
+            this.valueMap = new ArrayList<>();
+            parse(decryptedTLV);
+        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+            e.printStackTrace();
+            throw new CryptoException();
+        }
     }
 }
 

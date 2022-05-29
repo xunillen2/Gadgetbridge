@@ -17,8 +17,15 @@
 package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets;
 
 import java.nio.ByteBuffer;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
@@ -122,7 +129,7 @@ public class DeviceConfig {
             }
 
             @Override
-            public byte[] serialize() {
+            public byte[] serialize() throws CryptoException {
                 this.tlv = new HuaweiTLV()
                         .put(0x81, this.tlv);
                 this.complete = true;
@@ -287,20 +294,25 @@ public class DeviceConfig {
                 byte[] clientSerial,
                 String mac,
                 HuaweiCrypto huaweiCrypto
-        ) {
+        ) throws CryptoException {
             super(secretsProvider);
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
             byte[] iv = secretsProvider.getIv();
 
-            this.tlv = new HuaweiTLV()
-                    .put(0x01)
-                    .put(0x03, (byte) 0x00)
-                    .put(0x05, clientSerial)
-                    .put(0x06, huaweiCrypto.createBondingKey(mac, secretsProvider.getSecretKey(), iv))
-                    .put(0x07, iv);
-            this.isEncrypted = false;
-            this.complete = true;
+            try {
+                this.tlv = new HuaweiTLV()
+                        .put(0x01)
+                        .put(0x03, (byte) 0x00)
+                        .put(0x05, clientSerial)
+                        .put(0x06, huaweiCrypto.createBondingKey(mac, secretsProvider.getSecretKey(), iv))
+                        .put(0x07, iv);
+                this.isEncrypted = false;
+                this.complete = true;
+            } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+                e.printStackTrace();
+                throw new CryptoException("Bonding key creation exception");
+            }
         }
     }
 
@@ -420,8 +432,14 @@ public class DeviceConfig {
 
             @Override
             protected void parseTlv() throws ParseException {
-                if (this.tlv.contains(0x7C) && this.tlv.getByte(0x7C) == 0x01)
-                    this.tlv.decrypt(secretsProvider.getSecretKey());
+                if (this.tlv.contains(0x7C) && this.tlv.getByte(0x7C) == 0x01) {
+                     try {
+                         this.tlv.decrypt(secretsProvider.getSecretKey());
+                     } catch (HuaweiTLV.CryptoException e) {
+                         e.printStackTrace();
+                         throw new CryptoException("Decrypt exception");
+                     }
+                }
                 if (this.tlv.contains(0x01))
                     this.level = this.tlv.getByte(0x01);
                 else

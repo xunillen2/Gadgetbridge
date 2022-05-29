@@ -67,6 +67,12 @@ public class HuaweiPacket {
         }
     }
 
+    public static class CryptoException extends ParseException {
+        public CryptoException(String message) {
+            super(message);
+        }
+    }
+
     protected static final int PACKET_MINIMAL_SIZE = 6;
 
     protected SecretsProvider secretsProvider;
@@ -126,7 +132,12 @@ public class HuaweiPacket {
         this.complete = packet.complete;
 
         if (this.tlv.contains(0x7C) && this.tlv.getBoolean(0x7C)) {
-            this.tlv.decrypt(secretsProvider.getSecretKey());
+            try {
+                this.tlv.decrypt(secretsProvider.getSecretKey());
+            } catch (HuaweiTLV.CryptoException e) {
+                e.printStackTrace();
+                throw new CryptoException("Decrypt exception");
+            }
         } else {
             if (this.isEncrypted) {
                 // TODO: potentially a log message? We expect it to be encrypted, but it isn't.
@@ -248,7 +259,7 @@ public class HuaweiPacket {
         }
     }
 
-    public byte[] serialize() {
+    public byte[] serialize() throws CryptoException {
         // TODO: necessary for this to work:
         //       - serviceId
         //       - commandId
@@ -256,10 +267,16 @@ public class HuaweiPacket {
         // TODO: maybe use the complete flag to know if it can be serialized?
 
         HuaweiTLV serializableTlv;
-        if (this.isEncrypted)
-            serializableTlv = this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
-        else
+        if (this.isEncrypted) {
+            try {
+                serializableTlv = this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
+            } catch (HuaweiTLV.CryptoException e) {
+                e.printStackTrace();
+                throw new CryptoException("Encrypt exception");
+            }
+        } else {
             serializableTlv = this.tlv;
+        }
 
         int headerLength = 4; // Magic + (bodyLength + 1) + 0x00
         byte[] serializedTLV = serializableTlv.serialize();

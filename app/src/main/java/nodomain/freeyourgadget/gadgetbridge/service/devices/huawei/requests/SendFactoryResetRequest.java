@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
@@ -33,8 +34,13 @@ public class SendFactoryResetRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
-        return new DeviceConfig.FactoryResetRequest(support.secretsProvider).serialize();
+    protected byte[] createRequest() throws RequestCreationException {
+        try {
+            return new DeviceConfig.FactoryResetRequest(support.secretsProvider).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

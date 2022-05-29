@@ -47,6 +47,8 @@ Add capacity to :
 public class Request extends AbstractBTLEOperation<HuaweiSupport> {
     private static final Logger LOG = LoggerFactory.getLogger(Request.class);
 
+    public static class RequestCreationException extends Exception { }
+
     protected byte serviceId;
     protected byte commandId;
     protected HuaweiPacket receivedPacket = null;
@@ -87,27 +89,33 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
     protected void doPerform() throws IOException {
         BluetoothGattCharacteristic characteristic = support
                 .getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_WRITE);
-        byte[] request = createRequest();
-        int mtu = support.getMtu();
-        if (request.length >= mtu) {
-            ByteBuffer buffer = ByteBuffer.wrap(request);
-            byte[] data;
-            while (buffer.hasRemaining()) {
-                int delta = Math.min(mtu, buffer.remaining());
-                data = new byte[delta];
-                buffer.get(data, 0, delta);
-                builder.write(characteristic, data);
+        try {
+            byte[] request = createRequest();
+            int mtu = support.getMtu();
+            if (request.length >= mtu) {
+                ByteBuffer buffer = ByteBuffer.wrap(request);
+                byte[] data;
+                while (buffer.hasRemaining()) {
+                    int delta = Math.min(mtu, buffer.remaining());
+                    data = new byte[delta];
+                    buffer.get(data, 0, delta);
+                    builder.write(characteristic, data);
+                }
+            } else {
+                builder.write(characteristic, request);
             }
-        } else {
-            builder.write(characteristic, request);
-        }
-        builder.wait(100); // Need to wait a little to let some requests end correctly i.e. Battery Level on reconnection to not print correctly
-        if (isSelfQueue) {
-            support.performConnected(builder.getTransaction());
+            builder.wait(100); // Need to wait a little to let some requests end correctly i.e. Battery Level on reconnection to not print correctly
+            if (isSelfQueue) {
+                support.performConnected(builder.getTransaction());
+            }
+        } catch (RequestCreationException e) {
+            e.printStackTrace();
+            // We cannot throw the RequestCreationException, so we throw an IOException
+            throw new IOException("Request could not be created");
         }
     }
 
-    protected byte[] createRequest() {
+    protected byte[] createRequest() throws RequestCreationException {
         return null;
     }
 

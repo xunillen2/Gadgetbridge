@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
@@ -35,12 +36,17 @@ public class SetWearLocationRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
+    protected byte[] createRequest() throws RequestCreationException {
         String locationString = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getString(DeviceSettingsPreferenceConst.PREF_WEARLOCATION, "left");
         byte location = (byte) (locationString.equals("left") ? 1 : 0);
-        return new DeviceConfig.WearLocationRequest(support.secretsProvider, location).serialize();
+        try {
+            return new DeviceConfig.WearLocationRequest(support.secretsProvider, location).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

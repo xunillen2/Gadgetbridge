@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
 
@@ -35,11 +36,15 @@ public class SetTruSleepRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
+    protected byte[] createRequest() throws RequestCreationException {
         boolean truSleepSwitch = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getBoolean(HuaweiConstants.PREF_HUAWEI_TRUSLEEP, false);
-        return new FitnessData.TruSleep.Request(support.secretsProvider, truSleepSwitch).serialize();
+        try {
+            return new FitnessData.TruSleep.Request(support.secretsProvider, truSleepSwitch).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            throw new RequestCreationException();
+        }
     }
 
     @Override

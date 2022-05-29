@@ -441,7 +441,7 @@ public class TestHuaweiTLV {
      * Following test also depends on the HuaweiCrypto class functioning correctly
      */
     @Test
-    public void testEncrypt() {
+    public void testEncrypt() throws HuaweiTLV.CryptoException {
         byte[] key = new byte[16];
         byte[] iv = new byte[16];
         Arrays.fill(key, (byte) 0);
@@ -469,7 +469,7 @@ public class TestHuaweiTLV {
      * Following test also depends on the HuaweiCrypto class functioning correctly
      */
     @Test
-    public void testDecrypt() {
+    public void testDecrypt() throws HuaweiTLV.CryptoException {
         byte[] key = new byte[16];
         byte[] iv = new byte[16];
         Arrays.fill(key, (byte) 0);

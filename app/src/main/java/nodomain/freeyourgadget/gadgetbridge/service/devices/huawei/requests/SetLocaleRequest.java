@@ -27,6 +27,7 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.SettingsActivity;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.LocaleConfig;
 
@@ -40,7 +41,7 @@ public class SetLocaleRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
+    protected byte[] createRequest() throws RequestCreationException {
         String localeString = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getString(DeviceSettingsPreferenceConst.PREF_LANGUAGE, "auto");
@@ -60,7 +61,12 @@ public class SetLocaleRequest extends Request {
             .getString(SettingsActivity.PREF_MEASUREMENT_SYSTEM, getContext().getString(R.string.p_unit_metric));
         LOG.debug("measurementString: " + measurementString);
         byte measurement = measurementString.equals("metric") ? LocaleConfig.MeasurementSystem.metric : LocaleConfig.MeasurementSystem.imperial;
-        return new LocaleConfig.SetLocaleRequest(support.secretsProvider, localeString.getBytes(StandardCharsets.UTF_8), measurement).serialize();
+        try {
+            return new LocaleConfig.SetLocaleRequest(support.secretsProvider, localeString.getBytes(StandardCharsets.UTF_8), measurement).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventBatteryInfo;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 
@@ -34,8 +35,13 @@ public class GetBatteryLevelRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
-        return new DeviceConfig.BatteryLevel.Request(support.secretsProvider).serialize();
+    protected byte[] createRequest() throws RequestCreationException {
+        try {
+            return new DeviceConfig.BatteryLevel.Request(support.secretsProvider).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

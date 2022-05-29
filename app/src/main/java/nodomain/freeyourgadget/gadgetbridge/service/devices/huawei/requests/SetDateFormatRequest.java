@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
@@ -37,7 +38,7 @@ public class SetDateFormatRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
+    protected byte[] createRequest() throws RequestCreationException {
         int time = DeviceConfig.Time.hours12;
         int date;
         String timeFormat = GBApplication
@@ -63,7 +64,12 @@ public class SetDateFormatRequest extends Request {
             default:
                 date = DeviceConfig.Date.yearFirst;
         }
-        return new DeviceConfig.SetDateFormatRequest(support.secretsProvider, (byte) date, (byte) time).serialize();
+        try {
+            return new DeviceConfig.SetDateFormatRequest(support.secretsProvider, (byte) date, (byte) time).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

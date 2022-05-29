@@ -83,8 +83,13 @@ public class SendNotificationRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
-        return this.packet.serialize();
+    protected byte[] createRequest() throws RequestCreationException {
+        try {
+            return this.packet.serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

@@ -17,6 +17,8 @@
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import org.slf4j.Logger;
@@ -24,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
@@ -43,16 +46,21 @@ public class GetAuthRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
+    protected byte[] createRequest() throws RequestCreationException {
         System.arraycopy(pastRequest.getValueReturned(), 2, serverNonce, 0, 16);
         System.arraycopy(pastRequest.getValueReturned(), 0, authVersion, 0, 2);
         huaweiCrypto = new HuaweiCrypto(authVersion);
-        byte[] challenge = huaweiCrypto.digestChallenge(clientNonce, serverNonce);
-        byte[] nonce = ByteBuffer.allocate(18)
-                                        .put(authVersion)
-                                        .put(clientNonce)
-                                        .array();
-        return new DeviceConfig.Auth.Request(support.secretsProvider, challenge, nonce).serialize();
+        try {
+            byte[] challenge = huaweiCrypto.digestChallenge(clientNonce, serverNonce);
+            byte[] nonce = ByteBuffer.allocate(18)
+                                            .put(authVersion)
+                                            .put(clientNonce)
+                                            .array();
+            return new DeviceConfig.Auth.Request(support.secretsProvider, challenge, nonce).serialize();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override
@@ -64,14 +72,19 @@ public class GetAuthRequest extends Request {
             return;
         }
 
-        byte[] expectedAnswer = huaweiCrypto.digestResponse(clientNonce, serverNonce);
-        byte[] actualAnswer = ((DeviceConfig.Auth.Response) receivedPacket).challengeResponse;
-        if (!Arrays.equals(expectedAnswer, actualAnswer)) {
-            throw new GBException("Challenge answer mismatch : "
-                            + StringUtils.bytesToHex(actualAnswer)
-                            + " != "
-                            + StringUtils.bytesToHex(expectedAnswer)
-            );
+        try {
+            byte[] expectedAnswer = huaweiCrypto.digestResponse(clientNonce, serverNonce);
+            byte[] actualAnswer = ((DeviceConfig.Auth.Response) receivedPacket).challengeResponse;
+            if (!Arrays.equals(expectedAnswer, actualAnswer)) {
+                throw new GBException("Challenge answer mismatch : "
+                        + StringUtils.bytesToHex(actualAnswer)
+                        + " != "
+                        + StringUtils.bytesToHex(expectedAnswer)
+                );
+            }
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            e.printStackTrace();
+            throw new GBException("Challenge response digest exception");
         }
     }
 }
