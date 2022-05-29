@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Aw70Workout;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 
@@ -38,8 +39,13 @@ public class GetAw70WorkoutDataRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
-        return new Aw70Workout.WorkoutData.Request(support.secretsProvider, workoutNumbers.workoutNumber, this.number).serialize();
+    protected byte[] createRequest() throws RequestCreationException {
+        try {
+            return new Aw70Workout.WorkoutData.Request(support.secretsProvider, workoutNumbers.workoutNumber, this.number).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

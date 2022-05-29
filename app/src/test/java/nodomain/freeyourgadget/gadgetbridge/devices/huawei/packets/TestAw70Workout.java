@@ -24,7 +24,7 @@ public class TestAw70Workout {
     };
 
     @Test
-    public void testWorkoutCountRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testWorkoutCountRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         int start = 0x00000000;
         int end = 0x01020304;
 
@@ -92,7 +92,7 @@ public class TestAw70Workout {
     }
 
     @Test
-    public void testWorkoutTotalsRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testWorkoutTotalsRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         short number = 0x1337;
 
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
@@ -155,7 +155,7 @@ public class TestAw70Workout {
     }
 
     @Test
-    public void testWorkoutDataRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testWorkoutDataRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         short workoutNumber = 0x0102;
         short dataNumber = 0x0304;
 
@@ -279,7 +279,7 @@ public class TestAw70Workout {
 
         Assert.assertEquals(2, ((Aw70Workout.WorkoutData.Response) packet).dataList.size());
 
-        Assert.assertEquals(0, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).unknownData);
+        Assert.assertNull(((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).unknownData);
         Assert.assertEquals(0x0a0b, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).speed);
         Assert.assertEquals(0x0c0d, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).cadence);
         Assert.assertEquals(0x0e0f, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).stepLength);
@@ -291,7 +291,7 @@ public class TestAw70Workout {
         Assert.assertEquals(0x17, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).backFootLanding);
         Assert.assertEquals(0x18, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).eversionAngle);
 
-        Assert.assertEquals(0, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).unknownData);
+        Assert.assertNull(((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).unknownData);
         Assert.assertEquals(0x191a, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).speed);
         Assert.assertEquals(0x1b1c, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).cadence);
         Assert.assertEquals(0x1d1e, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).stepLength);
@@ -305,7 +305,7 @@ public class TestAw70Workout {
     }
 
     @Test
-    public void testWorkoutPaceRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testWorkoutPaceRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         short workoutNumber = 0x0102;
         short paceNumber = 0x0304;
 
