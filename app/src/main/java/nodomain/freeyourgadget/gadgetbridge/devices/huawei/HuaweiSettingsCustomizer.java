@@ -23,6 +23,8 @@ import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.SwitchPreference;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +34,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpec
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsHandler;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
+import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.XTimePreference;
 
 import static nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst.PREF_LIFTWRIST_NOSHED;
@@ -74,7 +77,7 @@ public class HuaweiSettingsCustomizer implements DeviceSpecificSettingsCustomize
     }
 
     @Override
-    public void customizeSettings(final DeviceSpecificSettingsHandler handler) {}
+    public void customizeSettings(final DeviceSpecificSettingsHandler handleri, Prefs prefs) {}
 
     @Override
     public int describeContents() {
@@ -84,5 +87,10 @@ public class HuaweiSettingsCustomizer implements DeviceSpecificSettingsCustomize
     @Override
     public void writeToParcel(final Parcel dest, final int flags) {
         dest.writeParcelable(device, 0);
+    }
+
+    @Override
+    public Set<String> getPreferenceKeysWithSummary() {
+        return null;
     }
 }
