@@ -48,6 +48,7 @@ public class DeviceConfig {
         }
 
         public static class Response extends HuaweiPacket {
+            public short mtu = 0x0014;
             public byte[] serverNonce;
 
             public Response(SecretsProvider secretsProvider) {
@@ -59,11 +60,13 @@ public class DeviceConfig {
 
             @Override
             protected void parseTlv() throws ParseException {
-                if (this.tlv.contains(0x05)) {
+                if (this.tlv.contains(0x03))
+                    this.mtu = this.tlv.getShort(0x03);
+
+                if (this.tlv.contains(0x05))
                     this.serverNonce = this.tlv.getBytes(0x05);
-                } else {
+                else
                     throw new MissingTagException(0x05);
-                }
             }
         }
     }

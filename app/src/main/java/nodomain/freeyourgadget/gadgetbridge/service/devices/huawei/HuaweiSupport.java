@@ -146,7 +146,6 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     @Override
     protected TransactionBuilder initializeDevice(TransactionBuilder builder) {
-        setMtu();
         builder.setGattCallback(this);
         builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), true);
         deviceMac = gbDevice.getAddress();
@@ -188,19 +187,10 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         return connect();
     }
 
-    protected void setMtu() {
-        String name = gbDevice.getName();
-        if (name != null && (
-            name.toLowerCase().startsWith(HuaweiConstants.HU_BAND3E_NAME) ||
-            name.toLowerCase().startsWith(HuaweiConstants.HU_BAND4E_NAME) ||
-            name.toLowerCase().startsWith(HuaweiConstants.HU_WATCHGT2E_NAME) ||
-            name.toLowerCase().startsWith(HuaweiConstants.HU_WATCHGT_NAME) ||
-            name.toLowerCase().startsWith(HuaweiConstants.HO_BAND3_NAME)
-        )) {
-            mtu = 20;
-        }
+    public void setMtu(short mtu) {
+        this.mtu = mtu;
     }
-    
+
     protected void initializeDeviceFinalize() {
         TransactionBuilder builder = createTransactionBuilder("Initializing");
         builder.setGattCallback(this);

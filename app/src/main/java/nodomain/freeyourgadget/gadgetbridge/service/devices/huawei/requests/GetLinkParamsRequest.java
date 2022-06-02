@@ -52,6 +52,8 @@ public class GetLinkParamsRequest extends Request {
             throw new Exception();
         }
 
+        support.setMtu(((LinkParams.Response) receivedPacket).mtu);
+
         this.serverNonce = ((LinkParams.Response) receivedPacket).serverNonce;
     }
 
