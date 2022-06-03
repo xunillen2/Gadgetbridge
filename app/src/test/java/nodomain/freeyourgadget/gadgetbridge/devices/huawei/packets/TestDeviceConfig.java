@@ -59,7 +59,7 @@ public class TestDeviceConfig {
 
     @Test
     public void testLinkParamsResponse() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.ParseException {
-        byte[] rawLinkParams = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x17, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x05, (byte) 0x12, (byte) 0x00, (byte) 0x01, (byte) 0x6a, (byte) 0xa2, (byte) 0x96, (byte) 0xe3, (byte) 0x76, (byte) 0x41, (byte) 0xb1, (byte) 0x0c, (byte) 0xf8, (byte) 0xaa, (byte) 0xf7, (byte) 0x47, (byte) 0x05, (byte) 0x5d, (byte) 0x0a, (byte) 0xa3, (byte) 0x0b, (byte) 0x8d};
+        byte[] rawLinkParams = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x1b, (byte) 0x00, (byte) 0x01, (byte) 0x01, (byte) 0x03, (byte) 0x02, (byte) 0x00, (byte) 0x14, (byte) 0x05, (byte) 0x12, (byte) 0x00, (byte) 0x01, (byte) 0x6a, (byte) 0xa2, (byte) 0x96, (byte) 0xe3, (byte) 0x76, (byte) 0x41, (byte) 0xb1, (byte) 0x0c, (byte) 0xf8, (byte) 0xaa, (byte) 0xf7, (byte) 0x47, (byte) 0x05, (byte) 0x5d, (byte) 0x0a, (byte) 0xa3, (byte) 0xe8, (byte) 0x9f};
 
         byte[] expectedServerNonce = new byte[] {(byte) 0x00, (byte) 0x01, (byte) 0x6A, (byte) 0xA2, (byte) 0x96, (byte) 0xE3, (byte) 0x76, (byte) 0x41, (byte) 0xB1, (byte) 0x0C, (byte) 0xF8, (byte) 0xAA, (byte) 0xF7, (byte) 0x47, (byte) 0x05, (byte) 0x5D, (byte) 0x0A, (byte) 0xA3};
 
@@ -67,6 +67,7 @@ public class TestDeviceConfig {
         tlvField.setAccessible(true);
 
         HuaweiTLV expectedTlv = new HuaweiTLV()
+                .put(0x03, new byte[] {0x00, 0x14})
                 .put(0x05, expectedServerNonce);
 
         HuaweiPacket packetLinkParams = new HuaweiPacket(secretsProvider).parse(rawLinkParams);
