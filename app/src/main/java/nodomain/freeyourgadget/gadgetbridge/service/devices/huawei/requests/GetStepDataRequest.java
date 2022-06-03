@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
 
@@ -22,8 +23,13 @@ public class GetStepDataRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
-        return new FitnessData.MessageData.Request(support.secretsProvider, this.commandId, this.count).serialize();
+    protected byte[] createRequest() throws RequestCreationException {
+        try {
+            return new FitnessData.MessageData.Request(support.secretsProvider, this.commandId, this.count).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

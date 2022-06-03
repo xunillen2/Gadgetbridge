@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
@@ -38,8 +39,13 @@ public class GetSupportedServicesRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
-        return new DeviceConfig.SupportedServices.Request(support.secretsProvider, this.allSupportedServices).serialize();
+    protected byte[] createRequest() throws RequestCreationException {
+        try {
+            return new DeviceConfig.SupportedServices.Request(support.secretsProvider, this.allSupportedServices).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

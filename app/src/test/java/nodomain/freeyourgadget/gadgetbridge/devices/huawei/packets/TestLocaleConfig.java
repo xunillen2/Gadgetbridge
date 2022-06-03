@@ -23,7 +23,7 @@ public class TestLocaleConfig {
     };
 
     @Test
-    public void testSetLocaleRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testSetLocaleRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
         tlvField.setAccessible(true);
 

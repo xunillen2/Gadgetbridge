@@ -25,7 +25,7 @@ public class TestMusicControl {
     };
 
     @Test
-    public void testMusicStatusRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testMusicStatusRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         int okInput = 0x000186a0;
         int errInput = 0x00000000;
 
@@ -79,7 +79,7 @@ public class TestMusicControl {
     }
 
     @Test
-    public void testMusicInfoRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testMusicInfoRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         String artistName = "Artist";
         String songName = "Song";
         byte playState = 0x01;

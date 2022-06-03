@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.WorkMode;
 
@@ -35,12 +36,17 @@ public class SetWorkModeRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
+    protected byte[] createRequest() throws RequestCreationException {
         String workModeString = GBApplication
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getString(HuaweiConstants.PREF_HUAWEI_WORKMODE, "auto");
         boolean workMode = workModeString.equals("auto");
-        return new WorkMode.SwitchStatusRequest(support.secretsProvider, workMode).serialize();
+        try {
+            return new WorkMode.SwitchStatusRequest(support.secretsProvider, workMode).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

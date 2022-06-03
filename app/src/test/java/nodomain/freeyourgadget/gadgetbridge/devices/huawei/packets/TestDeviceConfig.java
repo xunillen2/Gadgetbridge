@@ -10,8 +10,15 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class TestDeviceConfig {
 
@@ -28,7 +35,7 @@ public class TestDeviceConfig {
     };
 
     @Test
-    public void testLinkParamsRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testLinkParamsRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
         tlvField.setAccessible(true);
 
@@ -79,7 +86,7 @@ public class TestDeviceConfig {
     }
 
     @Test
-    public void testSupportedServicesRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testSupportedServicesRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         byte[] allSupportedServices = new byte[] {(byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04, (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08, (byte) 0x09, (byte) 0x0a, (byte) 0x0b, (byte) 0x0c, (byte) 0x0d, (byte) 0x0e, (byte) 0x0f, (byte) 0x10, (byte) 0x11, (byte) 0x12, (byte) 0x13, (byte) 0x14, (byte) 0x15, (byte) 0x16, (byte) 0x17, (byte) 0x18, (byte) 0x19, (byte) 0x1a, (byte) 0x1b, (byte) 0x1c, (byte) 0x1d, (byte) 0x1e, (byte) 0x1f, (byte) 0x20, (byte) 0x21, (byte) 0x22, (byte) 0x23, (byte) 0x24, (byte) 0x25, (byte) 0x26, (byte) 0x27, (byte) 0x28, (byte) 0x29, (byte) 0x2a, (byte) 0x2b, (byte) 0x2c, (byte) 0x2d, (byte) 0x2e, (byte) 0x2f, (byte) 0x30, (byte) 0x31, (byte) 0x32, (byte) 0x33, (byte) 0x34, (byte) 0x35};
 
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
@@ -129,7 +136,7 @@ public class TestDeviceConfig {
     }
 
     @Test
-    public void testSupportedCommandsRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testSupportedCommandsRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         byte service1 = (byte) 0x01;
         byte[] commands1 = new byte[]{(byte) 0x04, (byte) 0x07, (byte) 0x08, (byte) 0x09, (byte) 0x0A, (byte) 0x0D, (byte) 0x0E, (byte) 0x10, (byte) 0x11, (byte) 0x12, (byte) 0x13, (byte) 0x14, (byte) 0x1B, (byte) 0x1A, (byte) 0x1D, (byte) 0x21, (byte) 0x22, (byte) 0x23, (byte) 0x24, (byte) 0x29, (byte) 0x2A, (byte) 0x2B, (byte) 0x32, (byte) 0x2E, (byte) 0x31, (byte) 0x30, (byte) 0x35, (byte) 0x36, (byte) 0x37, (byte) 0x2F};
         byte service2 = (byte) 0x02;
@@ -214,7 +221,7 @@ public class TestDeviceConfig {
     }
 
     @Test
-    public void testDateFormatRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testDateFormatRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         byte dateformat = (byte) 0x02;
         byte timeFormat = (byte) 0x02;
 
@@ -242,7 +249,7 @@ public class TestDeviceConfig {
     }
 
     @Test
-    public void testTimeRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testTimeRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         int timestamp = 1633987331;
         short zoneOffset = (short) 512;
 
@@ -268,7 +275,7 @@ public class TestDeviceConfig {
     }
 
     @Test
-    public void testProductInformationRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testProductInformationRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
         tlvField.setAccessible(true);
 
@@ -344,29 +351,35 @@ public class TestDeviceConfig {
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
         tlvField.setAccessible(true);
 
-        HuaweiTLV expectedTlv = new HuaweiTLV()
-                .put(0x01)
-                .put(0x03, (byte) 0x00)
-                .put(0x05, clientSerial)
-                .put(0x06, huaweiCrypto.createBondingKey(mac, secretsProvider.getSecretKey(), secretsProvider.getIv()))
-                .put(0x07, secretsProvider.getIv());
+        try {
+            HuaweiTLV expectedTlv = new HuaweiTLV()
+                    .put(0x01)
+                    .put(0x03, (byte) 0x00)
+                    .put(0x05, clientSerial)
+                    .put(0x06, huaweiCrypto.createBondingKey(mac, secretsProvider.getSecretKey(), secretsProvider.getIv()))
+                    .put(0x07, secretsProvider.getIv());
 
-        byte[] serialized = new byte[] {(byte) 0x5A, (byte) 0x00, (byte) 0x44, (byte) 0x00, (byte) 0x01, (byte) 0x0E, (byte) 0x01, (byte) 0x00, (byte) 0x03, (byte) 0x01, (byte) 0x00, (byte) 0x05, (byte) 0x06, (byte) 0x54, (byte) 0x56, (byte) 0x64, (byte) 0x54, (byte) 0x4D, (byte) 0x44, (byte) 0x06, (byte) 0x20, (byte) 0x88, (byte) 0x45, (byte) 0xAA, (byte) 0xB5, (byte) 0x9C, (byte) 0x84, (byte) 0x39, (byte) 0xAE, (byte) 0xD8, (byte) 0xE9, (byte) 0x71, (byte) 0x01, (byte) 0x5D, (byte) 0xC8, (byte) 0x34, (byte) 0x05, (byte) 0xC5, (byte) 0x9A, (byte) 0x6B, (byte) 0xDB, (byte) 0x62, (byte) 0x7D, (byte) 0xC8, (byte) 0xC3, (byte) 0xF4, (byte) 0xCC, (byte) 0x30, (byte) 0x74, (byte) 0x21, (byte) 0xD4, (byte) 0x45, (byte) 0x0E, (byte) 0x07, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x72, (byte) 0xFC};
-        DeviceConfig.BondRequest request = new DeviceConfig.BondRequest(
-                secretsProvider,
-                clientSerial,
-                mac,
-                huaweiCrypto
-        );
-        Assert.assertEquals(0x01, request.serviceId);
-        Assert.assertEquals(0x0E, request.commandId);
-        Assert.assertEquals(expectedTlv, tlvField.get(request));
-        Assert.assertTrue(request.complete);
-        Assert.assertArrayEquals(serialized, request.serialize());
+            byte[] serialized = new byte[]{(byte) 0x5A, (byte) 0x00, (byte) 0x44, (byte) 0x00, (byte) 0x01, (byte) 0x0E, (byte) 0x01, (byte) 0x00, (byte) 0x03, (byte) 0x01, (byte) 0x00, (byte) 0x05, (byte) 0x06, (byte) 0x54, (byte) 0x56, (byte) 0x64, (byte) 0x54, (byte) 0x4D, (byte) 0x44, (byte) 0x06, (byte) 0x20, (byte) 0x88, (byte) 0x45, (byte) 0xAA, (byte) 0xB5, (byte) 0x9C, (byte) 0x84, (byte) 0x39, (byte) 0xAE, (byte) 0xD8, (byte) 0xE9, (byte) 0x71, (byte) 0x01, (byte) 0x5D, (byte) 0xC8, (byte) 0x34, (byte) 0x05, (byte) 0xC5, (byte) 0x9A, (byte) 0x6B, (byte) 0xDB, (byte) 0x62, (byte) 0x7D, (byte) 0xC8, (byte) 0xC3, (byte) 0xF4, (byte) 0xCC, (byte) 0x30, (byte) 0x74, (byte) 0x21, (byte) 0xD4, (byte) 0x45, (byte) 0x0E, (byte) 0x07, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x72, (byte) 0xFC};
+            DeviceConfig.BondRequest request = new DeviceConfig.BondRequest(
+                    secretsProvider,
+                    clientSerial,
+                    mac,
+                    huaweiCrypto
+            );
+
+            Assert.assertEquals(0x01, request.serviceId);
+            Assert.assertEquals(0x0E, request.commandId);
+            Assert.assertEquals(expectedTlv, tlvField.get(request));
+            Assert.assertTrue(request.complete);
+            Assert.assertArrayEquals(serialized, request.serialize());
+        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException | HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
     }
 
     @Test
-    public void testBondParamsRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testBondParamsRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         byte[] clientSerial = new byte[] {(byte) 0x54, (byte) 0x56, (byte) 0x64, (byte) 0x54, (byte) 0x4D, (byte) 0x44};
         byte[] mac = new byte[] {(byte) 0x46, (byte) 0x46, (byte) 0x3A, (byte) 0x46, (byte) 0x46, (byte) 0x3A, (byte) 0x46, (byte) 0x46, (byte) 0x3A, (byte) 0x46, (byte) 0x46, (byte) 0x3A, (byte) 0x46, (byte) 0x46, (byte) 0x3A, (byte) 0x43, (byte) 0x43};
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
@@ -394,7 +407,7 @@ public class TestDeviceConfig {
     }
 
     @Test
-    public void testAuthRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testAuthRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         byte[] challenge = new byte[] {(byte) 0x9D, (byte) 0xF6, (byte) 0x52, (byte) 0x69, (byte) 0x06, (byte) 0x7B, (byte) 0xEB, (byte) 0x46, (byte) 0x94, (byte) 0xAD, (byte) 0x35, (byte) 0xE2, (byte) 0x88, (byte) 0xC3, (byte) 0x84, (byte) 0x24, (byte) 0xA2, (byte) 0x55, (byte) 0xD8, (byte) 0x0F, (byte) 0xA7, (byte) 0x68, (byte) 0x21, (byte) 0x9B, (byte) 0xA1, (byte) 0xC3, (byte) 0xDC, (byte) 0x09, (byte) 0x24, (byte) 0x81, (byte) 0x51, (byte) 0x61};
         byte[] nonce = new byte[] {(byte) 0x00, (byte) 0x01, (byte) 0xBF, (byte) 0x1F, (byte) 0xEF, (byte) 0x9F, (byte) 0xF0, (byte) 0xFE, (byte) 0xEF, (byte) 0xEF, (byte) 0x9F, (byte) 0xEF, (byte) 0xF0, (byte) 0xEF, (byte) 0xF8, (byte) 0xFA, (byte) 0xEF, (byte) 0xF0};
 

@@ -16,27 +16,29 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.devices.huawei;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.InvalidKeyException;
+import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.Mac;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import nodomain.freeyourgadget.gadgetbridge.util.GB;
-
 public class HuaweiCrypto {
-    private static final Logger LOG = LoggerFactory.getLogger(HuaweiCrypto.class);
 
     public static final byte[] SECRET_KEY_1_v1 = new byte[]{ 0x6F, 0x75, 0x6A, 0x79,
                                                             0x6D, 0x77, 0x71, 0x34,
@@ -80,25 +82,22 @@ public class HuaweiCrypto {
     }
 
     public static byte[] generateNonce() {
-        return GB.hexStringToByteArray(RandomStringUtils.random(32, true, true));
+        // While technically not a nonce, we need it to be random and rely on the length for the chance of repitition to be small
+        byte[] returnValue = new byte[16];
+        (new SecureRandom()).nextBytes(returnValue);
+        return returnValue;
     }
 
-    private static byte[] calcHmacSha256(byte[] secretKey, byte[] message) {
+    private static byte[] calcHmacSha256(byte[] secretKey, byte[] message) throws NoSuchAlgorithmException, InvalidKeyException {
         byte[] hmacSha256 = null;
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, "HmacSHA256");
-            mac.init(secretKeySpec);
-            hmacSha256 = mac.doFinal(message);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        }
+        Mac mac = Mac.getInstance("HmacSHA256");
+        SecretKeySpec secretKeySpec = new SecretKeySpec(secretKey, "HmacSHA256");
+        mac.init(secretKeySpec);
+        hmacSha256 = mac.doFinal(message);
         return hmacSha256;
     }
 
-    public byte[] computeDigest(byte[] message, byte[] clientNonce, byte[] serverNonce) {
+    public byte[] computeDigest(byte[] message, byte[] clientNonce, byte[] serverNonce) throws NoSuchAlgorithmException, InvalidKeyException {
         byte[] digestSecret;
         if (authVersion == 1) {
             digestSecret = DIGEST_SECRET_v1;
@@ -119,11 +118,11 @@ public class HuaweiCrypto {
         return calcHmacSha256(digestStep1, completeNonce);
     }
 
-    public byte[] digestChallenge(byte[] clientNonce, byte[] serverNonce) {
+    public byte[] digestChallenge(byte[] clientNonce, byte[] serverNonce) throws NoSuchAlgorithmException, InvalidKeyException {
         return computeDigest(MESSAGE_CHALLENGE, clientNonce, serverNonce);
     }
 
-    public byte[] digestResponse(byte[] clientNonce, byte[] serverNonce) {
+    public byte[] digestResponse(byte[] clientNonce, byte[] serverNonce) throws NoSuchAlgorithmException, InvalidKeyException {
         return computeDigest(MESSAGE_RESPONSE, clientNonce, serverNonce);
     }
 
@@ -142,33 +141,23 @@ public class HuaweiCrypto {
         return ivCounter;
     }
 
-    public static byte[] encrypt(byte[] data, byte[] key, byte[] iv){
-        try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
-            AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, paramSpec);
-            return cipher.doFinal(data);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static byte[] encrypt(byte[] data, byte[] key, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+        AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
+        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, paramSpec);
+        return cipher.doFinal(data);
     }
 
-    public static byte[] decrypt(byte[] data, byte[] key, byte[] iv){
-        try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
-            AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, paramSpec);
-            return cipher.doFinal(data);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static byte[] decrypt(byte[] data, byte[] key, byte[] iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+        AlgorithmParameterSpec paramSpec = new IvParameterSpec(iv);
+        cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, paramSpec);
+        return cipher.doFinal(data);
     }
 
-    public byte[] createSecretKey(String macAddress){
+    public byte[] createSecretKey(String macAddress) throws NoSuchAlgorithmException {
         byte[] secret_key_1 = SECRET_KEY_1_v23;
         byte[] secret_key_2 = SECRET_KEY_2_v23;
         if (authVersion == 1) {
@@ -182,23 +171,20 @@ public class HuaweiCrypto {
         for (int i = 0; i < 16; i++) {
             mixedSecretKey[i] = (byte)((((0xFF & secret_key_1[i]) << 4) ^ (0xFF & secret_key_2[i])) & 0xFF);
         }
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] mixedSecretKeyHash = digest.digest(mixedSecretKey);
-            byte[] finalMixedKey = new byte[16];
-            for (int i = 0; i < 16; i++) {
-                finalMixedKey[i] = (byte)((((0xFF & mixedSecretKeyHash[i]) >> 6) ^ (0xFF & macAddressKey[i])) & 0xFF);
-            }
-            MessageDigest digest2 = MessageDigest.getInstance("SHA-256");
-            byte[] finalMixedKeyHash = digest2.digest(finalMixedKey);
-            return Arrays.copyOfRange(finalMixedKeyHash, 0, 16);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] mixedSecretKeyHash = digest.digest(mixedSecretKey);
+        byte[] finalMixedKey = new byte[16];
+        for (int i = 0; i < 16; i++) {
+            finalMixedKey[i] = (byte)((((0xFF & mixedSecretKeyHash[i]) >> 6) ^ (0xFF & macAddressKey[i])) & 0xFF);
         }
-        return null;
+        MessageDigest digest2 = MessageDigest.getInstance("SHA-256");
+        byte[] finalMixedKeyHash = digest2.digest(finalMixedKey);
+        return Arrays.copyOfRange(finalMixedKeyHash, 0, 16);
     }
 
-    public byte[] createBondingKey(String macAddress, byte[] key, byte[] iv){
-        return encrypt(key, createSecretKey(macAddress), iv);
+    public byte[] createBondingKey(String macAddress, byte[] key, byte[] iv) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+        byte[] secretKey = createSecretKey(macAddress);
+        return encrypt(key, secretKey, iv);
     }
 }

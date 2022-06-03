@@ -25,6 +25,7 @@ import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiUtil;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
@@ -40,7 +41,7 @@ public class SendDndAddRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
+    protected byte[] createRequest() throws RequestCreationException {
         SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(support.deviceMac);
 
         int dndPriority = sharedPrefs.getInt(HuaweiConstants.PREF_HUAWEI_DND_PRIORITY, 0x00); //Device priority - accept activation
@@ -64,16 +65,21 @@ public class SendDndAddRequest extends Request {
                 sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_SU, true)
         );
 
-        return new DeviceConfig.DndAddRequest(
-            support.secretsProvider,
-            dndEnable,
-            start,
-            end,
-            cycle,
-            dndPriority,
-            statusLiftWrist,
-            statusDndLiftWrist
-        ).serialize();
+        try {
+            return new DeviceConfig.DndAddRequest(
+                    support.secretsProvider,
+                    dndEnable,
+                    start,
+                    end,
+                    cycle,
+                    dndPriority,
+                    statusLiftWrist,
+                    statusDndLiftWrist
+            ).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

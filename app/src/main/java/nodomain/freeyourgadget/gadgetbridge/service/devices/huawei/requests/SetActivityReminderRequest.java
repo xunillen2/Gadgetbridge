@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiUtil;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
@@ -39,7 +40,7 @@ public class SetActivityReminderRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
+    protected byte[] createRequest() throws RequestCreationException {
         SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(support.deviceMac);
 
         boolean longsitSwitch = sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_INACTIVITY_ENABLE, false);
@@ -58,14 +59,19 @@ public class SetActivityReminderRequest extends Request {
                 sharedPrefs.getBoolean(DeviceSettingsPreferenceConst.PREF_INACTIVITY_SU, false)
         );
 
-        return new FitnessData.ActivityReminder.Request(
-                support.secretsProvider,
-                longsitSwitch,
-                (byte) Integer.parseInt(longsitInterval),
-                start,
-                end,
-                (byte) cycle
-        ).serialize();
+        try {
+            return new FitnessData.ActivityReminder.Request(
+                    support.secretsProvider,
+                    longsitSwitch,
+                    (byte) Integer.parseInt(longsitInterval),
+                    start,
+                    end,
+                    (byte) cycle
+            ).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override

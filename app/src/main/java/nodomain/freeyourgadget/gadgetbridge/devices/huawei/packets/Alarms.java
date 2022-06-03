@@ -46,13 +46,14 @@ public class Alarms {
         }
 
         @Override
-        public byte[] serialize() {
+        public byte[] serialize() throws CryptoException {
             // Finalize the tlv before serializing
             this.alarms.put(0x82, new HuaweiTLV()
                     .put(0x03, (byte) (count + 1))
             );
             this.tlv = new HuaweiTLV().put(0x81, this.alarms);
             this.complete = true;
+
             return super.serialize();
         }
     }

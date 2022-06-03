@@ -24,7 +24,7 @@ public class TestNotifications {
 
     @SuppressWarnings("ConstantConditions")
     @Test
-    public void testNotificationActionRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testNotificationActionRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         short notificationId = 0x01;
         byte notificationType = 0x02;
         boolean vibrate = false;
@@ -88,7 +88,7 @@ public class TestNotifications {
     }
 
     @Test
-    public void testSetNotificationRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testSetNotificationRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
         tlvField.setAccessible(true);
 
@@ -124,7 +124,7 @@ public class TestNotifications {
     }
 
     @Test
-    public void testSetWearMessagePushRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testSetWearMessagePushRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
         tlvField.setAccessible(true);
 

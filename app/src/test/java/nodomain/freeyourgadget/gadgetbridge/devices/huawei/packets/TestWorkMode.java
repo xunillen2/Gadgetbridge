@@ -23,7 +23,7 @@ public class TestWorkMode {
     };
 
     @Test
-    public void testSwitchStatusRequest() throws NoSuchFieldException, IllegalAccessException {
+    public void testSwitchStatusRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
         tlvField.setAccessible(true);
 

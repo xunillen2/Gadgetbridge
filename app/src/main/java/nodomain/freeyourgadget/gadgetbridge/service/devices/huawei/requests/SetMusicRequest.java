@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
@@ -27,7 +28,7 @@ public class SetMusicRequest extends Request {
     }
 
     @Override
-    protected byte[] createRequest() {
+    protected byte[] createRequest() throws RequestCreationException {
         String artistName = "";
         String songName = "";
         byte playState = MusicStateSpec.STATE_UNKNOWN;
@@ -41,14 +42,19 @@ public class SetMusicRequest extends Request {
         byte maxVolume = (byte) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         byte currentVolume = (byte) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
 
-        return new MusicControl.MusicInfo.Request(
-                support.secretsProvider,
-                artistName,
-                songName,
-                playState,
-                maxVolume,
-                currentVolume
-        ).serialize();
+        try {
+            return new MusicControl.MusicInfo.Request(
+                    support.secretsProvider,
+                    artistName,
+                    songName,
+                    playState,
+                    maxVolume,
+                    currentVolume
+            ).serialize();
+        } catch (HuaweiPacket.CryptoException e) {
+            e.printStackTrace();
+            throw new RequestCreationException();
+        }
     }
 
     @Override
