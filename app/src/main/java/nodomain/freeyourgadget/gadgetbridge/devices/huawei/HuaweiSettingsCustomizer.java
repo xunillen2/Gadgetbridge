@@ -24,6 +24,7 @@ import androidx.preference.Preference;
 import androidx.preference.SwitchPreference;
 
 import java.util.Set;
+import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +92,6 @@ public class HuaweiSettingsCustomizer implements DeviceSpecificSettingsCustomize
 
     @Override
     public Set<String> getPreferenceKeysWithSummary() {
-        return null;
+        return Collections.emptySet();
     }
 }
