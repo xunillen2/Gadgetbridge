@@ -74,7 +74,10 @@ public class Aw70Workout {
                     workoutNumber.workoutNumber = subContainerTlv.getShort(0x06);
                     workoutNumber.dataCount = subContainerTlv.getShort(0x07);
                     workoutNumber.paceCount = subContainerTlv.getShort(0x08);
-                    workoutNumber.unknown = subContainerTlv.getShort(0x0a);
+                    if (subContainerTlv.contains(0x0a))
+                        workoutNumber.unknown = subContainerTlv.getShort(0x0a);
+                    else if (subContainerTlv.contains(0x09))
+                        workoutNumber.unknown = subContainerTlv.getShort(0x09);
                     this.workoutNumbers.add(workoutNumber);
                 }
             }

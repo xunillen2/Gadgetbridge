@@ -532,6 +532,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     public void onFetchRecordedData(int dataTypes) {
         if (getDevice().isBusy()) {
             LOG.warn("Device is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.");
+            // TODO: alert the user
             return;
         }
 
@@ -662,11 +663,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
                 start = start + 1;
             } catch (Exception e) {
-                LOG.warn("Exception for getting start time, using 01/01/2000 - 00:00:00.");
+                LOG.warn("Exception for getting start time, using 10/06/2022 - 00:00:00.");
             }
 
             if (start == 0 || start == 1)
-                start = 946684800;
+                start = 1654819200;
         }
 
         TransactionBuilder transactionBuilder = createTransactionBuilder("FetchWorkoutData");
