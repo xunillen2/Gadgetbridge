@@ -456,6 +456,10 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     setDnd();
                     break;
                 }
+                case DeviceSettingsPreferenceConst.PREF_FIND_PHONE:
+                case DeviceSettingsPreferenceConst.PREF_FIND_PHONE_DURATION:
+                    // TODO: enable/disable the find phone applet on band
+                    break;
             }
         } catch (IOException e) {
             GB.toast(getContext(), "Configuration of Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);

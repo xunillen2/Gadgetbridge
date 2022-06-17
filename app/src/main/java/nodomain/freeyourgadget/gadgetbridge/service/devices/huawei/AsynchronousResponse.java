@@ -4,17 +4,28 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Build;
+import android.os.Handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
+import nodomain.freeyourgadget.gadgetbridge.R;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSettingsPreferenceConst;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventCallControl;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventFindPhone;
 import nodomain.freeyourgadget.gadgetbridge.deviceevents.GBDeviceEventMusicControl;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiUtil;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Calls;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FindPhoneResponse;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicStatusRequest;
@@ -27,6 +38,18 @@ public class AsynchronousResponse {
     private static final Logger LOG = LoggerFactory.getLogger(AsynchronousResponse.class);
 
     private final HuaweiSupport support;
+    private final Handler mFindPhoneHandler = new Handler();
+
+    private final static HashMap<Integer, String> dayOfWeekMap = new HashMap<>();
+    static {
+        dayOfWeekMap.put(Calendar.MONDAY, DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_MO);
+        dayOfWeekMap.put(Calendar.TUESDAY, DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_TU);
+        dayOfWeekMap.put(Calendar.WEDNESDAY, DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_WE);
+        dayOfWeekMap.put(Calendar.THURSDAY, DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_TH);
+        dayOfWeekMap.put(Calendar.FRIDAY, DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_FR);
+        dayOfWeekMap.put(Calendar.SATURDAY, DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_SA);
+        dayOfWeekMap.put(Calendar.SUNDAY, DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_SU);
+    }
 
     public AsynchronousResponse(HuaweiSupport support) {
         this.support = support;
@@ -45,6 +68,41 @@ public class AsynchronousResponse {
                 return;
             }
 
+            SharedPreferences sharedPreferences = GBApplication.getDeviceSpecificSharedPrefs(support.deviceMac);
+
+            String findPhone = sharedPreferences.getString(DeviceSettingsPreferenceConst.PREF_FIND_PHONE, support.getContext().getString(R.string.p_off));
+
+            if (findPhone.equals(support.getContext().getString(R.string.p_off))) {
+                LOG.debug("Find phone command received, but it is disabled");
+                // TODO: hide applet on device
+                return;
+            }
+
+            if (sharedPreferences.getBoolean("disable_find_phone_with_dnd", false) && dndActive()) {
+                LOG.debug("Find phone command received, ringing prevented because of DND");
+                // TODO: stop the band from showing as ringing
+                return;
+            }
+
+            if (!findPhone.equals(support.getContext().getString(R.string.p_on))) {
+                // Duration set, stop after specified time
+                String strDuration = sharedPreferences.getString(DeviceSettingsPreferenceConst.PREF_FIND_PHONE_DURATION, "0");
+
+                int duration = Integer.parseInt(strDuration);
+                if (duration > 0) {
+                    mFindPhoneHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            GBDeviceEventFindPhone findPhoneEvent = new GBDeviceEventFindPhone();
+                            findPhoneEvent.event = GBDeviceEventFindPhone.Event.STOP;
+                            support.evaluateGBDeviceEvent(findPhoneEvent);
+
+                            // TODO: stop the band from showing as ringing
+                        }
+                    }, duration * 1000);
+                }
+            }
+
             GBDeviceEventFindPhone findPhoneEvent = new GBDeviceEventFindPhone();
             if (((FindPhoneResponse) response).start)
                 findPhoneEvent.event = GBDeviceEventFindPhone.Event.START;
@@ -52,6 +110,33 @@ public class AsynchronousResponse {
                 findPhoneEvent.event = GBDeviceEventFindPhone.Event.STOP;
             support.evaluateGBDeviceEvent(findPhoneEvent);
         }
+    }
+
+    private boolean dndActive() {
+        SharedPreferences sharedPreferences = GBApplication.getDeviceSpecificSharedPrefs(support.deviceMac);
+
+        String dndSwitch = sharedPreferences.getString(DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB, "off");
+        if (dndSwitch.equals(DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_OFF))
+            return false;
+
+        String startStr = sharedPreferences.getString(DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_START, "00:00");
+        if (dndSwitch.equals("automatic")) startStr = "00:00";
+        String endStr = sharedPreferences.getString(DeviceSettingsPreferenceConst.PREF_DO_NOT_DISTURB_END, "23:59");
+        if (dndSwitch.equals("automatic")) endStr = "23:59";
+
+        LocalTime currentTime = LocalTime.now();
+        LocalTime start = LocalTime.parse(startStr);
+        LocalTime end = LocalTime.parse(endStr);
+
+        if (start.isAfter(currentTime))
+            return false;
+        if (end.isBefore(currentTime))
+            return false;
+
+        Calendar date = Calendar.getInstance();
+        String preferenceString = dayOfWeekMap.get(date.get(Calendar.DAY_OF_WEEK));
+
+        return sharedPreferences.getBoolean(preferenceString, true);
     }
 
     /**
