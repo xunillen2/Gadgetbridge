@@ -41,7 +41,6 @@ public class Workout {
                 public short workoutNumber;
                 public short dataCount;
                 public short paceCount;
-                public short unknown;
             }
 
             public short count;

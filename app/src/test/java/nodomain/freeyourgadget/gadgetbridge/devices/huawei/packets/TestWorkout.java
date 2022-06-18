@@ -80,15 +80,15 @@ public class TestWorkout {
         Assert.assertEquals(0x1337, ((Workout.WorkoutCount.Response) packet).count);
         Assert.assertEquals(2, ((Workout.WorkoutCount.Response) packet).workoutNumbers.size());
 
+        Assert.assertArrayEquals(new byte[] {0x06, 0x02, 0x00, 0x01, 0x07, 0x02, 0x00, 0x02, 0x08, 0x02, 0x00, 0x03, 0x0a, 0x02, 0x00, 0x04}, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).rawData);
         Assert.assertEquals(0x01, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).workoutNumber);
         Assert.assertEquals(0x02, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).dataCount);
         Assert.assertEquals(0x03, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).paceCount);
-        Assert.assertEquals(0x04, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).unknown);
 
+        Assert.assertArrayEquals(new byte[] {0x06, 0x02, 0x00, 0x05, 0x07, 0x02, 0x00, 0x06, 0x08, 0x02, 0x00, 0x07, 0x0a, 0x02, 0x00, 0x08}, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).rawData);
         Assert.assertEquals(0x05, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).workoutNumber);
         Assert.assertEquals(0x06, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).dataCount);
         Assert.assertEquals(0x07, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).paceCount);
-        Assert.assertEquals(0x08, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).unknown);
     }
 
     @Test
@@ -142,6 +142,7 @@ public class TestWorkout {
         Assert.assertEquals(expectedTlv, tlvField.get(packet));
         Assert.assertTrue(packet.complete);
         Assert.assertTrue(packet instanceof Workout.WorkoutTotals.Response);
+        Assert.assertArrayEquals(new byte[] {0x02, 0x02, 0x13, 0x37, 0x03, 0x01, 0x01, 0x04, 0x04, 0x01, 0x02, 0x03, 0x04, 0x05, 0x04, 0x05, 0x06, 0x07, 0x08, 0x06, 0x04, 0x09, 0x0a, 0x0b, 0x0c, 0x07, 0x04, 0x0d, 0x0e, 0x0f, 0x10, 0x08, 0x04, 0x11, 0x12, 0x13, 0x14, 0x09, 0x04, 0x15, 0x16, 0x17, 0x18, 0x12, 0x04, 0x19, 0x1a, 0x1b, 0x1c, 0x14, 0x01, 0x1d}, ((Workout.WorkoutTotals.Response) packet).rawData);
         Assert.assertEquals(0x1337, ((Workout.WorkoutTotals.Response) packet).number);
         Assert.assertEquals(0x01, ((Workout.WorkoutTotals.Response) packet).status);
         Assert.assertEquals(0x01020304, ((Workout.WorkoutTotals.Response) packet).startTime);
