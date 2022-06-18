@@ -705,7 +705,7 @@ public class GBDaoGenerator {
     private static Entity addHuaweiWorkoutSummarySample(Schema schema, Entity user, Entity device) {
         Entity workoutSummary = addEntity(schema, "HuaweiWorkoutSummarySample");
 
-        workoutSummary.setJavaDoc(""); // TODO: write javadoc
+        workoutSummary.setJavaDoc("Contains Huawei Workout Summary samples (one per workout)");
 
         workoutSummary.addLongProperty("workoutId").primaryKey().autoincrement();
 
@@ -733,7 +733,7 @@ public class GBDaoGenerator {
     private static Entity addHuaweiWorkoutDataSample(Schema schema, Entity user, Entity device, Entity summaryEntity) {
         Entity workoutDataSample = addEntity(schema, "HuaweiWorkoutDataSample");
 
-        workoutDataSample.setJavaDoc(""); // TODO: write javadoc
+        workoutDataSample.setJavaDoc("Contains Huawei Workout data samples (multiple per workout)");
 
         Property id = workoutDataSample.addLongProperty("workoutId").primaryKey().notNull().getProperty();
         workoutDataSample.addToOne(summaryEntity, id);
@@ -757,7 +757,7 @@ public class GBDaoGenerator {
     private static Entity addHuaweiWorkoutPaceSample(Schema schema, Entity user, Entity device, Entity summaryEntity) {
         Entity workoutPaceSample = addEntity(schema, "HuaweiWorkoutPaceSample");
 
-        workoutPaceSample.setJavaDoc(""); // TODO: write javadoc
+        workoutPaceSample.setJavaDoc("Contains Huawei Workout pace data samples (one per workout)");
 
         Property id = workoutPaceSample.addLongProperty("workoutId").primaryKey().notNull().getProperty();
         workoutPaceSample.addToOne(summaryEntity, id);

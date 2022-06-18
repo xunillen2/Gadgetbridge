@@ -528,7 +528,9 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     public void onFetchRecordedData(int dataTypes) {
         if (getDevice().isBusy()) {
             LOG.warn("Device is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.");
-            // TODO: alert the user
+            // TODO: better way of letting user know?
+            // TODO: use string that can be translated
+            GB.toast("Devices is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.", Toast.LENGTH_LONG, 0);
             return;
         }
 
