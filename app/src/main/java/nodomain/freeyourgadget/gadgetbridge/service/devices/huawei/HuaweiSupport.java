@@ -962,6 +962,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             if (!results.isEmpty())
                 workoutId = results.get(0).getWorkoutId();
 
+            byte[] raw;
+            if (packet.rawData == null)
+                raw = null;
+            else
+                raw = StringUtils.bytesToHex(packet.rawData).getBytes(StandardCharsets.UTF_8);
+
             HuaweiWorkoutSummarySample summarySample = new HuaweiWorkoutSummarySample(
                     workoutId,
                     deviceId,
@@ -976,7 +982,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     packet.totalTime,
                     packet.duration,
                     packet.type,
-                    packet.rawData
+                    raw
             );
             db.getDaoSession().getHuaweiWorkoutSummarySampleDao().insertOrReplace(summarySample);
 
@@ -1049,6 +1055,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             HuaweiWorkoutDataSampleDao dao = db.getDaoSession().getHuaweiWorkoutDataSampleDao();
 
             for (Workout.WorkoutData.Response.Data data : dataList) {
+                byte[] unknown;
+                if (data.unknownData == null)
+                    unknown = null;
+                else
+                    unknown = StringUtils.bytesToHex(data.unknownData).getBytes(StandardCharsets.UTF_8);
+
                 HuaweiWorkoutDataSample dataSample = new HuaweiWorkoutDataSample(
                         workoutId,
                         data.timestamp,
@@ -1061,7 +1073,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                         data.midFootLanding,
                         data.backFootLanding,
                         data.eversionAngle,
-                        data.unknownData
+                        unknown
                 );
                 dao.insertOrReplace(dataSample);
             }
