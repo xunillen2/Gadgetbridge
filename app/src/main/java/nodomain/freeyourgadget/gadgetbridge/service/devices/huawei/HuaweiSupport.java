@@ -532,6 +532,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             return;
         }
 
+        // TODO: An exception during the parsing can leave GB thinking that the sync is not yet
+        //       finished, but it won't ever complete because of the parsing exception
+        //       Maybe this can be fixed with an exception handler from the callback? If then
+        //       called from the ResponseManager, it may not be too much work to implement.
+
         if (dataTypes == RecordedDataTypes.TYPE_ACTIVITY) {
             fetchActivityData();
         } else if (dataTypes == RecordedDataTypes.TYPE_GPS_TRACKS) {

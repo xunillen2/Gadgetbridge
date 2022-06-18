@@ -60,7 +60,8 @@ public class ResponseManager {
             else
                 receivedPacket = receivedPacket.parse(data);
         } catch (HuaweiPacket.ParseException e) {
-            e.printStackTrace();
+            LOG.error("Packet parse exception", e);
+
             // Clean up so the next message may be parsed correctly
             this.receivedPacket = null;
             return;
