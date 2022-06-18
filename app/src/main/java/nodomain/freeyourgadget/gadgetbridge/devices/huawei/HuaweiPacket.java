@@ -24,7 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Calls;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Aw70Workout;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Workout;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FindPhoneResponse;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
@@ -111,10 +111,10 @@ public class HuaweiPacket {
 
         responsePacketTypes.put((short) 0x0b01, FindPhoneResponse.class);
 
-        responsePacketTypes.put((short) 0x1707, Aw70Workout.WorkoutCount.Response.class);
-        responsePacketTypes.put((short) 0x1708, Aw70Workout.WorkoutTotals.Response.class);
-        responsePacketTypes.put((short) 0x170a, Aw70Workout.WorkoutData.Response.class);
-        responsePacketTypes.put((short) 0x170c, Aw70Workout.WorkoutPace.Response.class);
+        responsePacketTypes.put((short) 0x1707, Workout.WorkoutCount.Response.class);
+        responsePacketTypes.put((short) 0x1708, Workout.WorkoutTotals.Response.class);
+        responsePacketTypes.put((short) 0x170a, Workout.WorkoutData.Response.class);
+        responsePacketTypes.put((short) 0x170c, Workout.WorkoutPace.Response.class);
 
         responsePacketTypes.put((short) 0x2501, MusicControl.MusicStatusResponse.class);
         responsePacketTypes.put((short) 0x2502, MusicControl.MusicInfo.Response.class);

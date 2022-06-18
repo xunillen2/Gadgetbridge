@@ -7,7 +7,7 @@ import java.util.List;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 
-public class Aw70Workout {
+public class Workout {
     public static final byte id = 0x17;
 
     public static class WorkoutCount {
@@ -21,7 +21,7 @@ public class Aw70Workout {
             ) {
                 super(secretsProvider);
 
-                this.serviceId = Aw70Workout.id;
+                this.serviceId = Workout.id;
                 this.commandId = id;
 
                 this.tlv = new HuaweiTLV()
@@ -92,7 +92,7 @@ public class Aw70Workout {
             public Request(SecretsProvider secretsProvider, short number) {
                 super(secretsProvider);
 
-                this.serviceId = Aw70Workout.id;
+                this.serviceId = Workout.id;
                 this.commandId = id;
 
                 this.tlv = new HuaweiTLV().put(0x81, new HuaweiTLV()
@@ -152,7 +152,7 @@ public class Aw70Workout {
             ) {
                 super(secretsProvider);
 
-                this.serviceId = Aw70Workout.id;
+                this.serviceId = Workout.id;
                 this.commandId = id;
 
                 this.tlv = new HuaweiTLV().put(0x81, new HuaweiTLV()
@@ -382,7 +382,7 @@ public class Aw70Workout {
             ) {
                 super(secretsProvider);
 
-                this.serviceId = Aw70Workout.id;
+                this.serviceId = Workout.id;
                 this.commandId = id;
 
                 this.tlv = new HuaweiTLV().put(0x81, new HuaweiTLV()

@@ -24,8 +24,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
-import com.google.gson.JsonObject;
-
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,13 +44,12 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSett
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
-import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiSampleProvider;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Aw70Workout;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Workout;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary;
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummaryDao;
@@ -72,7 +69,6 @@ import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.model.CalendarEventSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CallSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
-import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
@@ -87,7 +83,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Stop
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetFitnessTotalsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSleepDataCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetStepDataCountRequest;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetAw70WorkoutCountRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetWorkoutCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AlarmsRequest;
@@ -674,8 +670,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         // TODO: maybe use a different string from the other synchronization
         transactionBuilder.add(new SetDeviceBusyAction(getDevice(), getContext().getString(R.string.busy_task_fetch_activity_data), getContext()));
 
-        final GetAw70WorkoutCountRequest getAw70WorkoutCountRequest = new GetAw70WorkoutCountRequest(this, transactionBuilder, start, end);
-        getAw70WorkoutCountRequest.setFinalizeReq(new RequestCallback() {
+        final GetWorkoutCountRequest getWorkoutCountRequest = new GetWorkoutCountRequest(this, transactionBuilder, start, end);
+        getWorkoutCountRequest.setFinalizeReq(new RequestCallback() {
             @Override
             public void call() {
                 handleSyncFinished();
@@ -683,8 +679,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         });
 
         try {
-            responseManager.addHandler(getAw70WorkoutCountRequest);
-            getAw70WorkoutCountRequest.perform();
+            responseManager.addHandler(getWorkoutCountRequest);
+            getWorkoutCountRequest.perform();
         } catch (IOException e) {
             handleSyncFinished();
             e.printStackTrace();
@@ -943,7 +939,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         // TODO: potentially do more with this, maybe through realtime data?
     }
 
-    public Long addWorkoutTotalsData(Aw70Workout.WorkoutTotals.Response packet) {
+    public Long addWorkoutTotalsData(Workout.WorkoutTotals.Response packet) {
         try (DBHandler db = GBApplication.acquireDB()) {
             Long userId = DBHelper.getUser(db.getDaoSession()).getId();
             Long deviceId = DBHelper.getDevice(getDevice(), db.getDaoSession()).getId();
@@ -1039,14 +1035,14 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         }
     }
 
-    public void addWorkoutSampleData(Long workoutId, List<Aw70Workout.WorkoutData.Response.Data> dataList) {
+    public void addWorkoutSampleData(Long workoutId, List<Workout.WorkoutData.Response.Data> dataList) {
         if (workoutId == null)
             return;
 
         try (DBHandler db = GBApplication.acquireDB()) {
             HuaweiWorkoutDataSampleDao dao = db.getDaoSession().getHuaweiWorkoutDataSampleDao();
 
-            for (Aw70Workout.WorkoutData.Response.Data data : dataList) {
+            for (Workout.WorkoutData.Response.Data data : dataList) {
                 HuaweiWorkoutDataSample dataSample = new HuaweiWorkoutDataSample(
                         workoutId,
                         data.timestamp,
@@ -1068,14 +1064,14 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         }
     }
 
-    public void addWorkoutPaceData(Long workoutId, List<Aw70Workout.WorkoutPace.Response.Block> paceList) {
+    public void addWorkoutPaceData(Long workoutId, List<Workout.WorkoutPace.Response.Block> paceList) {
         if (workoutId == null)
             return;
 
         try (DBHandler db = GBApplication.acquireDB()) {
             HuaweiWorkoutPaceSampleDao dao = db.getDaoSession().getHuaweiWorkoutPaceSampleDao();
 
-            for (Aw70Workout.WorkoutPace.Response.Block block : paceList) {
+            for (Workout.WorkoutPace.Response.Block block : paceList) {
                 HuaweiWorkoutPaceSample paceSample = new HuaweiWorkoutPaceSample(
                         workoutId,
                         block.distance,

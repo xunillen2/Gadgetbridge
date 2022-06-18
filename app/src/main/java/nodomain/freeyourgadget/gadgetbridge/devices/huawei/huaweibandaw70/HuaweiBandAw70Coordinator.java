@@ -71,10 +71,4 @@ public class HuaweiBandAw70Coordinator extends HuaweiCoordinator{
                 R.xml.devicesettings_allow_accept_reject_calls,
         };
     }
-
-    // TODO: remove when supported for other Huawei bands
-    @Override
-    public boolean supportsActivityTracks() {
-        return true;
-    }
 }

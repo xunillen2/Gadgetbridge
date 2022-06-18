@@ -4,21 +4,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Aw70Workout;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Workout;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 
-public class GetAw70WorkoutCountRequest extends Request {
-    private static final Logger LOG = LoggerFactory.getLogger(GetAw70WorkoutCountRequest.class);
+public class GetWorkoutCountRequest extends Request {
+    private static final Logger LOG = LoggerFactory.getLogger(GetWorkoutCountRequest.class);
 
     private int start = 0;
     private int end = 0;
 
-    public GetAw70WorkoutCountRequest(HuaweiSupport support, TransactionBuilder builder, int start, int end) {
+    public GetWorkoutCountRequest(HuaweiSupport support, TransactionBuilder builder, int start, int end) {
         super(support);
 
-        this.serviceId = Aw70Workout.id;
-        this.commandId = Aw70Workout.WorkoutCount.id;
+        this.serviceId = Workout.id;
+        this.commandId = Workout.WorkoutCount.id;
         this.builder = builder;
 
         this.start = start;
@@ -28,7 +28,7 @@ public class GetAw70WorkoutCountRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new Aw70Workout.WorkoutCount.Request(support.secretsProvider, this.start, this.end).serialize();
+            return new Workout.WorkoutCount.Request(support.secretsProvider, this.start, this.end).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();
@@ -37,12 +37,12 @@ public class GetAw70WorkoutCountRequest extends Request {
 
     @Override
     protected void processResponse() throws Exception {
-        if (!(receivedPacket instanceof Aw70Workout.WorkoutCount.Response)) {
+        if (!(receivedPacket instanceof Workout.WorkoutCount.Response)) {
             // TODO: exception
             return;
         }
 
-        Aw70Workout.WorkoutCount.Response packet = (Aw70Workout.WorkoutCount.Response) receivedPacket;
+        Workout.WorkoutCount.Response packet = (Workout.WorkoutCount.Response) receivedPacket;
 
         if (packet.count != packet.workoutNumbers.size()) {
             // TODO: exception
@@ -50,7 +50,7 @@ public class GetAw70WorkoutCountRequest extends Request {
         }
 
         if (packet.count > 0) {
-            GetAw70WorkoutTotalsRequest nextRequest = new GetAw70WorkoutTotalsRequest(
+            GetWorkoutTotalsRequest nextRequest = new GetWorkoutTotalsRequest(
                     this.support,
                     packet.workoutNumbers.remove(0),
                     packet.workoutNumbers

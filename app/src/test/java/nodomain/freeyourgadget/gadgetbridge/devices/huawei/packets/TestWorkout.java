@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 
-public class TestAw70Workout {
+public class TestWorkout {
 
     HuaweiPacket.SecretsProvider secretsProvider = new HuaweiPacket.SecretsProvider() {
         @Override
@@ -38,7 +38,7 @@ public class TestAw70Workout {
 
         byte[] expected = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x2a, (byte) 0x00, (byte) 0x17, (byte) 0x07, (byte) 0x7c, (byte) 0x01, (byte) 0x01, (byte) 0x7d, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7e, (byte) 0x10, (byte) 0xf7, (byte) 0x48, (byte) 0xf7, (byte) 0x49, (byte) 0x4a, (byte) 0xa5, (byte) 0xb2, (byte) 0xc9, (byte) 0x41, (byte) 0xf5, (byte) 0x7f, (byte) 0xb4, (byte) 0xe9, (byte) 0x17, (byte) 0xac, (byte) 0xb5, (byte) 0x5f, (byte) 0x8e};
 
-        Aw70Workout.WorkoutCount.Request request = new Aw70Workout.WorkoutCount.Request(secretsProvider, start, end);
+        Workout.WorkoutCount.Request request = new Workout.WorkoutCount.Request(secretsProvider, start, end);
 
         Assert.assertEquals(0x17, request.serviceId);
         Assert.assertEquals(0x07, request.commandId);
@@ -76,19 +76,19 @@ public class TestAw70Workout {
         Assert.assertEquals(0x07, packet.commandId);
         Assert.assertEquals(expectedTlv, tlvField.get(packet));
         Assert.assertTrue(packet.complete);
-        Assert.assertTrue(packet instanceof Aw70Workout.WorkoutCount.Response);
-        Assert.assertEquals(0x1337, ((Aw70Workout.WorkoutCount.Response) packet).count);
-        Assert.assertEquals(2, ((Aw70Workout.WorkoutCount.Response) packet).workoutNumbers.size());
+        Assert.assertTrue(packet instanceof Workout.WorkoutCount.Response);
+        Assert.assertEquals(0x1337, ((Workout.WorkoutCount.Response) packet).count);
+        Assert.assertEquals(2, ((Workout.WorkoutCount.Response) packet).workoutNumbers.size());
 
-        Assert.assertEquals(0x01, ((Aw70Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).workoutNumber);
-        Assert.assertEquals(0x02, ((Aw70Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).dataCount);
-        Assert.assertEquals(0x03, ((Aw70Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).paceCount);
-        Assert.assertEquals(0x04, ((Aw70Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).unknown);
+        Assert.assertEquals(0x01, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).workoutNumber);
+        Assert.assertEquals(0x02, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).dataCount);
+        Assert.assertEquals(0x03, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).paceCount);
+        Assert.assertEquals(0x04, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(0).unknown);
 
-        Assert.assertEquals(0x05, ((Aw70Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).workoutNumber);
-        Assert.assertEquals(0x06, ((Aw70Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).dataCount);
-        Assert.assertEquals(0x07, ((Aw70Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).paceCount);
-        Assert.assertEquals(0x08, ((Aw70Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).unknown);
+        Assert.assertEquals(0x05, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).workoutNumber);
+        Assert.assertEquals(0x06, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).dataCount);
+        Assert.assertEquals(0x07, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).paceCount);
+        Assert.assertEquals(0x08, ((Workout.WorkoutCount.Response) packet).workoutNumbers.get(1).unknown);
     }
 
     @Test
@@ -104,7 +104,7 @@ public class TestAw70Workout {
 
         byte[] expected = new byte[] {(byte) 0x5a, (byte) 0x00, (byte) 0x2a, (byte) 0x00, (byte) 0x17, (byte) 0x08, (byte) 0x7c, (byte) 0x01, (byte) 0x01, (byte) 0x7d, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7e, (byte) 0x10, (byte) 0xf6, (byte) 0xfb, (byte) 0xc0, (byte) 0xb6, (byte) 0x4f, (byte) 0x9a, (byte) 0xfa, (byte) 0x77, (byte) 0x53, (byte) 0x28, (byte) 0x7d, (byte) 0x13, (byte) 0xca, (byte) 0x49, (byte) 0xda, (byte) 0xfd, (byte) 0x26, (byte) 0x91};
 
-        Aw70Workout.WorkoutTotals.Request request = new Aw70Workout.WorkoutTotals.Request(secretsProvider, number);
+        Workout.WorkoutTotals.Request request = new Workout.WorkoutTotals.Request(secretsProvider, number);
 
         Assert.assertEquals(0x17, request.serviceId);
         Assert.assertEquals(0x08, request.commandId);
@@ -141,17 +141,17 @@ public class TestAw70Workout {
         Assert.assertEquals(0x08, packet.commandId);
         Assert.assertEquals(expectedTlv, tlvField.get(packet));
         Assert.assertTrue(packet.complete);
-        Assert.assertTrue(packet instanceof Aw70Workout.WorkoutTotals.Response);
-        Assert.assertEquals(0x1337, ((Aw70Workout.WorkoutTotals.Response) packet).number);
-        Assert.assertEquals(0x01, ((Aw70Workout.WorkoutTotals.Response) packet).status);
-        Assert.assertEquals(0x01020304, ((Aw70Workout.WorkoutTotals.Response) packet).startTime);
-        Assert.assertEquals(0x05060708, ((Aw70Workout.WorkoutTotals.Response) packet).endTime);
-        Assert.assertEquals(0x090a0b0c, ((Aw70Workout.WorkoutTotals.Response) packet).calories);
-        Assert.assertEquals(0x0d0e0f10, ((Aw70Workout.WorkoutTotals.Response) packet).distance);
-        Assert.assertEquals(0x11121314, ((Aw70Workout.WorkoutTotals.Response) packet).stepCount);
-        Assert.assertEquals(0x15161718, ((Aw70Workout.WorkoutTotals.Response) packet).totalTime);
-        Assert.assertEquals(0x191a1b1c, ((Aw70Workout.WorkoutTotals.Response) packet).duration);
-        Assert.assertEquals(0x1d, ((Aw70Workout.WorkoutTotals.Response) packet).type);
+        Assert.assertTrue(packet instanceof Workout.WorkoutTotals.Response);
+        Assert.assertEquals(0x1337, ((Workout.WorkoutTotals.Response) packet).number);
+        Assert.assertEquals(0x01, ((Workout.WorkoutTotals.Response) packet).status);
+        Assert.assertEquals(0x01020304, ((Workout.WorkoutTotals.Response) packet).startTime);
+        Assert.assertEquals(0x05060708, ((Workout.WorkoutTotals.Response) packet).endTime);
+        Assert.assertEquals(0x090a0b0c, ((Workout.WorkoutTotals.Response) packet).calories);
+        Assert.assertEquals(0x0d0e0f10, ((Workout.WorkoutTotals.Response) packet).distance);
+        Assert.assertEquals(0x11121314, ((Workout.WorkoutTotals.Response) packet).stepCount);
+        Assert.assertEquals(0x15161718, ((Workout.WorkoutTotals.Response) packet).totalTime);
+        Assert.assertEquals(0x191a1b1c, ((Workout.WorkoutTotals.Response) packet).duration);
+        Assert.assertEquals(0x1d, ((Workout.WorkoutTotals.Response) packet).type);
     }
 
     @Test
@@ -169,7 +169,7 @@ public class TestAw70Workout {
 
         byte[] expected = {(byte) 0x5a, (byte) 0x00, (byte) 0x2a, (byte) 0x00, (byte) 0x17, (byte) 0x0a, (byte) 0x7c, (byte) 0x01, (byte) 0x01, (byte) 0x7d, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7e, (byte) 0x10, (byte) 0xd2, (byte) 0xd7, (byte) 0x55, (byte) 0x23, (byte) 0xeb, (byte) 0x51, (byte) 0x4f, (byte) 0xe0, (byte) 0x35, (byte) 0x6c, (byte) 0x60, (byte) 0xc5, (byte) 0xbf, (byte) 0x61, (byte) 0x68, (byte) 0xd1, (byte) 0x03, (byte) 0x83};
 
-        Aw70Workout.WorkoutData.Request request = new Aw70Workout.WorkoutData.Request(secretsProvider, workoutNumber, dataNumber);
+        Workout.WorkoutData.Request request = new Workout.WorkoutData.Request(secretsProvider, workoutNumber, dataNumber);
 
         Assert.assertEquals(0x17, request.serviceId);
         Assert.assertEquals(0x0a, request.commandId);
@@ -262,46 +262,46 @@ public class TestAw70Workout {
         Assert.assertEquals(0x0a, packet.commandId);
         Assert.assertEquals(expectedTlv, tlvField.get(packet));
         Assert.assertTrue(packet.complete);
-        Assert.assertTrue(packet instanceof Aw70Workout.WorkoutData.Response);
+        Assert.assertTrue(packet instanceof Workout.WorkoutData.Response);
 
-        Assert.assertEquals(0x0102, ((Aw70Workout.WorkoutData.Response) packet).workoutNumber);
-        Assert.assertEquals(0x0304, ((Aw70Workout.WorkoutData.Response) packet).dataNumber);
-        Assert.assertArrayEquals(headerBuf.array(), ((Aw70Workout.WorkoutData.Response) packet).rawHeader);
-        Assert.assertArrayEquals(dataBuf.array(), ((Aw70Workout.WorkoutData.Response) packet).rawData);
+        Assert.assertEquals(0x0102, ((Workout.WorkoutData.Response) packet).workoutNumber);
+        Assert.assertEquals(0x0304, ((Workout.WorkoutData.Response) packet).dataNumber);
+        Assert.assertArrayEquals(headerBuf.array(), ((Workout.WorkoutData.Response) packet).rawHeader);
+        Assert.assertArrayEquals(dataBuf.array(), ((Workout.WorkoutData.Response) packet).rawData);
 
-        Assert.assertEquals(0x0102, ((Aw70Workout.WorkoutData.Response) packet).header.workoutNumber);
-        Assert.assertEquals(0x0304, ((Aw70Workout.WorkoutData.Response) packet).header.dataNumber);
-        Assert.assertEquals(0x05060708, ((Aw70Workout.WorkoutData.Response) packet).header.timestamp);
-        Assert.assertEquals(0x09, ((Aw70Workout.WorkoutData.Response) packet).header.interval);
-        Assert.assertEquals(0x0002, ((Aw70Workout.WorkoutData.Response) packet).header.dataCount);
-        Assert.assertEquals(0x0f, ((Aw70Workout.WorkoutData.Response) packet).header.dataLength);
-        Assert.assertEquals(0x0042, ((Aw70Workout.WorkoutData.Response) packet).header.bitmap);
+        Assert.assertEquals(0x0102, ((Workout.WorkoutData.Response) packet).header.workoutNumber);
+        Assert.assertEquals(0x0304, ((Workout.WorkoutData.Response) packet).header.dataNumber);
+        Assert.assertEquals(0x05060708, ((Workout.WorkoutData.Response) packet).header.timestamp);
+        Assert.assertEquals(0x09, ((Workout.WorkoutData.Response) packet).header.interval);
+        Assert.assertEquals(0x0002, ((Workout.WorkoutData.Response) packet).header.dataCount);
+        Assert.assertEquals(0x0f, ((Workout.WorkoutData.Response) packet).header.dataLength);
+        Assert.assertEquals(0x0042, ((Workout.WorkoutData.Response) packet).header.bitmap);
 
-        Assert.assertEquals(2, ((Aw70Workout.WorkoutData.Response) packet).dataList.size());
+        Assert.assertEquals(2, ((Workout.WorkoutData.Response) packet).dataList.size());
 
-        Assert.assertNull(((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).unknownData);
-        Assert.assertEquals(0x0a0b, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).speed);
-        Assert.assertEquals(0x0c0d, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).cadence);
-        Assert.assertEquals(0x0e0f, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).stepLength);
-        Assert.assertEquals(0x1011, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).groundContactTime);
-        Assert.assertEquals(0x12, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).impact);
-        Assert.assertEquals(0x1314, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).swingAngle);
-        Assert.assertEquals(0x15, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).foreFootLanding);
-        Assert.assertEquals(0x16, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).midFootLanding);
-        Assert.assertEquals(0x17, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).backFootLanding);
-        Assert.assertEquals(0x18, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(0).eversionAngle);
+        Assert.assertNull(((Workout.WorkoutData.Response) packet).dataList.get(0).unknownData);
+        Assert.assertEquals(0x0a0b, ((Workout.WorkoutData.Response) packet).dataList.get(0).speed);
+        Assert.assertEquals(0x0c0d, ((Workout.WorkoutData.Response) packet).dataList.get(0).cadence);
+        Assert.assertEquals(0x0e0f, ((Workout.WorkoutData.Response) packet).dataList.get(0).stepLength);
+        Assert.assertEquals(0x1011, ((Workout.WorkoutData.Response) packet).dataList.get(0).groundContactTime);
+        Assert.assertEquals(0x12, ((Workout.WorkoutData.Response) packet).dataList.get(0).impact);
+        Assert.assertEquals(0x1314, ((Workout.WorkoutData.Response) packet).dataList.get(0).swingAngle);
+        Assert.assertEquals(0x15, ((Workout.WorkoutData.Response) packet).dataList.get(0).foreFootLanding);
+        Assert.assertEquals(0x16, ((Workout.WorkoutData.Response) packet).dataList.get(0).midFootLanding);
+        Assert.assertEquals(0x17, ((Workout.WorkoutData.Response) packet).dataList.get(0).backFootLanding);
+        Assert.assertEquals(0x18, ((Workout.WorkoutData.Response) packet).dataList.get(0).eversionAngle);
 
-        Assert.assertNull(((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).unknownData);
-        Assert.assertEquals(0x191a, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).speed);
-        Assert.assertEquals(0x1b1c, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).cadence);
-        Assert.assertEquals(0x1d1e, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).stepLength);
-        Assert.assertEquals(0x1f20, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).groundContactTime);
-        Assert.assertEquals(0x21, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).impact);
-        Assert.assertEquals(0x2223, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).swingAngle);
-        Assert.assertEquals(0x24, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).foreFootLanding);
-        Assert.assertEquals(0x25, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).midFootLanding);
-        Assert.assertEquals(0x26, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).backFootLanding);
-        Assert.assertEquals(0x27, ((Aw70Workout.WorkoutData.Response) packet).dataList.get(1).eversionAngle);
+        Assert.assertNull(((Workout.WorkoutData.Response) packet).dataList.get(1).unknownData);
+        Assert.assertEquals(0x191a, ((Workout.WorkoutData.Response) packet).dataList.get(1).speed);
+        Assert.assertEquals(0x1b1c, ((Workout.WorkoutData.Response) packet).dataList.get(1).cadence);
+        Assert.assertEquals(0x1d1e, ((Workout.WorkoutData.Response) packet).dataList.get(1).stepLength);
+        Assert.assertEquals(0x1f20, ((Workout.WorkoutData.Response) packet).dataList.get(1).groundContactTime);
+        Assert.assertEquals(0x21, ((Workout.WorkoutData.Response) packet).dataList.get(1).impact);
+        Assert.assertEquals(0x2223, ((Workout.WorkoutData.Response) packet).dataList.get(1).swingAngle);
+        Assert.assertEquals(0x24, ((Workout.WorkoutData.Response) packet).dataList.get(1).foreFootLanding);
+        Assert.assertEquals(0x25, ((Workout.WorkoutData.Response) packet).dataList.get(1).midFootLanding);
+        Assert.assertEquals(0x26, ((Workout.WorkoutData.Response) packet).dataList.get(1).backFootLanding);
+        Assert.assertEquals(0x27, ((Workout.WorkoutData.Response) packet).dataList.get(1).eversionAngle);
     }
 
     @Test
@@ -319,7 +319,7 @@ public class TestAw70Workout {
 
         byte[] expected = {(byte) 0x5a, (byte) 0x00, (byte) 0x2a, (byte) 0x00, (byte) 0x17, (byte) 0x0c, (byte) 0x7c, (byte) 0x01, (byte) 0x01, (byte) 0x7d, (byte) 0x10, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x7e, (byte) 0x10, (byte) 0x0c, (byte) 0x18, (byte) 0x24, (byte) 0x67, (byte) 0x5e, (byte) 0xe9, (byte) 0x8d, (byte) 0x36, (byte) 0x5f, (byte) 0xde, (byte) 0x1c, (byte) 0x9e, (byte) 0xa0, (byte) 0xd7, (byte) 0x0a, (byte) 0x01, (byte) 0xd3, (byte) 0xce};
 
-        Aw70Workout.WorkoutPace.Request request = new Aw70Workout.WorkoutPace.Request(secretsProvider, workoutNumber, paceNumber);
+        Workout.WorkoutPace.Request request = new Workout.WorkoutPace.Request(secretsProvider, workoutNumber, paceNumber);
 
         Assert.assertEquals(0x17, request.serviceId);
         Assert.assertEquals(0x0c, request.commandId);
@@ -369,19 +369,19 @@ public class TestAw70Workout {
         Assert.assertEquals(0x0c, packet.commandId);
         Assert.assertEquals(expectedTlv, tlvField.get(packet));
         Assert.assertTrue(packet.complete);
-        Assert.assertTrue(packet instanceof Aw70Workout.WorkoutPace.Response);
-        Assert.assertEquals(0x0102, ((Aw70Workout.WorkoutPace.Response) packet).workoutNumber);
-        Assert.assertEquals(0x0304, ((Aw70Workout.WorkoutPace.Response) packet).paceNumber);
-        Assert.assertEquals(2, ((Aw70Workout.WorkoutPace.Response) packet).blocks.size());
+        Assert.assertTrue(packet instanceof Workout.WorkoutPace.Response);
+        Assert.assertEquals(0x0102, ((Workout.WorkoutPace.Response) packet).workoutNumber);
+        Assert.assertEquals(0x0304, ((Workout.WorkoutPace.Response) packet).paceNumber);
+        Assert.assertEquals(2, ((Workout.WorkoutPace.Response) packet).blocks.size());
 
-        Assert.assertEquals(0x0506, ((Aw70Workout.WorkoutPace.Response) packet).blocks.get(0).distance);
-        Assert.assertEquals(0x07, ((Aw70Workout.WorkoutPace.Response) packet).blocks.get(0).type);
-        Assert.assertEquals(0x08090a0b, ((Aw70Workout.WorkoutPace.Response) packet).blocks.get(0).pace);
-        Assert.assertEquals(0, ((Aw70Workout.WorkoutPace.Response) packet).blocks.get(0).correction);
+        Assert.assertEquals(0x0506, ((Workout.WorkoutPace.Response) packet).blocks.get(0).distance);
+        Assert.assertEquals(0x07, ((Workout.WorkoutPace.Response) packet).blocks.get(0).type);
+        Assert.assertEquals(0x08090a0b, ((Workout.WorkoutPace.Response) packet).blocks.get(0).pace);
+        Assert.assertEquals(0, ((Workout.WorkoutPace.Response) packet).blocks.get(0).correction);
 
-        Assert.assertEquals(0x0c0d, ((Aw70Workout.WorkoutPace.Response) packet).blocks.get(1).distance);
-        Assert.assertEquals(0x0e, ((Aw70Workout.WorkoutPace.Response) packet).blocks.get(1).type);
-        Assert.assertEquals(0x0f101112, ((Aw70Workout.WorkoutPace.Response) packet).blocks.get(1).pace);
-        Assert.assertEquals(0x1314, ((Aw70Workout.WorkoutPace.Response) packet).blocks.get(1).correction);
+        Assert.assertEquals(0x0c0d, ((Workout.WorkoutPace.Response) packet).blocks.get(1).distance);
+        Assert.assertEquals(0x0e, ((Workout.WorkoutPace.Response) packet).blocks.get(1).type);
+        Assert.assertEquals(0x0f101112, ((Workout.WorkoutPace.Response) packet).blocks.get(1).pace);
+        Assert.assertEquals(0x1314, ((Workout.WorkoutPace.Response) packet).blocks.get(1).correction);
     }
 }

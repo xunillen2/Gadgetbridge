@@ -7,22 +7,22 @@ import java.util.Arrays;
 import java.util.List;
 
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Aw70Workout;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Workout;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 
-public class GetAw70WorkoutPaceRequest extends Request {
-    private static final Logger LOG = LoggerFactory.getLogger(GetAw70WorkoutPaceRequest.class);
+public class GetWorkoutPaceRequest extends Request {
+    private static final Logger LOG = LoggerFactory.getLogger(GetWorkoutPaceRequest.class);
 
-    Aw70Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers;
-    List<Aw70Workout.WorkoutCount.Response.WorkoutNumbers> remainder;
+    Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers;
+    List<Workout.WorkoutCount.Response.WorkoutNumbers> remainder;
     short number;
     Long databaseId;
 
-    public GetAw70WorkoutPaceRequest(HuaweiSupport support, Aw70Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers, List<Aw70Workout.WorkoutCount.Response.WorkoutNumbers> remainder, short number, Long databaseId) {
+    public GetWorkoutPaceRequest(HuaweiSupport support, Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers, List<Workout.WorkoutCount.Response.WorkoutNumbers> remainder, short number, Long databaseId) {
         super(support);
 
-        this.serviceId = Aw70Workout.id;
-        this.commandId = Aw70Workout.WorkoutPace.id;
+        this.serviceId = Workout.id;
+        this.commandId = Workout.WorkoutPace.id;
 
         this.workoutNumbers = workoutNumbers;
         this.remainder = remainder;
@@ -34,7 +34,7 @@ public class GetAw70WorkoutPaceRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new Aw70Workout.WorkoutPace.Request(this.support.secretsProvider ,this.workoutNumbers.workoutNumber, this.number).serialize();
+            return new Workout.WorkoutPace.Request(this.support.secretsProvider ,this.workoutNumbers.workoutNumber, this.number).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();
@@ -43,31 +43,31 @@ public class GetAw70WorkoutPaceRequest extends Request {
 
     @Override
     protected void processResponse() throws Exception {
-        if (!(receivedPacket instanceof Aw70Workout.WorkoutPace.Response)) {
+        if (!(receivedPacket instanceof Workout.WorkoutPace.Response)) {
             // TODO: exception
             return;
         }
 
-        if (((Aw70Workout.WorkoutPace.Response) receivedPacket).workoutNumber != this.workoutNumbers.workoutNumber) {
+        if (((Workout.WorkoutPace.Response) receivedPacket).workoutNumber != this.workoutNumbers.workoutNumber) {
             // TODO: exception or something?
             LOG.error("Incorrect workout number!");
         }
 
-        if (((Aw70Workout.WorkoutPace.Response) receivedPacket).paceNumber != this.number) {
+        if (((Workout.WorkoutPace.Response) receivedPacket).paceNumber != this.number) {
             // TODO: exception or something?
             LOG.error("Incorrect pace number!");
         }
 
         LOG.info("Workout {} pace {}:", this.workoutNumbers.workoutNumber, this.number);
-        LOG.info("Workout  : " + ((Aw70Workout.WorkoutPace.Response) receivedPacket).workoutNumber);
-        LOG.info("Pace     : " + ((Aw70Workout.WorkoutPace.Response) receivedPacket).paceNumber);
-        LOG.info("Block num: " + ((Aw70Workout.WorkoutPace.Response) receivedPacket).blocks.size());
-        LOG.info("Blocks   : " + Arrays.toString(((Aw70Workout.WorkoutPace.Response) receivedPacket).blocks.toArray()));
+        LOG.info("Workout  : " + ((Workout.WorkoutPace.Response) receivedPacket).workoutNumber);
+        LOG.info("Pace     : " + ((Workout.WorkoutPace.Response) receivedPacket).paceNumber);
+        LOG.info("Block num: " + ((Workout.WorkoutPace.Response) receivedPacket).blocks.size());
+        LOG.info("Blocks   : " + Arrays.toString(((Workout.WorkoutPace.Response) receivedPacket).blocks.toArray()));
 
-        support.addWorkoutPaceData(this.databaseId, ((Aw70Workout.WorkoutPace.Response) receivedPacket).blocks);
+        support.addWorkoutPaceData(this.databaseId, ((Workout.WorkoutPace.Response) receivedPacket).blocks);
 
         if (this.workoutNumbers.paceCount > this.number + 1) {
-            GetAw70WorkoutPaceRequest nextRequest = new GetAw70WorkoutPaceRequest(
+            GetWorkoutPaceRequest nextRequest = new GetWorkoutPaceRequest(
                     this.support,
                     this.workoutNumbers,
                     this.remainder,
@@ -79,7 +79,7 @@ public class GetAw70WorkoutPaceRequest extends Request {
             this.nextRequest(nextRequest);
         } else {
             if (remainder.size() > 0) {
-                GetAw70WorkoutTotalsRequest nextRequest = new GetAw70WorkoutTotalsRequest(
+                GetWorkoutTotalsRequest nextRequest = new GetWorkoutTotalsRequest(
                         this.support,
                         remainder.remove(0),
                         remainder

@@ -7,14 +7,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
-import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Aw70Workout;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Workout;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 
-public class GetAw70WorkoutDataRequest extends Request {
-    private static final Logger LOG = LoggerFactory.getLogger(GetAw70WorkoutDataRequest.class);
+public class GetWorkoutDataRequest extends Request {
+    private static final Logger LOG = LoggerFactory.getLogger(GetWorkoutDataRequest.class);
 
-    Aw70Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers;
-    List<Aw70Workout.WorkoutCount.Response.WorkoutNumbers> remainder;
+    Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers;
+    List<Workout.WorkoutCount.Response.WorkoutNumbers> remainder;
     short number;
     Long databaseId;
 
@@ -25,11 +25,11 @@ public class GetAw70WorkoutDataRequest extends Request {
      * @param remainder The numbers of the remainder if the workouts to get
      * @param number The number of this data request
      */
-    public GetAw70WorkoutDataRequest(HuaweiSupport support, Aw70Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers, List<Aw70Workout.WorkoutCount.Response.WorkoutNumbers> remainder, short number, Long databaseId) {
+    public GetWorkoutDataRequest(HuaweiSupport support, Workout.WorkoutCount.Response.WorkoutNumbers workoutNumbers, List<Workout.WorkoutCount.Response.WorkoutNumbers> remainder, short number, Long databaseId) {
         super(support);
 
-        this.serviceId = Aw70Workout.id;
-        this.commandId = Aw70Workout.WorkoutData.id;
+        this.serviceId = Workout.id;
+        this.commandId = Workout.WorkoutData.id;
 
         this.workoutNumbers = workoutNumbers;
         this.remainder = remainder;
@@ -41,7 +41,7 @@ public class GetAw70WorkoutDataRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new Aw70Workout.WorkoutData.Request(support.secretsProvider, workoutNumbers.workoutNumber, this.number).serialize();
+            return new Workout.WorkoutData.Request(support.secretsProvider, workoutNumbers.workoutNumber, this.number).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();
@@ -50,37 +50,37 @@ public class GetAw70WorkoutDataRequest extends Request {
 
     @Override
     protected void processResponse() throws Exception {
-        if (!(receivedPacket instanceof Aw70Workout.WorkoutData.Response)) {
+        if (!(receivedPacket instanceof Workout.WorkoutData.Response)) {
             // TODO: exception
             return;
         }
 
-        if (((Aw70Workout.WorkoutData.Response) receivedPacket).workoutNumber != this.workoutNumbers.workoutNumber) {
+        if (((Workout.WorkoutData.Response) receivedPacket).workoutNumber != this.workoutNumbers.workoutNumber) {
             // TODO: exception or something?
             LOG.error("Incorrect workout number!");
         }
 
-        if (((Aw70Workout.WorkoutData.Response) receivedPacket).dataNumber != this.number) {
+        if (((Workout.WorkoutData.Response) receivedPacket).dataNumber != this.number) {
             // TODO: exception or something?
             LOG.error("Incorrect data number!");
         }
 
         LOG.info("Workout {} data {}:", this.workoutNumbers.workoutNumber, this.number);
-        LOG.info("Workout : " + ((Aw70Workout.WorkoutData.Response) receivedPacket).workoutNumber);
-        LOG.info("Data num: " + ((Aw70Workout.WorkoutData.Response) receivedPacket).dataNumber);
-        LOG.info("Header  : " + Arrays.toString(((Aw70Workout.WorkoutData.Response) receivedPacket).rawHeader));
-        LOG.info("Header  : " + ((Aw70Workout.WorkoutData.Response) receivedPacket).header);
-        LOG.info("Data    : " + Arrays.toString(((Aw70Workout.WorkoutData.Response) receivedPacket).rawData));
-        LOG.info("Data    : " + Arrays.toString(((Aw70Workout.WorkoutData.Response) receivedPacket).dataList.toArray()));
-        LOG.info("Bitmap  : " + ((Aw70Workout.WorkoutData.Response) receivedPacket).innerBitmap);
+        LOG.info("Workout : " + ((Workout.WorkoutData.Response) receivedPacket).workoutNumber);
+        LOG.info("Data num: " + ((Workout.WorkoutData.Response) receivedPacket).dataNumber);
+        LOG.info("Header  : " + Arrays.toString(((Workout.WorkoutData.Response) receivedPacket).rawHeader));
+        LOG.info("Header  : " + ((Workout.WorkoutData.Response) receivedPacket).header);
+        LOG.info("Data    : " + Arrays.toString(((Workout.WorkoutData.Response) receivedPacket).rawData));
+        LOG.info("Data    : " + Arrays.toString(((Workout.WorkoutData.Response) receivedPacket).dataList.toArray()));
+        LOG.info("Bitmap  : " + ((Workout.WorkoutData.Response) receivedPacket).innerBitmap);
 
         this.support.addWorkoutSampleData(
                 this.databaseId,
-                ((Aw70Workout.WorkoutData.Response) receivedPacket).dataList
+                ((Workout.WorkoutData.Response) receivedPacket).dataList
         );
 
         if (this.workoutNumbers.dataCount > this.number + 1) {
-            GetAw70WorkoutDataRequest nextRequest = new GetAw70WorkoutDataRequest(
+            GetWorkoutDataRequest nextRequest = new GetWorkoutDataRequest(
                     this.support,
                     this.workoutNumbers,
                     this.remainder,
@@ -91,7 +91,7 @@ public class GetAw70WorkoutDataRequest extends Request {
             this.support.addInProgressRequest(nextRequest);
             this.nextRequest(nextRequest);
         } else if (this.workoutNumbers.paceCount > 0) {
-            GetAw70WorkoutPaceRequest nextRequest = new GetAw70WorkoutPaceRequest(
+            GetWorkoutPaceRequest nextRequest = new GetWorkoutPaceRequest(
                     this.support,
                     this.workoutNumbers,
                     this.remainder,
@@ -103,7 +103,7 @@ public class GetAw70WorkoutDataRequest extends Request {
             this.nextRequest(nextRequest);
         } else {
             if (remainder.size() > 0) {
-                GetAw70WorkoutTotalsRequest nextRequest = new GetAw70WorkoutTotalsRequest(
+                GetWorkoutTotalsRequest nextRequest = new GetWorkoutTotalsRequest(
                         this.support,
                         remainder.remove(0),
                         remainder
