@@ -36,6 +36,8 @@ public class Workout {
 
         public static class Response extends HuaweiPacket {
             public static class WorkoutNumbers {
+                public byte[] rawData;
+
                 public short workoutNumber;
                 public short dataCount;
                 public short paceCount;
@@ -70,14 +72,18 @@ public class Workout {
 
                 List<HuaweiTLV> subContainers = container.getObjects(0x85);
                 for (HuaweiTLV subContainerTlv : subContainers) {
+                    if (!subContainerTlv.contains(0x06))
+                        throw new MissingTagException(0x06);
+                    if (!subContainerTlv.contains(0x07))
+                        throw new MissingTagException(0x07);
+                    if (!subContainerTlv.contains(0x08))
+                        throw new MissingTagException(0x08);
+
                     WorkoutNumbers workoutNumber = new WorkoutNumbers();
+                    workoutNumber.rawData = subContainerTlv.serialize();
                     workoutNumber.workoutNumber = subContainerTlv.getShort(0x06);
                     workoutNumber.dataCount = subContainerTlv.getShort(0x07);
                     workoutNumber.paceCount = subContainerTlv.getShort(0x08);
-                    if (subContainerTlv.contains(0x0a))
-                        workoutNumber.unknown = subContainerTlv.getShort(0x0a);
-                    else if (subContainerTlv.contains(0x09))
-                        workoutNumber.unknown = subContainerTlv.getShort(0x09);
                     this.workoutNumbers.add(workoutNumber);
                 }
             }
@@ -104,6 +110,8 @@ public class Workout {
         }
 
         public static class Response extends HuaweiPacket {
+            public byte[] rawData;
+
             public short number;
             public byte status; // TODO: enum?
             public int startTime;
@@ -126,16 +134,33 @@ public class Workout {
 
                 HuaweiTLV container = this.tlv.getObject(0x81);
 
+                if (!container.contains(0x02))
+                    throw new MissingTagException(0x02);
+                if (!container.contains(0x03))
+                    throw new MissingTagException(0x03);
+                if (!container.contains(0x04))
+                    throw new MissingTagException(0x04);
+                if (!container.contains(0x05))
+                    throw new MissingTagException(0x05);
+
+                this.rawData = container.serialize();
                 this.number = container.getShort(0x02);
                 this.status = container.getByte(0x03);
                 this.startTime = container.getInteger(0x04);
                 this.endTime = container.getInteger(0x05);
-                this.calories = container.getInteger(0x06);
-                this.distance = container.getInteger(0x07);
-                this.stepCount = container.getInteger(0x08);
-                this.totalTime = container.getInteger(0x09);
-                this.duration = container.getInteger(0x12);
-                this.type = container.getByte(0x14);
+
+                if (container.contains(0x06))
+                    this.calories = container.getInteger(0x06);
+                if (container.contains(0x07))
+                    this.distance = container.getInteger(0x07);
+                if (container.contains(0x08))
+                    this.stepCount = container.getInteger(0x08);
+                if (container.contains(0x09))
+                    this.totalTime = container.getInteger(0x09);
+                if (container.contains(0x12))
+                    this.duration = container.getInteger(0x12);
+                if (container.contains(0x14))
+                    this.type = container.getByte(0x14);
             }
         }
     }
@@ -440,6 +465,13 @@ public class Workout {
 
                 this.blocks = new ArrayList<>();
                 for (HuaweiTLV blockTlv : container.getObjects(0x83)) {
+                    if (!blockTlv.contains(0x04))
+                        throw new MissingTagException(0x04);
+                    if (!blockTlv.contains(0x05))
+                        throw new MissingTagException(0x05);
+                    if (!blockTlv.contains(0x06))
+                        throw new MissingTagException(0x06);
+
                     Block block = new Block();
                     block.distance = blockTlv.getShort(0x04);
                     block.type = blockTlv.getByte(0x05);

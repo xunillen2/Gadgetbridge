@@ -43,7 +43,7 @@ public class GBDaoGenerator {
 
 
     public static void main(String[] args) throws Exception {
-        final Schema schema = new Schema(42, MAIN_PACKAGE + ".entities");
+        final Schema schema = new Schema(43, MAIN_PACKAGE + ".entities");
 
         Entity userAttributes = addUserAttributes(schema);
         Entity user = addUserInfo(schema, userAttributes);
@@ -724,6 +724,8 @@ public class GBDaoGenerator {
         workoutSummary.addIntProperty("totalTime").notNull();
         workoutSummary.addIntProperty("duration").notNull();
         workoutSummary.addByteProperty("type").notNull();
+
+        workoutSummary.addByteArrayProperty("rawData");
 
         return workoutSummary;
     }

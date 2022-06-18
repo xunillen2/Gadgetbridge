@@ -970,7 +970,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     packet.stepCount,
                     packet.totalTime,
                     packet.duration,
-                    packet.type
+                    packet.type,
+                    packet.rawData
             );
             db.getDaoSession().getHuaweiWorkoutSummarySampleDao().insertOrReplace(summarySample);
 
