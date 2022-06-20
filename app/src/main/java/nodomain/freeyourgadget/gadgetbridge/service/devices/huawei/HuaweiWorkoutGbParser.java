@@ -3,7 +3,9 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import de.greenrobot.dao.query.QueryBuilder;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
@@ -61,7 +63,6 @@ public class HuaweiWorkoutGbParser {
             QueryBuilder qbPace = db.getDaoSession().getHuaweiWorkoutPaceSampleDao().queryBuilder().where(
                     HuaweiWorkoutPaceSampleDao.Properties.WorkoutId.eq(workoutId)
             );
-            List<HuaweiWorkoutPaceSample> paceSamples = qbPace.build().list();
 
             Long userId = summary.getUserId();
             Long deviceId = summary.getDeviceId();
@@ -114,6 +115,7 @@ public class HuaweiWorkoutGbParser {
             typeJson.put("unit", "");
             jsonObject.put("Type", typeJson);
 
+            boolean unknownData = false;
             int cadence = 0;
             int stepLength = 0;
             int groundContactTime = 0;
@@ -139,6 +141,8 @@ public class HuaweiWorkoutGbParser {
                 eversionAngle += dataSample.getEversionAngle();
                 if (dataSample.getEversionAngle() > maxEversionAngle)
                     maxEversionAngle = dataSample.getEversionAngle();
+                if (dataSample.getDataErrorHex() != null)
+                    unknownData = true;
             }
             // Average the things that should probably be averaged
             cadence = cadence / dataSamples.size();
@@ -202,6 +206,53 @@ public class HuaweiWorkoutGbParser {
             maxEversionAngleJson.put("value", maxEversionAngle);
             maxEversionAngleJson.put("unit", "degrees");
             jsonObject.put("Eversion angle (max)", maxEversionAngleJson);
+
+            ListIterator<HuaweiWorkoutPaceSample> it = qbPace.build().listIterator();
+            int count = 0;
+            int pace = 0;
+            while (it.hasNext()) {
+                int index = it.nextIndex();
+                HuaweiWorkoutPaceSample sample = it.next();
+
+                count += 1;
+                pace += sample.getPace();
+
+                JSONObject paceDistance = new JSONObject();
+                paceDistance.put("value", sample.getDistance());
+                paceDistance.put("unit", "kilometers");
+                jsonObject.put(String.format("Pace %d distance", index), paceDistance);
+
+                JSONObject paceType = new JSONObject();
+                paceType.put("value", sample.getType());
+                paceType.put("unit", ""); // TODO: not sure
+                jsonObject.put(String.format("Pace %d type", index), paceType);
+
+                JSONObject pacePace = new JSONObject();
+                pacePace.put("value", sample.getPace());
+                pacePace.put("unit", "seconds_km");
+                jsonObject.put(String.format("Pace %d pace", index), pacePace);
+
+                if (sample.getCorrection() != 0) {
+                    JSONObject paceCorrection = new JSONObject();
+                    paceCorrection.put("value", sample.getCorrection());
+                    paceCorrection.put("unit", "m");
+                    jsonObject.put(String.format("Pace %d correction", index), paceCorrection);
+                }
+            }
+
+            JSONObject avgPace = new JSONObject();
+            avgPace.put("value", pace / count);
+            avgPace.put("unit", "seconds_km");
+            jsonObject.put("Average pace", avgPace);
+
+            if (unknownData) {
+                JSONObject unknownDataJson = new JSONObject();
+                unknownDataJson.put("value", "YES");
+                unknownDataJson.put("unit", "string");
+
+                // TODO: make this a translatable string
+                jsonObject.put("Unknown data encountered", unknownDataJson);
+            }
 
             BaseActivitySummary baseSummary = new BaseActivitySummary(
                     id,
