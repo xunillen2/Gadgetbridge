@@ -18,6 +18,7 @@ package nodomain.freeyourgadget.gadgetbridge.devices.huawei;
 
 import android.content.SharedPreferences;
 import android.os.Parcel;
+import android.widget.Toast;
 
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
@@ -35,6 +36,8 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpec
 import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsHandler;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceType;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiWorkoutGbParser;
+import nodomain.freeyourgadget.gadgetbridge.util.GB;
 import nodomain.freeyourgadget.gadgetbridge.util.Prefs;
 import nodomain.freeyourgadget.gadgetbridge.util.XTimePreference;
 
@@ -73,6 +76,15 @@ public class HuaweiSettingsCustomizer implements DeviceSpecificSettingsCustomize
             if (!statusLiftWrist || dndState.equals("off")) {
                 dndLifWrist.setChecked(false);
                 dndLifWrist.setEnabled(false);
+            }
+        }
+        if (preference.getKey().equals("huawei_reparse_workout_data")) {
+            if (((SwitchPreference) preference).isChecked()) {
+                GB.toast("Starting workout reparse", Toast.LENGTH_SHORT, 0);
+                HuaweiWorkoutGbParser.parseAllWorkouts();
+                GB.toast("Workout reparse is complete", Toast.LENGTH_SHORT, 0);
+
+                ((SwitchPreference) preference).setChecked(false);
             }
         }
     }

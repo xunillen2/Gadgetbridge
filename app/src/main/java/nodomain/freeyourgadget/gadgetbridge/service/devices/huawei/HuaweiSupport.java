@@ -988,60 +988,6 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             );
             db.getDaoSession().getHuaweiWorkoutSummarySampleDao().insertOrReplace(summarySample);
 
-            Date start = new Date(packet.startTime * 1000L);
-            Date end = new Date(packet.endTime * 1000L);
-
-            // Avoid duplicates
-            QueryBuilder qb2 = db.getDaoSession().getBaseActivitySummaryDao().queryBuilder().where(
-                    BaseActivitySummaryDao.Properties.UserId.eq(userId),
-                    BaseActivitySummaryDao.Properties.DeviceId.eq(deviceId),
-                    BaseActivitySummaryDao.Properties.StartTime.eq(start),
-                    BaseActivitySummaryDao.Properties.EndTime.eq(end)
-            );
-            List<BaseActivitySummary> results2 = qb2.build().list();
-            Long id = null;
-            if (!results2.isEmpty())
-                id = results2.get(0).getId();
-
-            JSONObject jsonObject = new JSONObject();
-
-            JSONObject calories = new JSONObject();
-            calories.put("value", packet.calories);
-            calories.put("unit", "calories_unit");
-            jsonObject.put("caloriesBurnt", calories);
-
-            JSONObject distance = new JSONObject();
-            distance.put("value", packet.distance);
-            distance.put("unit", "meters");
-            jsonObject.put("distanceMeters", distance);
-
-            JSONObject steps = new JSONObject();
-            steps.put("value", packet.stepCount);
-            steps.put("unit", "steps_unit");
-            jsonObject.put("steps", steps);
-
-            JSONObject time = new JSONObject();
-            time.put("value", packet.duration);
-            time.put("unit", "seconds");
-            jsonObject.put("activeSeconds", time);
-
-            BaseActivitySummary summary = new BaseActivitySummary(
-                    id,
-                    "Workout " + packet.number,
-                    start,
-                    end,
-                    packet.type, // TODO: may not be correct
-                    null,
-                    null,
-                    null,
-                    null,
-                    deviceId,
-                    userId,
-                    jsonObject.toString(),
-                    null
-            );
-            db.getDaoSession().getBaseActivitySummaryDao().insertOrReplace(summary);
-
             return summarySample.getWorkoutId();
         } catch (Exception e) {
             e.printStackTrace();
@@ -1104,6 +1050,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        HuaweiWorkoutGbParser.parseWorkout(workoutId);
     }
 
     public void setWearLocation() {
