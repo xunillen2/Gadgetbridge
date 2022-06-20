@@ -1014,6 +1014,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                         data.timestamp,
                         data.speed,
                         data.cadence,
+                        data.stepLength,
                         data.groundContactTime,
                         data.impact,
                         data.swingAngle,
