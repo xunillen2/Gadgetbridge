@@ -24,16 +24,19 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import de.greenrobot.dao.query.QueryBuilder;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.SettingsActivity;
@@ -41,14 +44,22 @@ import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSett
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
-import nodomain.freeyourgadget.gadgetbridge.devices.huami.HuamiConst;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiSampleProvider;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Workout;
 import nodomain.freeyourgadget.gadgetbridge.devices.miband.MiBandConst;
+import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary;
+import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummaryDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySample;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutDataSample;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutDataSampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutPaceSample;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutPaceSampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySample;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.entities.Alarm;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
@@ -61,6 +72,7 @@ import nodomain.freeyourgadget.gadgetbridge.model.CannedMessagesSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.MusicStateSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
+import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes;
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.AbstractBTLEDeviceSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
@@ -71,6 +83,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.Stop
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetFitnessTotalsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSleepDataCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetStepDataCountRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetWorkoutCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SetMusicRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.AlarmsRequest;
@@ -515,9 +528,27 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     public void onFetchRecordedData(int dataTypes) {
         if (getDevice().isBusy()) {
             LOG.warn("Device is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.");
+            // TODO: better way of letting user know?
+            // TODO: use string that can be translated
+            GB.toast("Devices is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.", Toast.LENGTH_LONG, 0);
             return;
         }
 
+        // TODO: An exception during the parsing can leave GB thinking that the sync is not yet
+        //       finished, but it won't ever complete because of the parsing exception
+        //       Maybe this can be fixed with an exception handler from the callback? If then
+        //       called from the ResponseManager, it may not be too much work to implement.
+
+        if (dataTypes == RecordedDataTypes.TYPE_ACTIVITY) {
+            fetchActivityData();
+        } else if (dataTypes == RecordedDataTypes.TYPE_GPS_TRACKS) {
+            fetchWorkoutData();
+        } else {
+            LOG.warn("Recorded data type {} not implemented yet.", dataTypes);
+        }
+    }
+
+    private void fetchActivityData() {
         int sleepStart = 0;
         int stepStart = 0;
         int end = (int) (System.currentTimeMillis() / 1000);
@@ -589,6 +620,74 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         try {
             responseManager.addHandler(getSleepDataCountRequest);
             getSleepDataCountRequest.perform();
+        } catch (IOException e) {
+            handleSyncFinished();
+            e.printStackTrace();
+        }
+    }
+
+    private void fetchWorkoutData() {
+        int start = 0;
+        int end = (int) (System.currentTimeMillis() / 1000);
+
+        SharedPreferences sharedPreferences = GBApplication.getDeviceSpecificSharedPrefs(getDevice().getAddress());
+        long prefLastSyncTime = sharedPreferences.getLong("lastSportsActivityTimeMillis", 0);
+        if (prefLastSyncTime != 0) {
+            start = (int) (prefLastSyncTime / 1000);
+
+            // Reset for next calls
+            sharedPreferences.edit().putLong("lastSportsActivityTimeMillis", 0).apply();
+        } else {
+            try (DBHandler db = GBApplication.acquireDB()) {
+                Long userId = DBHelper.getUser(db.getDaoSession()).getId();
+                Long deviceId = DBHelper.getDevice(getDevice(), db.getDaoSession()).getId();
+
+                QueryBuilder qb1 = db.getDaoSession().getHuaweiWorkoutSummarySampleDao().queryBuilder().where(
+                        HuaweiWorkoutSummarySampleDao.Properties.DeviceId.eq(deviceId),
+                        HuaweiWorkoutSummarySampleDao.Properties.UserId.eq(userId)
+                ).orderDesc(
+                        HuaweiWorkoutSummarySampleDao.Properties.StartTimestamp
+                ).limit(1);
+
+                List<HuaweiWorkoutSummarySample> samples1 = qb1.list();
+                if (!samples1.isEmpty())
+                    start = samples1.get(0).getEndTimestamp();
+
+                QueryBuilder qb2 = db.getDaoSession().getBaseActivitySummaryDao().queryBuilder().where(
+                        BaseActivitySummaryDao.Properties.DeviceId.eq(deviceId),
+                        BaseActivitySummaryDao.Properties.UserId.eq(userId)
+                ).orderDesc(
+                        BaseActivitySummaryDao.Properties.StartTime
+                ).limit(1);
+
+                List<BaseActivitySummary> samples2 = qb2.list();
+                if (!samples2.isEmpty())
+                    start = Math.min(start, (int) (samples2.get(0).getEndTime().getTime() / 1000L));
+
+                start = start + 1;
+            } catch (Exception e) {
+                LOG.warn("Exception for getting start time, using 10/06/2022 - 00:00:00.");
+            }
+
+            if (start == 0 || start == 1)
+                start = 1654819200;
+        }
+
+        TransactionBuilder transactionBuilder = createTransactionBuilder("FetchWorkoutData");
+        // TODO: maybe use a different string from the other synchronization
+        transactionBuilder.add(new SetDeviceBusyAction(getDevice(), getContext().getString(R.string.busy_task_fetch_activity_data), getContext()));
+
+        final GetWorkoutCountRequest getWorkoutCountRequest = new GetWorkoutCountRequest(this, transactionBuilder, start, end);
+        getWorkoutCountRequest.setFinalizeReq(new RequestCallback() {
+            @Override
+            public void call() {
+                handleSyncFinished();
+            }
+        });
+
+        try {
+            responseManager.addHandler(getWorkoutCountRequest);
+            getWorkoutCountRequest.perform();
         } catch (IOException e) {
             handleSyncFinished();
             e.printStackTrace();
@@ -845,6 +944,115 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         LOG.debug("FITNESS total distance: " + distance + " m");
 
         // TODO: potentially do more with this, maybe through realtime data?
+    }
+
+    public Long addWorkoutTotalsData(Workout.WorkoutTotals.Response packet) {
+        try (DBHandler db = GBApplication.acquireDB()) {
+            Long userId = DBHelper.getUser(db.getDaoSession()).getId();
+            Long deviceId = DBHelper.getDevice(getDevice(), db.getDaoSession()).getId();
+
+            // Avoid duplicates
+            QueryBuilder qb = db.getDaoSession().getHuaweiWorkoutSummarySampleDao().queryBuilder().where(
+                    HuaweiWorkoutSummarySampleDao.Properties.UserId.eq(userId),
+                    HuaweiWorkoutSummarySampleDao.Properties.DeviceId.eq(deviceId),
+                    HuaweiWorkoutSummarySampleDao.Properties.WorkoutNumber.eq(packet.number),
+                    HuaweiWorkoutSummarySampleDao.Properties.StartTimestamp.eq(packet.startTime),
+                    HuaweiWorkoutSummarySampleDao.Properties.EndTimestamp.eq(packet.endTime)
+            );
+            List<HuaweiWorkoutSummarySample> results = qb.build().list();
+            Long workoutId = null;
+            if (!results.isEmpty())
+                workoutId = results.get(0).getWorkoutId();
+
+            byte[] raw;
+            if (packet.rawData == null)
+                raw = null;
+            else
+                raw = StringUtils.bytesToHex(packet.rawData).getBytes(StandardCharsets.UTF_8);
+
+            HuaweiWorkoutSummarySample summarySample = new HuaweiWorkoutSummarySample(
+                    workoutId,
+                    deviceId,
+                    userId,
+                    packet.number,
+                    packet.status,
+                    packet.startTime,
+                    packet.endTime,
+                    packet.calories,
+                    packet.distance,
+                    packet.stepCount,
+                    packet.totalTime,
+                    packet.duration,
+                    packet.type,
+                    raw
+            );
+            db.getDaoSession().getHuaweiWorkoutSummarySampleDao().insertOrReplace(summarySample);
+
+            return summarySample.getWorkoutId();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void addWorkoutSampleData(Long workoutId, List<Workout.WorkoutData.Response.Data> dataList) {
+        if (workoutId == null)
+            return;
+
+        try (DBHandler db = GBApplication.acquireDB()) {
+            HuaweiWorkoutDataSampleDao dao = db.getDaoSession().getHuaweiWorkoutDataSampleDao();
+
+            for (Workout.WorkoutData.Response.Data data : dataList) {
+                byte[] unknown;
+                if (data.unknownData == null)
+                    unknown = null;
+                else
+                    unknown = StringUtils.bytesToHex(data.unknownData).getBytes(StandardCharsets.UTF_8);
+
+                HuaweiWorkoutDataSample dataSample = new HuaweiWorkoutDataSample(
+                        workoutId,
+                        data.timestamp,
+                        data.speed,
+                        data.cadence,
+                        data.stepLength,
+                        data.groundContactTime,
+                        data.impact,
+                        data.swingAngle,
+                        data.foreFootLanding,
+                        data.midFootLanding,
+                        data.backFootLanding,
+                        data.eversionAngle,
+                        unknown
+                );
+                dao.insertOrReplace(dataSample);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addWorkoutPaceData(Long workoutId, List<Workout.WorkoutPace.Response.Block> paceList) {
+        if (workoutId == null)
+            return;
+
+        try (DBHandler db = GBApplication.acquireDB()) {
+            HuaweiWorkoutPaceSampleDao dao = db.getDaoSession().getHuaweiWorkoutPaceSampleDao();
+
+            for (Workout.WorkoutPace.Response.Block block : paceList) {
+                HuaweiWorkoutPaceSample paceSample = new HuaweiWorkoutPaceSample(
+                        workoutId,
+                        block.distance,
+                        block.type,
+                        block.pace,
+                        block.correction
+                );
+                dao.insertOrReplace(paceSample);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        HuaweiWorkoutGbParser.parseWorkout(workoutId);
     }
 
     public void setWearLocation() {
