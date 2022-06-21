@@ -71,6 +71,7 @@ public class HuaweiWatchGTCoordinator extends HuaweiCoordinator{
                 R.xml.devicesettings_dateformat,
                 R.xml.devicesettings_timeformat,
                 R.xml.devicesettings_allow_accept_reject_calls,
+                R.xml.devicesettings_huawei_reparse_workout_data,
                 R.xml.devicesettings_find_phone,
                 R.xml.devicesettings_disable_find_phone_with_dnd,
         };
