@@ -116,96 +116,98 @@ public class HuaweiWorkoutGbParser {
             jsonObject.put("Type", typeJson);
 
             boolean unknownData = false;
-            int cadence = 0;
-            int stepLength = 0;
-            int groundContactTime = 0;
-            int impact = 0;
-            int maxImpact = 0;
-            int swingAngle = 0;
-            int foreFootLanding = 0;
-            int midFootLanding = 0;
-            int backFootLanding = 0;
-            int eversionAngle = 0;
-            int maxEversionAngle = 0;
-            for (HuaweiWorkoutDataSample dataSample : dataSamples) {
-                cadence += dataSample.getCadence();
-                stepLength += dataSample.getStepLength();
-                groundContactTime += dataSample.getGroundContactTime();
-                impact += dataSample.getImpact();
-                if (dataSample.getImpact() > maxImpact)
-                    maxImpact = dataSample.getImpact();
-                swingAngle += dataSample.getSwingAngle();
-                foreFootLanding += dataSample.getForeFootLanding();
-                midFootLanding += dataSample.getMidFootLanding();
-                backFootLanding += dataSample.getBackFootLanding();
-                eversionAngle += dataSample.getEversionAngle();
-                if (dataSample.getEversionAngle() > maxEversionAngle)
-                    maxEversionAngle = dataSample.getEversionAngle();
-                if (dataSample.getDataErrorHex() != null)
-                    unknownData = true;
+            if (dataSamples.size() != 0) {
+                int cadence = 0;
+                int stepLength = 0;
+                int groundContactTime = 0;
+                int impact = 0;
+                int maxImpact = 0;
+                int swingAngle = 0;
+                int foreFootLanding = 0;
+                int midFootLanding = 0;
+                int backFootLanding = 0;
+                int eversionAngle = 0;
+                int maxEversionAngle = 0;
+                for (HuaweiWorkoutDataSample dataSample : dataSamples) {
+                    cadence += dataSample.getCadence();
+                    stepLength += dataSample.getStepLength();
+                    groundContactTime += dataSample.getGroundContactTime();
+                    impact += dataSample.getImpact();
+                    if (dataSample.getImpact() > maxImpact)
+                        maxImpact = dataSample.getImpact();
+                    swingAngle += dataSample.getSwingAngle();
+                    foreFootLanding += dataSample.getForeFootLanding();
+                    midFootLanding += dataSample.getMidFootLanding();
+                    backFootLanding += dataSample.getBackFootLanding();
+                    eversionAngle += dataSample.getEversionAngle();
+                    if (dataSample.getEversionAngle() > maxEversionAngle)
+                        maxEversionAngle = dataSample.getEversionAngle();
+                    if (dataSample.getDataErrorHex() != null)
+                        unknownData = true;
+                }
+                // Average the things that should probably be averaged
+                cadence = cadence / dataSamples.size();
+                stepLength = stepLength / dataSamples.size();
+                groundContactTime = groundContactTime / dataSamples.size();
+                impact = impact / dataSamples.size();
+                swingAngle = swingAngle / dataSamples.size();
+                eversionAngle = eversionAngle / dataSamples.size();
+
+                JSONObject cadenceJson = new JSONObject();
+                cadenceJson.put("value", cadence);
+                cadenceJson.put("unit", "steps/min");
+                jsonObject.put("Cadence (avg)", cadenceJson);
+
+                JSONObject stepLengthJson = new JSONObject();
+                stepLengthJson.put("value", stepLength);
+                stepLengthJson.put("unit", "cm");
+                jsonObject.put("Step Length (avg)", stepLengthJson);
+
+                JSONObject groundContactTimeJson = new JSONObject();
+                groundContactTimeJson.put("value", groundContactTime);
+                groundContactTimeJson.put("unit", "milliseconds");
+                jsonObject.put("Ground contact time (avg)", groundContactTimeJson);
+
+                JSONObject impactJson = new JSONObject();
+                impactJson.put("value", impact);
+                impactJson.put("unit", "g");
+                jsonObject.put("Impact (avg)", impactJson);
+
+                JSONObject maxImpactJson = new JSONObject();
+                maxImpactJson.put("value", maxImpact);
+                maxImpactJson.put("unit", "g");
+                jsonObject.put("Impact (max)", maxImpactJson);
+
+                JSONObject swingAngleJson = new JSONObject();
+                swingAngleJson.put("value", swingAngle);
+                swingAngleJson.put("unit", "degrees");
+                jsonObject.put("Swing angle (avg)", swingAngleJson);
+
+                JSONObject foreFootLandingJson = new JSONObject();
+                foreFootLandingJson.put("value", foreFootLanding);
+                foreFootLandingJson.put("unit", "");
+                jsonObject.put("Fore foot landings", foreFootLandingJson);
+
+                JSONObject midFootLandingJson = new JSONObject();
+                midFootLandingJson.put("value", midFootLanding);
+                midFootLandingJson.put("unit", "");
+                jsonObject.put("Mid foot landings", midFootLandingJson);
+
+                JSONObject backFootLandingJson = new JSONObject();
+                backFootLandingJson.put("value", backFootLanding);
+                backFootLandingJson.put("unit", "");
+                jsonObject.put("Back foot landings", backFootLandingJson);
+
+                JSONObject eversionAngleJson = new JSONObject();
+                eversionAngleJson.put("value", eversionAngle);
+                eversionAngleJson.put("unit", "degrees");
+                jsonObject.put("Eversion angle (avg)", eversionAngleJson);
+
+                JSONObject maxEversionAngleJson = new JSONObject();
+                maxEversionAngleJson.put("value", maxEversionAngle);
+                maxEversionAngleJson.put("unit", "degrees");
+                jsonObject.put("Eversion angle (max)", maxEversionAngleJson);
             }
-            // Average the things that should probably be averaged
-            cadence = cadence / dataSamples.size();
-            stepLength = stepLength / dataSamples.size();
-            groundContactTime = groundContactTime / dataSamples.size();
-            impact = impact / dataSamples.size();
-            swingAngle = swingAngle / dataSamples.size();
-            eversionAngle = eversionAngle / dataSamples.size();
-
-            JSONObject cadenceJson = new JSONObject();
-            cadenceJson.put("value", cadence);
-            cadenceJson.put("unit", "steps/min");
-            jsonObject.put("Cadence (avg)", cadenceJson);
-
-            JSONObject stepLengthJson = new JSONObject();
-            stepLengthJson.put("value", stepLength);
-            stepLengthJson.put("unit", "cm");
-            jsonObject.put("Step Length (avg)", stepLengthJson);
-
-            JSONObject groundContactTimeJson = new JSONObject();
-            groundContactTimeJson.put("value", groundContactTime);
-            groundContactTimeJson.put("unit", "milliseconds");
-            jsonObject.put("Ground contact time (avg)", groundContactTimeJson);
-
-            JSONObject impactJson = new JSONObject();
-            impactJson.put("value", impact);
-            impactJson.put("unit", "g");
-            jsonObject.put("Impact (avg)", impactJson);
-
-            JSONObject maxImpactJson = new JSONObject();
-            maxImpactJson.put("value", maxImpact);
-            maxImpactJson.put("unit", "g");
-            jsonObject.put("Impact (max)", maxImpactJson);
-
-            JSONObject swingAngleJson = new JSONObject();
-            swingAngleJson.put("value", swingAngle);
-            swingAngleJson.put("unit", "degrees");
-            jsonObject.put("Swing angle (avg)", swingAngleJson);
-
-            JSONObject foreFootLandingJson = new JSONObject();
-            foreFootLandingJson.put("value", foreFootLanding);
-            foreFootLandingJson.put("unit", "");
-            jsonObject.put("Fore foot landings", foreFootLandingJson);
-
-            JSONObject midFootLandingJson = new JSONObject();
-            midFootLandingJson.put("value", midFootLanding);
-            midFootLandingJson.put("unit", "");
-            jsonObject.put("Mid foot landings", midFootLandingJson);
-
-            JSONObject backFootLandingJson = new JSONObject();
-            backFootLandingJson.put("value", backFootLanding);
-            backFootLandingJson.put("unit", "");
-            jsonObject.put("Back foot landings", backFootLandingJson);
-
-            JSONObject eversionAngleJson = new JSONObject();
-            eversionAngleJson.put("value", eversionAngle);
-            eversionAngleJson.put("unit", "degrees");
-            jsonObject.put("Eversion angle (avg)", eversionAngleJson);
-
-            JSONObject maxEversionAngleJson = new JSONObject();
-            maxEversionAngleJson.put("value", maxEversionAngle);
-            maxEversionAngleJson.put("unit", "degrees");
-            jsonObject.put("Eversion angle (max)", maxEversionAngleJson);
 
             ListIterator<HuaweiWorkoutPaceSample> it = qbPace.build().listIterator();
             int count = 0;
@@ -240,10 +242,12 @@ public class HuaweiWorkoutGbParser {
                 }
             }
 
-            JSONObject avgPace = new JSONObject();
-            avgPace.put("value", pace / count);
-            avgPace.put("unit", "seconds_km");
-            jsonObject.put("Average pace", avgPace);
+            if (count != 0) {
+                JSONObject avgPace = new JSONObject();
+                avgPace.put("value", pace / count);
+                avgPace.put("unit", "seconds_km");
+                jsonObject.put("Average pace", avgPace);
+            }
 
             if (unknownData) {
                 JSONObject unknownDataJson = new JSONObject();
