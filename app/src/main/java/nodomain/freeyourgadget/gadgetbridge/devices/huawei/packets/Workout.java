@@ -135,8 +135,6 @@ public class Workout {
 
                 if (!container.contains(0x02))
                     throw new MissingTagException(0x02);
-                if (!container.contains(0x03))
-                    throw new MissingTagException(0x03);
                 if (!container.contains(0x04))
                     throw new MissingTagException(0x04);
                 if (!container.contains(0x05))
@@ -144,7 +142,10 @@ public class Workout {
 
                 this.rawData = container.serialize();
                 this.number = container.getShort(0x02);
-                this.status = container.getByte(0x03);
+                if (container.contains(0x03))
+                    this.status = container.getByte(0x03);
+                else
+                    this.status = -1;
                 this.startTime = container.getInteger(0x04);
                 this.endTime = container.getInteger(0x05);
 
