@@ -77,9 +77,9 @@ public class HuaweiWorkoutGbParser {
                     BaseActivitySummaryDao.Properties.EndTime.eq(end)
             );
             List<BaseActivitySummary> duplicates = qb.build().list();
-            Long id = null;
+            BaseActivitySummary previous = null;
             if (!duplicates.isEmpty())
-                id = duplicates.get(0).getId();
+                previous = duplicates.get(0);
 
             int type = huaweiTypeToGbType(summary.getType());
 
@@ -258,21 +258,40 @@ public class HuaweiWorkoutGbParser {
                 jsonObject.put("Unknown data encountered", unknownDataJson);
             }
 
-            BaseActivitySummary baseSummary = new BaseActivitySummary(
-                    id,
-                    "Workout " + summary.getWorkoutNumber(),
-                    start,
-                    end,
-                    type,
-                    null,
-                    null,
-                    null,
-                    null,
-                    deviceId,
-                    userId,
-                    jsonObject.toString(),
-                    null
-            );
+            BaseActivitySummary baseSummary;
+            if (previous == null) {
+                baseSummary = new BaseActivitySummary(
+                        null,
+                        "Workout " + summary.getWorkoutNumber(),
+                        start,
+                        end,
+                        type,
+                        null,
+                        null,
+                        null,
+                        null,
+                        deviceId,
+                        userId,
+                        jsonObject.toString(),
+                        null
+                );
+            } else {
+                baseSummary = new BaseActivitySummary(
+                        previous.getId(),
+                        previous.getName(),
+                        start,
+                        end,
+                        type,
+                        previous.getBaseLongitude(),
+                        previous.getBaseLatitude(),
+                        previous.getBaseAltitude(),
+                        previous.getGpxTrack(),
+                        deviceId,
+                        userId,
+                        jsonObject.toString(),
+                        null
+                );
+            }
             db.getDaoSession().getBaseActivitySummaryDao().insertOrReplace(baseSummary);
         } catch (Exception e) {
             e.printStackTrace();
