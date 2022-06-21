@@ -410,6 +410,7 @@
         <item>@string/menuitem_status</item>
         <item>@string/menuitem_pai</item>
         <item>@string/menuitem_hr</item>
+        <item>@string/menuitem_breathing</item>
         <item>@string/menuitem_stress</item>
         <item>@string/menuitem_eventreminder</item>
         <item>@string/menuitem_dnd</item>
@@ -432,6 +433,7 @@
         <item>@string/p_menuitem_status</item>
         <item>@string/p_menuitem_pai</item>
         <item>@string/p_menuitem_hr</item>
+        <item>@string/p_menuitem_breathing</item>
         <item>@string/p_menuitem_stress</item>
         <item>@string/p_menuitem_eventreminder</item>
         <item>@string/p_menuitem_dnd</item>
@@ -467,6 +469,7 @@
         <item>@string/menuitem_activity</item>
         <item>@string/menuitem_eventreminder</item>
         <item>@string/menuitem_pai</item>
+        <item>@string/menuitem_sleep</item>
         <item>@string/menuitem_worldclock</item>
         <item>@string/menuitem_stress</item>
         <item>@string/menuitem_cycles</item>
@@ -494,6 +497,7 @@
         <item>@string/p_menuitem_activity</item>
         <item>@string/p_menuitem_eventreminder</item>
         <item>@string/p_menuitem_pai</item>
+        <item>@string/p_menuitem_sleep</item>
         <item>@string/p_menuitem_worldclock</item>
         <item>@string/p_menuitem_stress</item>
         <item>@string/p_menuitem_cycles</item>
@@ -521,6 +525,7 @@
         <item>@string/p_menuitem_activity</item>
         <item>@string/p_menuitem_eventreminder</item>
         <item>@string/p_menuitem_pai</item>
+        <item>@string/p_menuitem_sleep</item>
         <item>@string/p_menuitem_worldclock</item>
         <item>@string/p_menuitem_stress</item>
         <item>@string/p_menuitem_cycles</item>
@@ -545,6 +550,7 @@
         <item>@string/menuitem_mutephone</item>
         <item>@string/menuitem_eventreminder</item>
         <item>@string/menuitem_pai</item>
+        <item>@string/menuitem_sleep</item>
         <item>@string/menuitem_worldclock</item>
         <item>@string/menuitem_stress</item>
         <item>@string/menuitem_cycles</item>
@@ -570,6 +576,7 @@
         <item>@string/p_menuitem_mutephone</item>
         <item>@string/p_menuitem_eventreminder</item>
         <item>@string/p_menuitem_pai</item>
+        <item>@string/p_menuitem_sleep</item>
         <item>@string/p_menuitem_worldclock</item>
         <item>@string/p_menuitem_stress</item>
         <item>@string/p_menuitem_cycles</item>
@@ -726,6 +733,7 @@
         <item>@string/menuitem_pai</item>
         <item>@string/menuitem_hr</item>
         <item>@string/menuitem_spo2</item>
+        <item>@string/menuitem_breathing</item>
         <item>@string/menuitem_stress</item>
         <item>@string/menuitem_eventreminder</item>
         <item>@string/menuitem_dnd</item>
@@ -749,6 +757,7 @@
         <item>@string/p_menuitem_pai</item>
         <item>@string/p_menuitem_hr</item>
         <item>@string/p_menuitem_spo2</item>
+        <item>@string/p_menuitem_breathing</item>
         <item>@string/p_menuitem_stress</item>
         <item>@string/p_menuitem_eventreminder</item>
         <item>@string/p_menuitem_dnd</item>
@@ -1431,7 +1440,8 @@
         <item name="de_DE">@string/german</item>
         <item name="it_IT">@string/italian</item>
         <item name="fr_FR">@string/french</item>
-        <item name="pt_BR">@string/portuguese</item>
+        <item name="pt_BR">@string/portuguese_br</item>
+        <item name="pt_PT">@string/portuguese_pt</item>
         <item name="nl_NL">@string/dutch</item>
         <item name="pl_PL">@string/polish</item>
         <item name="cs_CZ">@string/czesh</item>
@@ -1458,6 +1468,7 @@
         <item>it_IT</item>
         <item>fr_FR</item>
         <item>pt_BR</item>
+        <item>pt_PT</item>
         <item>nl_NL</item>
         <item>pl_PL</item>
         <item>cs_CZ</item>
@@ -2282,5 +2293,47 @@
         <item>manual</item>
     </string-array>
 
-</resources>
+    <string-array name="pref_transliteration_languages">
+        <item>@string/arabic</item>
+        <item>@string/bengali</item>
+        <item>@string/czech</item>
+        <item>@string/estonian</item>
+        <item>@string/extended_ascii</item>
+        <item>@string/german</item>
+        <item>@string/greek</item>
+        <item>@string/hebrew</item>
+        <item>@string/icelandic</item>
+        <item>@string/korean</item>
+        <item>@string/lithuanian</item>
+        <item>@string/persian</item>
+        <item>@string/polish</item>
+        <item>@string/russian</item>
+        <item>@string/scandinavian</item>
+        <item>@string/turkish</item>
+        <item>@string/ukranian</item>
+    </string-array>
 
+    <string-array name="pref_transliteration_languages_values">
+        <item>arabic</item>
+        <item>bengali</item>
+        <item>czech</item>
+        <item>estonian</item>
+        <item>extended_ascii</item>
+        <item>german</item>
+        <item>greek</item>
+        <item>hebrew</item>
+        <item>icelandic</item>
+        <item>korean</item>
+        <item>lithuanian</item>
+        <item>persian</item>
+        <item>polish</item>
+        <item>russian</item>
+        <item>scandinavian</item>
+        <item>turkish</item>
+        <item>ukranian</item>
+    </string-array>
+
+    <string-array name="pref_transliteration_languages_default">
+        <!-- transliteration disabled by default -->
+    </string-array>
+</resources>

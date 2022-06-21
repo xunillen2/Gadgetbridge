@@ -41,6 +41,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.view.menu.MenuItemImpl;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -89,6 +90,8 @@ public class ControlCenterv2 extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GBActivity {
 
     public static final int MENU_REFRESH_CODE = 1;
+    public static final String ACTION_REQUEST_PERMISSIONS
+            = "nodomain.freeyourgadget.gadgetbridge.activities.controlcenter.requestpermissions";
     private static PhoneStateListener fakeStateListener;
 
     //needed for KK compatibility
@@ -122,6 +125,9 @@ public class ControlCenterv2 extends AppCompatActivity
                     break;
                 case DeviceService.ACTION_REALTIME_SAMPLES:
                     handleRealtimeSample(intent.getSerializableExtra(DeviceService.EXTRA_REALTIME_SAMPLE));
+                    break;
+                case ACTION_REQUEST_PERMISSIONS:
+                    checkAndRequestPermissions(false);
                     break;
             }
         }
@@ -161,6 +167,13 @@ public class ControlCenterv2 extends AppCompatActivity
                 this, drawer, toolbar, R.string.controlcenter_navigation_drawer_open, R.string.controlcenter_navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
+
+        /* This sucks but for the play store we're not allowed a donation link. Instead for
+        the Bangle.js Play Store app we put a message in the About dialog via @string/about_description */
+        if (BuildConfig.FLAVOR == "banglejs") {
+            MenuItemImpl v = (MenuItemImpl) ((NavigationView) drawer.getChildAt(1)).getMenu().findItem(R.id.donation_link);
+            if (v != null) v.setVisible(false);
+        }
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -234,6 +247,7 @@ public class ControlCenterv2 extends AppCompatActivity
         filterLocal.addAction(GBApplication.ACTION_NEW_DATA);
         filterLocal.addAction(DeviceManager.ACTION_DEVICES_CHANGED);
         filterLocal.addAction(DeviceService.ACTION_REALTIME_SAMPLES);
+        filterLocal.addAction(ACTION_REQUEST_PERMISSIONS);
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filterLocal);
 
         refreshPairedDevices();
@@ -250,7 +264,7 @@ public class ControlCenterv2 extends AppCompatActivity
                 // Put up a dialog explaining why we need permissions (Polite, but also Play Store policy)
                 // When accepted, we open the Activity for Notification access
                 DialogFragment dialog = new NotifyListenerPermissionsDialogFragment();
-                dialog.show(getSupportFragmentManager(), "PermissionsDialogFragment");
+                dialog.show(getSupportFragmentManager(), "NotifyListenerPermissionsDialogFragment");
             }
         }
 
@@ -263,11 +277,11 @@ public class ControlCenterv2 extends AppCompatActivity
                     // Put up a dialog explaining why we need permissions (Polite, but also Play Store policy)
                     // When accepted, we open the Activity for Notification access
                     DialogFragment dialog = new NotifyPolicyPermissionsDialogFragment();
-                    dialog.show(getSupportFragmentManager(), "PermissionsDialogFragment");
+                    dialog.show(getSupportFragmentManager(), "NotifyPolicyPermissionsDialogFragment");
                 }
             }
             // Check all the other permissions that we need to for Android M + later
-            checkAndRequestPermissions();
+            checkAndRequestPermissions(true);
         }
 
         ChangeLog cl = createChangeLog();
@@ -334,30 +348,30 @@ public class ControlCenterv2 extends AppCompatActivity
             case R.id.action_settings:
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 startActivityForResult(settingsIntent, MENU_REFRESH_CODE);
-                return true;
+                return false; //we do not want the drawer menu item to get selected
             case R.id.action_debug:
                 Intent debugIntent = new Intent(this, DebugActivity.class);
                 startActivity(debugIntent);
-                return true;
+                return false;
             case R.id.action_data_management:
                 Intent dbIntent = new Intent(this, DataManagementActivity.class);
                 startActivity(dbIntent);
-                return true;
+                return false;
             case R.id.action_notification_management:
                 Intent blIntent = new Intent(this, NotificationManagementActivity.class);
                 startActivity(blIntent);
-                return true;
+                return false;
             case R.id.device_action_discover:
                 launchDiscoveryActivity();
-                return true;
+                return false;
             case R.id.action_quit:
                 GBApplication.quit();
-                return true;
+                return false;
             case R.id.donation_link:
                 Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("https://liberapay.com/Gadgetbridge")); //TODO: centralize if ever used somewhere else
                 i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(i);
-                return true;
+                return false;
             case R.id.external_changelog:
                 ChangeLog cl = createChangeLog();
                 try {
@@ -365,14 +379,14 @@ public class ControlCenterv2 extends AppCompatActivity
                 } catch (Exception ignored) {
                     GB.toast(getBaseContext(), "Error showing Changelog", Toast.LENGTH_LONG, GB.ERROR);
                 }
-                return true;
+                return false;
             case R.id.about:
                 Intent aboutIntent = new Intent(this, AboutActivity.class);
                 startActivity(aboutIntent);
-                return true;
+                return false;
         }
 
-        return true;
+        return false;
     }
 
     private ChangeLog createChangeLog() {
@@ -405,7 +419,7 @@ public class ControlCenterv2 extends AppCompatActivity
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    private void checkAndRequestPermissions() {
+    private void checkAndRequestPermissions(boolean showDialogFirst) {
         List<String> wantedPermissions = new ArrayList<>();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_DENIED)
@@ -478,15 +492,20 @@ public class ControlCenterv2 extends AppCompatActivity
                     }
                 }
                 wantedPermissions.removeAll(shouldNotAsk);
-            } else {
+            } else if (!showDialogFirst) {
                 // Permissions have not been asked yet, but now will be
                 prefs.getPreferences().edit().putBoolean("permissions_asked", true).apply();
             }
 
             if (!wantedPermissions.isEmpty()) {
-                GB.toast(this, getString(R.string.permission_granting_mandatory), Toast.LENGTH_LONG, GB.ERROR);
-                ActivityCompat.requestPermissions(this, wantedPermissions.toArray(new String[0]), 0);
-                GB.toast(this, getString(R.string.permission_granting_mandatory), Toast.LENGTH_LONG, GB.ERROR);
+                if (showDialogFirst) {
+                    // Show a dialog - thus will then call checkAndRequestPermissions(false)
+                    DialogFragment dialog = new LocationPermissionsDialogFragment();
+                    dialog.show(getSupportFragmentManager(), "LocationPermissionsDialogFragment");
+                } else {
+                    GB.toast(this, getString(R.string.permission_granting_mandatory), Toast.LENGTH_LONG, GB.ERROR);
+                    ActivityCompat.requestPermissions(this, wantedPermissions.toArray(new String[0]), 0);
+                }
             }
         }
 
@@ -579,4 +598,25 @@ public class ControlCenterv2 extends AppCompatActivity
         }
     }
 
+    /// Called from checkAndRequestPermissions - this puts up a dialog explaining we need permissions, and then calls checkAndRequestPermissions (via an intent) when 'ok' pressed
+    public static class LocationPermissionsDialogFragment extends DialogFragment {
+        ControlCenterv2 controlCenter;
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            Context context = getContext();
+            builder.setMessage(context.getString(R.string.permission_location,
+                            getContext().getString(R.string.app_name),
+                            getContext().getString(R.string.ok)))
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Intent intent = new Intent(ACTION_REQUEST_PERMISSIONS);
+                            LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+                        }
+                    });
+            return builder.create();
+        }
+    }
 }

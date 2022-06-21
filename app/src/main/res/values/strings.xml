@@ -9,13 +9,13 @@
     <string name="application_name_banglejs_main">Bangle.js Gadgetbridge</string>
     <string name="title_activity_controlcenter_banglejs_main">Bangle.js Gadgetbridge</string>
     <string name="about_activity_title_banglejs_main">About Bangle.js Gadgetbridge</string>
-    <string name="about_description_banglejs_main">Android companion app for Bangle.js built on top of the Gadgetbridge project, with added Internet Access.</string>
+    <string name="about_description_banglejs_main">Android companion app for Bangle.js built on top of the Gadgetbridge project, with added Internet Access.\n\nDue to Google Play Store policies, we are not allowed a donation link in the app itself, but if you like this app please consider donating via the Gadgetbridge homepage below.</string>
     <string name="gadgetbridge_running_banglejs_main">Bangle.js running</string>
 
     <string name="application_name_banglejs_nopebble">Bangle.js Gadgetbridge</string>
     <string name="title_activity_controlcenter_banglejs_nopebble">Bangle.js Gadgetbridge</string>
     <string name="about_activity_title_banglejs_nopebble">About Bangle.js Gadgetbridge</string>
-    <string name="about_description_banglejs_nopebble">Android companion app for Bangle.js built on top of the Gadgetbridge project, with added Internet Access.</string>
+    <string name="about_description_banglejs_nopebble">Android companion app for Bangle.js built on top of the Gadgetbridge project, with added Internet Access.\n\nDue to Google Play Store policies, we are not allowed a donation link in the app itself, but if you like this app please consider donating via the Gadgetbridge homepage below.</string>
     <string name="gadgetbridge_running_banglejs_nopebble">Bangle.js running</string>
 
     <string name="application_name_main_nightly">Gadgetbridge (Nightly)</string>
@@ -182,6 +182,8 @@
     <string name="pref_summary_transliteration">Enable this if your device has no support for your language\'s font</string>
     <string name="pref_title_banglejs_text_bitmap">Text as Bitmaps</string>
     <string name="pref_summary_banglejs_text_bitmap">If a word cannot be rendered with the watch\'s font, render it to a bitmap in Gadgetbridge and display the bitmap on the watch</string>
+    <string name="pref_title_banglejs_webview_url">App loader URL</string>
+    <string name="pref_summary_banglejs_webview_url">If you want a custom app loader put your https://…/android.html URL here. Otherwise leave blank for https://banglejs.com/apps</string>
     <string name="pref_title_rtl">Right-To-Left</string>
     <string name="pref_summary_rtl">Enable this if your device can not show right-to-left languages</string>
     <string name="pref_rtl_max_line_length">Right-To-Left Max Line Length</string>
@@ -370,6 +372,10 @@
     <string name="prefs_hr_alarm_activity">Heart rate alarm during sports activity</string>
     <string name="prefs_hr_alarm_low">Low limit</string>
     <string name="prefs_hr_alarm_high">High limit</string>
+    <string name="pref_workout_start_on_phone_title">Fitness app tracking</string>
+    <string name="pref_workout_start_on_phone_summary">Start/stop fitness app tracking on phone when a GPS workout is started on the band</string>
+    <string name="pref_workout_send_gps_title">Send GPS during workout</string>
+    <string name="pref_workout_send_gps_summary">Send the current GPS location to the band during a workout</string>
     <!-- Auto export preferences -->
     <string name="pref_header_auto_export">Auto export</string>
     <string name="pref_title_auto_export_enabled">Auto export enabled</string>
@@ -383,6 +389,8 @@
     <string name="pref_auto_fetch_limit_fetches">Minimum time between fetches</string>
     <string name="pref_auto_fetch_limit_fetches_summary">Fetches every %d minutes</string>
     <!-- developer/debug preferences-->
+    <string name="discovery_scanning_intensity">Scanning intensity</string>
+    <string name="discovery_scanning_intensity_warning">If you experience freezing or unresponsiveness, try to set Scanning intensity to lower level. If your device is not being discovered, try to set Scanning intensity to higher level.</string>
     <string name="pref_disable_new_ble_scanning">Disable new BLE scanning</string>
     <string name="pref_summary_disable_new_ble_scanning">Check this option if your device cannot be found during discovery</string>
     <string name="not_connected">Not connected</string>
@@ -739,6 +747,15 @@
     <string name="spanish">Spanish</string>
     <string name="russian">Russian</string>
     <string name="german">German</string>
+    <string name="bengali">Bengali</string>
+    <string name="czech">Czech</string>
+    <string name="estonian">Estonian</string>
+    <string name="extended_ascii">Extended ASCII</string>
+    <string name="icelandic">Icelandic</string>
+    <string name="lithuanian">Lithuanian</string>
+    <string name="persian">Persian</string>
+    <string name="scandinavian">Scandinavian</string>
+    <string name="ukranian">Ukranian</string>
     <string name="italian">Italian</string>
     <string name="french">French</string>
     <string name="polish">Polish</string>
@@ -752,6 +769,8 @@
     <string name="thai">Thai</string>
     <string name="vietnamese">Vietnamese</string>
     <string name="portuguese">Portuguese</string>
+    <string name="portuguese_br">Portuguese (Brazil)</string>
+    <string name="portuguese_pt">Portuguese (Portugal)</string>
     <string name="romanian">Romanian</string>
     <string name="hungarian">Hungarian</string>
     <string name="greek">Greek</string>
@@ -1038,6 +1057,9 @@
     <string name="notification_channel_high_priority_name">High-priority</string>
     <string name="notification_channel_transfer_name">Data transfer</string>
     <string name="notification_channel_low_battery_name">Low battery</string>
+    <string name="notification_channel_gps">GPS tracking</string>
+    <string name="notification_gps_title">Gadgetbridge GPS</string>
+    <string name="notification_gps_text">Sending GPS location to %1$d devices</string>
     <string name="devicetype_amazfit_gts">Amazfit GTS</string>
     <string name="devicetype_amazfit_vergel">Amazfit Verge Lite</string>
     <string name="devicetype_sg2">Lemfo SG2</string>
@@ -1133,6 +1155,8 @@
     <string name="widget_10_minutes">10 minutes</string>
     <string name="widget_20_minutes">20 minutes</string>
     <string name="widget_1_hour">1 hour</string>
+    <string name="quick_alarm">Quick alarm</string>
+    <string name="quick_alarm_description">Alarm from widget</string>
     <string name="icon_placeholder" translatable="false">Icon</string>
     <string name="watch_not_connected">Watch not connected</string>
     <string name="qhybrid_vibration_strength">vibration strength:</string>
@@ -1194,8 +1218,9 @@
     <string name="about_additional_contributions">Many thanks to all unlisted contributors for contributing code, translations, support, ideas, motivation, bug reports, money… ✊</string>
     <string name="about_links">Links</string>
     <string name="permission_granting_mandatory">All these permissions are required and instability might occur if not granted</string>
-    <string name="permission_notification_listener">%1$s needs access to Notifications in order to display them on your watch.\n\nPlease tap \'%2$s\' then \'%1$s\' and enable \'Allow Notification Access\', then tap \'Back\' to return to %1$s</string>
-    <string name="permission_notification_policy_access">%1$s needs access to Do Not Disturb settings in order to honour them on your watch.\n\nPlease tap \'%2$s\' then \'%1$s\' and enable \'Allow Do Not Disturb\', then tap \'Back\' to return to %1$s</string>
+    <string name="permission_notification_listener">%1$s needs access to Notifications in order to display them on your watch when your phone\'s screen is off.\n\nPlease tap \'%2$s\' then \'%1$s\' and enable \'Allow Notification Access\', then tap \'Back\' to return to %1$s</string>
+    <string name="permission_notification_policy_access">%1$s needs access to Do Not Disturb settings in order to honour them on your watch when your phone\'s screen is off.\n\nPlease tap \'%2$s\' then \'%1$s\' and enable \'Allow Do Not Disturb\', then tap \'Back\' to return to %1$s</string>
+    <string name="permission_location">%1$s needs access to your location in the background to allow it to stay connected to your watch even when your screen is off.\n\nPlease tap \'%2$s\' to agree.</string>
     <string name="error_version_check_extreme_caution">CAUTION: Error when checking version information! You should not continue! Saw version name \"%s\"</string>
     <string name="require_location_provider">Location must be enabled</string>
     <string name="companiondevice_pairing">CompanionDevice Pairing</string>
@@ -1633,6 +1658,7 @@
     <string name="pref_device_action_fitness_app_control_start">Fitness App Tracking Start</string>
     <string name="pref_device_action_fitness_app_control_stop">Fitness App Tracking Stop</string>
     <string name="pref_device_action_fitness_app_control_toggle">Toggle Fitness App Tracking</string>
+    <string name="pref_device_action_phone_gps_location_listener_stop">GPS Location Listener Stop</string>
     <!-- Translators: the ### indicate number of digits, keep intact -->
     <string name="distance_format_meters">###m</string>
     <!-- Translators: the ### indicate number of digits, keep intact -->
@@ -1678,4 +1704,6 @@
     <string name="pref_enable_call_reject_summary">Enable rejecting calls from the device</string>
 
     <string name="pref_disable_find_phone_with_dnd">Disable find my phone when do not disturb is active</string>
+    <string name="info_no_devices_connected">no devices connected</string>
+    <string name="info_connected_count">%d devices connected</string>
 </resources>

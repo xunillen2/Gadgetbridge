@@ -45,6 +45,7 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_DEVICE_INTENTS = "device_intents";
 
     public static final String PREF_BANGLEJS_TEXT_BITMAP = "banglejs_text_bitmap";
+    public static final String PREF_BANGLEJS_WEBVIEW_URL = "banglejs_webview_url";
 
     public static final String PREF_DISCONNECT_NOTIFICATION = "disconnect_notification";
     public static final String PREF_DISCONNECT_NOTIFICATION_START = "disconnect_notification_start";
@@ -123,6 +124,9 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_DO_NOT_DISTURB_SA = "pref_do_not_disturb_sa";
     public static final String PREF_DO_NOT_DISTURB_SU = "pref_do_not_disturb_su";
 
+    public static final String PREF_WORKOUT_START_ON_PHONE = "workout_start_on_phone";
+    public static final String PREF_WORKOUT_SEND_GPS_TO_BAND = "workout_send_gps_to_band";
+
     public static final String PREF_FIND_PHONE = "prefs_find_phone";
     public static final String PREF_FIND_PHONE_DURATION = "prefs_find_phone_duration";
     public static final String PREF_AUTOLIGHT = "autolight";
@@ -144,7 +148,7 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_SONYSWR12_SMART_INTERVAL = "smart_alarm_interval_preference";
 
     public static final String PREF_BT_CONNECTED_ADVERTISEMENT = "bt_connected_advertisement";
-    public static final String PREF_TRANSLITERATION_ENABLED = "pref_transliteration_enabled";
+    public static final String PREF_TRANSLITERATION_LANGUAGES = "pref_transliteration_languages";
 
     public static final String PREF_NOTHING_EAR1_INEAR = "pref_nothing_inear_detection";
     public static final String PREF_NOTHING_EAR1_AUDIOMODE = "pref_nothing_audiomode";
