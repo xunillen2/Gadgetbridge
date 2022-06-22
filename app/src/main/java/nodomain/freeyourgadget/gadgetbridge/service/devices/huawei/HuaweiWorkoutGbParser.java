@@ -2,6 +2,7 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei;
 
 import org.json.JSONObject;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +12,7 @@ import de.greenrobot.dao.query.QueryBuilder;
 import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHandler;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Workout;
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary;
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummaryDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutDataSample;
@@ -21,14 +23,19 @@ import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySample;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.sonyswr12.entities.activity.ActivityType;
+import nodomain.freeyourgadget.gadgetbridge.util.GB;
+import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 /**
  * This class parses the Huawei workouts into the table GB uses to show the workouts
+ * It also re-parses the unknown data from the workout tables
  * It is a separate class so it can easily be used to re-parse the data without database migrations
  */
 public class HuaweiWorkoutGbParser {
 
     public static void parseAllWorkouts() {
+        parseUnknownWorkoutData();
+
         try (DBHandler db = GBApplication.acquireDB()) {
             QueryBuilder<HuaweiWorkoutSummarySample> qb = db.getDaoSession().getHuaweiWorkoutSummarySampleDao().queryBuilder();
             for (HuaweiWorkoutSummarySample summary : qb.listLazy()) {
@@ -37,6 +44,50 @@ public class HuaweiWorkoutGbParser {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Parses the unknown data from the workout data table
+     */
+    private static void parseUnknownWorkoutData() {
+        try (DBHandler dbHandler = GBApplication.acquireDB()) {
+                QueryBuilder<HuaweiWorkoutDataSample> qb = dbHandler.getDaoSession().getHuaweiWorkoutDataSampleDao().queryBuilder().where(
+                        HuaweiWorkoutDataSampleDao.Properties.DataErrorHex.notEq("")
+                );
+                for (HuaweiWorkoutDataSample sample : qb.build().listLazy()) {
+                    byte[] data = GB.hexStringToByteArray(new String(sample.getDataErrorHex()));
+                    Workout.WorkoutData.Response response = new Workout.WorkoutData.Response(data);
+
+                    for (Workout.WorkoutData.Response.Data responseData : response.dataList) {
+                        byte[] dataErrorHex;
+                        if (responseData.unknownData == null)
+                            dataErrorHex = null;
+                        else
+                            dataErrorHex = StringUtils.bytesToHex(responseData.unknownData).getBytes(StandardCharsets.UTF_8);
+
+                        HuaweiWorkoutDataSample dataSample = new HuaweiWorkoutDataSample(
+                                sample.getWorkoutId(),
+                                responseData.timestamp,
+                                responseData.heartRate,
+                                responseData.speed,
+                                responseData.cadence,
+                                responseData.stepLength,
+                                responseData.groundContactTime,
+                                responseData.impact,
+                                responseData.swingAngle,
+                                responseData.foreFootLanding,
+                                responseData.midFootLanding,
+                                responseData.backFootLanding,
+                                responseData.eversionAngle,
+                                dataErrorHex
+                        );
+
+                        dbHandler.getDaoSession().getHuaweiWorkoutDataSampleDao().insertOrReplace(dataSample);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 
     public static int huaweiTypeToGbType(byte huaweiType) {
