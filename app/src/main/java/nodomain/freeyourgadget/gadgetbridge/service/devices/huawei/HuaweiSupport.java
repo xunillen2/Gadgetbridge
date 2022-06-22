@@ -1055,8 +1055,6 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        HuaweiWorkoutGbParser.parseWorkout(workoutId);
     }
 
     public void setWearLocation() {
