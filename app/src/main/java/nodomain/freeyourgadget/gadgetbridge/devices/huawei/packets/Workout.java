@@ -112,15 +112,15 @@ public class Workout {
             public byte[] rawData;
 
             public short number;
-            public byte status; // TODO: enum?
+            public byte status = -1; // TODO: enum?
             public int startTime;
             public int endTime;
-            public int calories;
-            public int distance;
-            public int stepCount;
-            public int totalTime;
-            public int duration;
-            public byte type; // TODO: enum?
+            public int calories = -1;
+            public int distance = -1;
+            public int stepCount = -1;
+            public int totalTime = -1;
+            public int duration = -1;
+            public byte type = -1; // TODO: enum?
 
             public Response(SecretsProvider secretsProvider) {
                 super(secretsProvider);
@@ -144,8 +144,6 @@ public class Workout {
                 this.number = container.getShort(0x02);
                 if (container.contains(0x03))
                     this.status = container.getByte(0x03);
-                else
-                    this.status = -1;
                 this.startTime = container.getInteger(0x04);
                 this.endTime = container.getInteger(0x05);
 

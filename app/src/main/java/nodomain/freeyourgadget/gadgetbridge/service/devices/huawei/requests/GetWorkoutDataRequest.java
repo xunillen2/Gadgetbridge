@@ -9,6 +9,7 @@ import java.util.List;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Workout;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiWorkoutGbParser;
 
 public class GetWorkoutDataRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetWorkoutDataRequest.class);
@@ -102,6 +103,8 @@ public class GetWorkoutDataRequest extends Request {
             this.support.addInProgressRequest(nextRequest);
             this.nextRequest(nextRequest);
         } else {
+            HuaweiWorkoutGbParser.parseWorkout(this.databaseId);
+
             if (remainder.size() > 0) {
                 GetWorkoutTotalsRequest nextRequest = new GetWorkoutTotalsRequest(
                         this.support,
