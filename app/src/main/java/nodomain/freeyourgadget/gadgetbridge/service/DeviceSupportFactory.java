@@ -71,8 +71,8 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband4.MiBand
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband5.MiBand5Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband6.MiBand6Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppe.ZeppESupport;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiBRSupport;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiLESupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.id115.ID115Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.itag.ITagSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.jyou.BFH16DeviceSupport;
@@ -328,7 +328,7 @@ public class DeviceSupportFactory {
             case HUAWEIWATCHGT:
             case HUAWEIBANDAW70:
             case HUAWEIBAND4PRO:
-                return new ServiceDeviceSupport(new HuaweiSupport());
+                return new ServiceDeviceSupport(new HuaweiLESupport());
         }
         return null;
     }
