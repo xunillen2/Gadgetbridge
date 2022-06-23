@@ -19,6 +19,8 @@ import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutPaceSample;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutPaceSampleDao;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySample;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySampleDao;
+import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.sonyswr12.entities.activity.ActivityType;
 
 /**
  * This class parses the Huawei workouts into the table GB uses to show the workouts
@@ -38,8 +40,20 @@ public class HuaweiWorkoutGbParser {
     }
 
     public static int huaweiTypeToGbType(byte huaweiType) {
-        // TODO: create a mapping
-        return (int) huaweiType;
+        int type = huaweiType & 0xFF;
+        switch (type) {
+            case 1:
+                return ActivityKind.TYPE_RUNNING;
+            case 2:
+            case 13:
+                return ActivityKind.TYPE_WALKING;
+            case 132:
+                return ActivityKind.TYPE_BASKETBALL;
+            case 134:
+                return ActivityKind.TYPE_ELLIPTICAL_TRAINER;
+            default:
+                return ActivityKind.TYPE_UNKNOWN;
+        }
     }
 
     public static void parseWorkout(Long workoutId) {
