@@ -82,7 +82,7 @@ public class Request {
     public Request(HuaweiBRSupport support) {
         this.support = support;
         this.builder = support.createTransactionBuilder(getName());
-        this.builder.setSocketCallback(support);
+        this.builder.setCallback(support);
         this.isSelfQueue = true;
     }
     

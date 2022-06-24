@@ -82,7 +82,7 @@ public class Request {
     public Request(HuaweiLESupport support) {
         this.support = support;
         this.builder = support.createTransactionBuilder(getName());
-        this.builder.setGattCallback(support);
+        this.builder.setCallback(support);
         this.isSelfQueue = true;
     }
     

@@ -51,7 +51,7 @@ public class Transaction extends AbstractTransaction {
         return mActions.isEmpty();
     }
 
-    public void setSocketCallback(@Nullable SocketCallback callback) {
+    public void setCallback(@Nullable SocketCallback callback) {
         socketCallback = callback;
     }
 

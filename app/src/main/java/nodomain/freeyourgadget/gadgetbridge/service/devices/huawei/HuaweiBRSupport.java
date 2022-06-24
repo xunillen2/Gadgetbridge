@@ -155,7 +155,7 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
 
     @Override
     protected TransactionBuilder initializeDevice(TransactionBuilder builder) {
-        builder.setSocketCallback(this);
+        builder.setCallback(this);
         deviceMac = gbDevice.getAddress();
         createRandomMacAddress();
         builder.add(new SetDeviceStateAction(getDevice(), GBDevice.State.AUTHENTICATING, getContext()));
@@ -201,7 +201,7 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
 
     protected void initializeDeviceFinalize() {
         TransactionBuilder builder = createTransactionBuilder("Initializing");
-        builder.setSocketCallback(this);
+        builder.setCallback(this);
         builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZING, getContext()));
         try {
             String name = gbDevice.getName();

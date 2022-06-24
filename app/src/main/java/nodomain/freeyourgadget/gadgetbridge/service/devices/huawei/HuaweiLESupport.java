@@ -159,7 +159,7 @@ public class HuaweiLESupport extends AbstractBTLEDeviceSupport {
 
     @Override
     protected TransactionBuilder initializeDevice(TransactionBuilder builder) {
-        builder.setGattCallback(this);
+        builder.setCallback(this);
         builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), true);
         deviceMac = gbDevice.getAddress();
         createRandomMacAddress();
@@ -211,7 +211,7 @@ public class HuaweiLESupport extends AbstractBTLEDeviceSupport {
 
     protected void initializeDeviceFinalize() {
         TransactionBuilder builder = createTransactionBuilder("Initializing");
-        builder.setGattCallback(this);
+        builder.setCallback(this);
         builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), true);
         builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZING, getContext()));
         try {

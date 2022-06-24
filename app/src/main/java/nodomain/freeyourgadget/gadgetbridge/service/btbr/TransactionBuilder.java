@@ -68,8 +68,8 @@ public class TransactionBuilder {
      *
      * @param callback the callback to set, may be null
      */
-    public void setSocketCallback(@Nullable SocketCallback callback) {
-        mTransaction.setSocketCallback(callback);
+    public void setCallback(@Nullable SocketCallback callback) {
+        mTransaction.setCallback(callback);
     }
 
     public

@@ -102,8 +102,8 @@ public class TransactionBuilder {
      *
      * @param callback the callback to set, may be null
      */
-    public void setGattCallback(@Nullable GattCallback callback) {
-        mTransaction.setGattCallback(callback);
+    public void setCallback(@Nullable GattCallback callback) {
+        mTransaction.setCallback(callback);
     }
 
     public
