@@ -8,17 +8,24 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import de.greenrobot.dao.AbstractDao;
 import de.greenrobot.dao.Property;
 import de.greenrobot.dao.query.QueryBuilder;
+import nodomain.freeyourgadget.gadgetbridge.GBApplication;
+import nodomain.freeyourgadget.gadgetbridge.GBEnvironment;
 import nodomain.freeyourgadget.gadgetbridge.database.DBHelper;
 import nodomain.freeyourgadget.gadgetbridge.devices.AbstractSampleProvider;
 import nodomain.freeyourgadget.gadgetbridge.entities.DaoSession;
 import nodomain.freeyourgadget.gadgetbridge.entities.Device;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySample;
 import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiActivitySampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutDataSample;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutDataSampleDao;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySample;
+import nodomain.freeyourgadget.gadgetbridge.entities.HuaweiWorkoutSummarySampleDao;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind;
 import nodomain.freeyourgadget.gadgetbridge.model.ActivitySample;
@@ -169,7 +176,8 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
                 sample.getSteps(),
                 sample.getCalories(),
                 sample.getDistance(),
-                sample.getSpo()
+                sample.getSpo(),
+                sample.getHeartRate()
         );
         sampleCopy.setProvider(sample.getProvider());
         return sampleCopy;
@@ -184,6 +192,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
         end.setCalories(ActivitySample.NOT_MEASURED);
         end.setDistance(ActivitySample.NOT_MEASURED);
         end.setSpo(ActivitySample.NOT_MEASURED);
+        end.setHeartRate(ActivitySample.NOT_MEASURED);
         end.setOtherTimestamp(start.getTimestamp());
 
         getSampleDao().insertOrReplace(start);
@@ -201,6 +210,7 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
             end.setCalories(ActivitySample.NOT_MEASURED);
             end.setDistance(ActivitySample.NOT_MEASURED);
             end.setSpo(ActivitySample.NOT_MEASURED);
+            end.setHeartRate(ActivitySample.NOT_MEASURED);
             end.setOtherTimestamp(start.getTimestamp());
 
             newSamples.add(start);
@@ -235,15 +245,47 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
         return samples;
     }
 
+    private List<HuaweiWorkoutDataSample> getRawOrderedWorkoutSamplesWithHeartRate(int timestampFrom, int timestampTo) {
+        Device dbDevice = DBHelper.findDevice(getDevice(), getSession());
+        if (dbDevice == null)
+            return Collections.emptyList();
+
+        QueryBuilder<HuaweiWorkoutDataSample> qb = getSession().getHuaweiWorkoutDataSampleDao().queryBuilder();
+        Property timestampProperty = HuaweiWorkoutDataSampleDao.Properties.Timestamp;
+        Property heartRateProperty = HuaweiWorkoutDataSampleDao.Properties.HeartRate;
+        Property deviceProperty = HuaweiWorkoutSummarySampleDao.Properties.DeviceId;
+        qb.join(HuaweiWorkoutDataSampleDao.Properties.WorkoutId, HuaweiWorkoutSummarySample.class, HuaweiWorkoutSummarySampleDao.Properties.WorkoutId)
+                .where(deviceProperty.eq(dbDevice.getId()));
+        qb.where(
+                timestampProperty.ge(timestampFrom),
+                timestampProperty.le(timestampTo),
+                heartRateProperty.notEq(ActivitySample.NOT_MEASURED)
+        ).orderAsc(timestampProperty);
+        List<HuaweiWorkoutDataSample> samples = qb.build().list();
+        getSession().getHuaweiWorkoutSummarySampleDao().detachAll();
+        return samples;
+    }
+
+    private class SampleLoopState {
+        public long deviceId = 0;
+        public long userId = 0;
+
+        int[] activityTypes = {};
+
+        public int sleepModifier = 0;
+        public boolean insideStepMarker = false;
+    }
+
     /*
      * Note that this does a lot more than the normal implementation, as it takes care of everything
      * that is necessary for proper displaying of data.
      *
-     * This essentially boils down to three things:
+     * This essentially boils down to four things:
+     *  - It adds in the workout heart rate data
      *  - It adds a sample with intensity zero before start markers (start of block)
      *  - It adds a sample with intensity zero after end markers (end of block)
      *  - It modifies some blocks so the sleep data gets handled correctly
-     * The first and third are necessary for proper stats calculation, the second is mostly for
+     * The second and fourth are necessary for proper stats calculation, the third is mostly for
      * nicer graphs.
      *
      * Note that the data in the database isn't changed, as the samples are detached.
@@ -253,189 +295,61 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
         // Note that the result of this function has to be sorted by timestamp!
 
         List<HuaweiActivitySample> rawSamples = getRawOrderedActivitySamples(timestamp_from, timestamp_to);
+        List<HuaweiWorkoutDataSample> workoutSamples = getRawOrderedWorkoutSamplesWithHeartRate(timestamp_from, timestamp_to);
+
+        /*
+         * This is a list of all samples handled so far
+         * The last sample can either be:
+         *  - The last handled sample, or
+         *  - A post sample
+         * A last handled sample will always have an equal or smaller timestamp.
+         * A post sample can have a smaller, equal, or one-greater timestamp.
+         */
         List<HuaweiActivitySample> processedSamples = new ArrayList<>();
 
-        int[] activityTypes = ActivityKind.mapToDBActivityTypes(activityType, this);
+        Iterator<HuaweiActivitySample> itRawSamples = rawSamples.iterator();
+        Iterator<HuaweiWorkoutDataSample> itWorkoutSamples = workoutSamples.iterator();
 
-        // TODO: make sure no data can have the same timestamp
-        //       This seems to sometimes happen when zooming in on a graph, switching to another
-        //       tab, and then switching back
+        HuaweiActivitySample nextRawSample = null;
+        if (itRawSamples.hasNext())
+            nextRawSample = itRawSamples.next();
+        HuaweiWorkoutDataSample nextWorkoutSample = null;
+        if (itWorkoutSamples.hasNext())
+            nextWorkoutSample = itWorkoutSamples.next();
 
-        int lastHandledTimestamp = 0;
-        HuaweiActivitySample postSample = null;
-        HuaweiActivitySample endSample = null;
-
-        ArrayList<HuaweiActivitySample> endOutOfBoundsSamples = new ArrayList<>();
-
-        int sleepModifier = 0;
-        boolean insideStepMarker = false;
-
-        for (HuaweiActivitySample sample : rawSamples) {
-            // Filter on Source 0x0d, Type 0x01, until we know what it is and how we should
-            // handle them. Just showing them currently has some issues.
-            if (sample.getSource() == FitnessData.MessageData.sleepId && sample.getRawKind() == RawTypes.UNKNOWN)
-                continue;
-
-            // Filter samples on activity type
-            if (activityTypes.length != 0) {
-                boolean typeFound = false;
-                for (int type : activityTypes) {
-                    if (type == sample.getRawKind()) {
-                        typeFound = true;
-                        break;
-                    }
-                }
-                if (!typeFound)
-                    continue;
-            }
-
-            if (endSample != null) {
-                if (endSample.getTimestamp() == sample.getTimestamp()) {
-                    int offset = 1;
-                    for (int i = processedSamples.size() - 1; i > 0; i--) {
-                        if (processedSamples.get(i).getTimestamp() == endSample.getTimestamp() - offset)
-                            offset -= 1;
-                        else
-                            break;
-                    }
-                    endSample.setTimestamp(endSample.getTimestamp() - offset);
-                }
-                processedSamples.add(endSample);
-                endSample = null;
-            }
-
-            if (postSample != null) {
-                if (postSample.getTimestamp() < sample.getTimestamp())
-                    processedSamples.add(postSample);
-                postSample = null;
-            }
-
-            if (sample.getTimestamp() < sample.getOtherTimestamp()) {
-                // Start mark
-
-                // Handle if the end marker is after the end timestamp
-                if (sample.getOtherTimestamp() > timestamp_to) {
-                    HuaweiActivitySample endOutOfBoundsSample = copySample(sample);
-                    endOutOfBoundsSample.setTimestamp(timestamp_to);
-                    endOutOfBoundsSample.setSteps(ActivitySample.NOT_MEASURED);
-                    endOutOfBoundsSample.setCalories(ActivitySample.NOT_MEASURED);
-                    endOutOfBoundsSample.setDistance(ActivitySample.NOT_MEASURED);
-                    endOutOfBoundsSample.setSpo(ActivitySample.NOT_MEASURED);
-                    endOutOfBoundsSample.setOtherTimestamp(sample.getTimestamp());
-                    endOutOfBoundsSamples.add(endOutOfBoundsSample);
-                }
-
-                // Add pre-sample for better stats if needed
-                if (lastHandledTimestamp < sample.getTimestamp() - 1) {
-                    HuaweiActivitySample preSample = new HuaweiActivitySample(
-                            sample.getTimestamp() - 1,
-                            sample.getDeviceId(),
-                            sample.getUserId(),
-                            0,
-                            (byte) 0x00,
-                            ActivitySample.NOT_MEASURED,
-                            0,
-                            ActivitySample.NOT_MEASURED,
-                            ActivitySample.NOT_MEASURED,
-                            ActivitySample.NOT_MEASURED,
-                            ActivitySample.NOT_MEASURED
-                    );
-                    preSample.setProvider(this);
-                    // Handle modifiers
-                    if (sleepModifier == 0)
-                        processedSamples.add(preSample);
-                }
-
-                // Handle modifiers
-                if (sleepModifier != 0)
-                    sample.setRawKind(sleepModifier);
-                if (insideStepMarker)
-                    LOG.info("Start marker inside step marker.");
-
-                // Add data
-                processedSamples.add(sample);
-
-                // Set modifiers
-                if (sample.getSource() == FitnessData.MessageData.sleepId && (sample.getRawKind() == RawTypes.LIGHT_SLEEP || sample.getRawKind() == RawTypes.DEEP_SLEEP))
-                    sleepModifier = sample.getRawKind();
-                if (sample.getSource() == FitnessData.MessageData.stepId)
-                    insideStepMarker = true;
-            } else {
-                // End mark
-
-                // Handle if the start marker is before the start timestamp
-                if (sample.getOtherTimestamp() < timestamp_from) {
-                    // This is only really useful for sleep data
-                    if (sample.getSource() == FitnessData.MessageData.sleepId && (sample.getRawKind() == RawTypes.LIGHT_SLEEP || sample.getRawKind() == RawTypes.DEEP_SLEEP)) {
-                        // Change the type of the previous markers so the sleep registers correctly
-                        for (HuaweiActivitySample processedSample : processedSamples)
-                            processedSample.setRawKind(sample.getRawKind());
-
-                        // Place a replacement start marker, may technically be out of timeframe
-                        HuaweiActivitySample preSample = copySample(sample);
-                        if (processedSamples.size() > 0)
-                            preSample.setTimestamp(Math.min(timestamp_from, processedSamples.get(0).getTimestamp() - 1));
-                        else
-                            preSample.setTimestamp(timestamp_from);
-                        preSample.setSteps(ActivitySample.NOT_MEASURED);
-                        preSample.setCalories(ActivitySample.NOT_MEASURED);
-                        preSample.setDistance(ActivitySample.NOT_MEASURED);
-                        preSample.setSpo(ActivitySample.NOT_MEASURED);
-                        preSample.setOtherTimestamp(sample.getTimestamp());
-                        processedSamples.add(0, preSample);
-                    } else {
-                        // These end markers are not useful
-                        // We may lose some steps here, but there is no way to know which count
-                        // we should use for them anyway
-                        continue;
-                    }
-                }
-
-                // Set modifiers
-                if (sample.getSource() == FitnessData.MessageData.sleepId && sample.getRawKind() == sleepModifier)
-                    sleepModifier = 0;
-                if (sample.getSource() == FitnessData.MessageData.stepId)
-                    insideStepMarker = false;
-
-                // These are not added yet as they may need to be moved
-                postSample = new HuaweiActivitySample(
-                        sample.getTimestamp() + 1,
-                        sample.getDeviceId(),
-                        sample.getUserId(),
-                        0,
-                        (byte) 0x00,
-                        ActivitySample.NOT_MEASURED,
-                        0,
-                        ActivitySample.NOT_MEASURED,
-                        ActivitySample.NOT_MEASURED,
-                        ActivitySample.NOT_MEASURED,
-                        ActivitySample.NOT_MEASURED
-                );
-                postSample.setProvider(this);
-
-                // Handle modifiers
-                if (sleepModifier != 0) {
-                    postSample = null;
-                    sample.setRawKind(sleepModifier);
-                }
-                if (insideStepMarker)
-                    LOG.info("End marker inside step marker.");
-
-                endSample = sample;
-            }
-
-            lastHandledTimestamp = sample.getTimestamp();
+        SampleLoopState state = new SampleLoopState();
+        if (nextRawSample != null) {
+            state.deviceId = nextRawSample.getDeviceId();
+            state.userId = nextRawSample.getUserId();
         }
+        state.activityTypes = ActivityKind.mapToDBActivityTypes(activityType, this);
 
-        if (endSample != null)
-            processedSamples.add(endSample);
+        while (nextRawSample != null || nextWorkoutSample != null) {
+            if (nextRawSample == null) {
+                processWorkoutSample(processedSamples, state, nextWorkoutSample);
 
-        if (postSample != null)
-            processedSamples.add(postSample);
+                nextWorkoutSample = null;
+                if (itWorkoutSamples.hasNext())
+                    nextWorkoutSample = itWorkoutSamples.next();
+            } else if (nextWorkoutSample == null) {
+                processRawSample(processedSamples, state, nextRawSample);
 
-        for (HuaweiActivitySample sample : endOutOfBoundsSamples) {
-            sample.setTimestamp(Math.max(timestamp_to, processedSamples.get(processedSamples.size() - 1).getTimestamp() + 1));
-            processedSamples.add(sample);
+                nextRawSample = null;
+                if (itRawSamples.hasNext())
+                    nextRawSample = itRawSamples.next();
+            } else if (nextRawSample.getTimestamp() > nextWorkoutSample.getTimestamp()) {
+                processWorkoutSample(processedSamples, state, nextWorkoutSample);
+
+                nextWorkoutSample = null;
+                if (itWorkoutSamples.hasNext())
+                    nextWorkoutSample = itWorkoutSamples.next();
+            } else {
+                processRawSample(processedSamples, state, nextRawSample);
+
+                nextRawSample = null;
+                if (itRawSamples.hasNext())
+                    nextRawSample = itRawSamples.next();
+            }
         }
 
         int lastTime = 0;
@@ -445,8 +359,163 @@ public class HuaweiSampleProvider extends AbstractSampleProvider<HuaweiActivityS
             lastTime = sample.getTimestamp();
         }
 
-        LOG.info("Raw samples: " + rawSamples.size() + ", Processed samples: " + processedSamples.size());
+        LOG.info("Raw samples: " + rawSamples.size() + ", Workout samples: " + workoutSamples.size() + ", Processed samples: " + processedSamples.size());
 
         return processedSamples;
+    }
+
+    /**
+     * Process raw activity sample
+     * @param processedSamples Resulting list, see {@link getGBActivitySamples} for requirements on list
+     * @param state Current state
+     * @param sample Sample to process
+     * @param activityTypes Activity types to filer on
+     */
+    private void processRawSample(List<HuaweiActivitySample> processedSamples, SampleLoopState state, HuaweiActivitySample sample) {
+        // Filter on Source 0x0d, Type 0x01, until we know what it is and how we should handle them.
+        // Just showing them currently has some issues.
+        if (sample.getSource() == FitnessData.MessageData.sleepId && sample.getRawKind() == RawTypes.UNKNOWN)
+            return;
+
+        // Filter samples on activity type
+        if (state.activityTypes.length != 0) {
+            boolean typeFound = false;
+            for (int type : state.activityTypes) {
+                if (type == sample.getRawKind()) {
+                    typeFound = true;
+                    break;
+                }
+            }
+            if (!typeFound)
+                return;
+        }
+
+        boolean isStartSample = sample.getTimestamp() <= sample.getOtherTimestamp();
+        boolean isEndSample = sample.getTimestamp() >= sample.getOtherTimestamp();
+
+        int processedSize = processedSamples.size();
+        int lastTimestamp = 0;
+        if (processedSize > 0)
+            lastTimestamp = processedSamples.get(processedSize - 1).getTimestamp();
+        if (lastTimestamp > sample.getTimestamp()) {
+            // Last must be post sample, one before must have an equal timestamp
+            // Remove post sample, if necessary it will be added again later
+            processedSamples.remove(processedSize - 1);
+            // The one before will have the same timestamp, move it back one
+            // While technically a collision is possible, it practically won't happen
+            processedSamples.get(processedSize - 2).setTimestamp(sample.getTimestamp() - 1);
+            if (state.sleepModifier != 0)
+                sample.setRawKind(state.sleepModifier);
+            sample.setProvider(this);
+            processedSamples.add(sample);
+        } else if (lastTimestamp == sample.getTimestamp()) {
+            // Equal timestamps, move previous one back
+            // While technically a collision is possible, it practically won't happen
+            processedSamples.get(processedSize - 1).setTimestamp(sample.getTimestamp() - 1);
+            if (state.sleepModifier != 0)
+                sample.setRawKind(state.sleepModifier);
+            sample.setProvider(this);
+            processedSamples.add(sample);
+        } else {
+            if (isStartSample && state.sleepModifier == 0 && lastTimestamp < sample.getTimestamp() - 1) {
+                // Sample is start sample, add presample if nothing is present and sleep modifier is zero
+                HuaweiActivitySample preSample = new HuaweiActivitySample(
+                        sample.getTimestamp() - 1,
+                        sample.getDeviceId(),
+                        sample.getUserId(),
+                        0,
+                        (byte) 0x00,
+                        ActivitySample.NOT_MEASURED,
+                        0,
+                        ActivitySample.NOT_MEASURED,
+                        ActivitySample.NOT_MEASURED,
+                        ActivitySample.NOT_MEASURED,
+                        ActivitySample.NOT_MEASURED,
+                        ActivitySample.NOT_MEASURED
+                );
+                preSample.setProvider(this);
+                processedSamples.add(preSample);
+            }
+
+            // Handle modifiers
+            if (state.sleepModifier != 0)
+                sample.setRawKind(state.sleepModifier);
+            if (isStartSample && state.insideStepMarker)
+                LOG.info("Start marker inside step marker.");
+
+            // Add sample
+            sample.setProvider(this);
+            processedSamples.add(sample);
+        }
+
+        // Change state
+        if (sample.getSource() == FitnessData.MessageData.sleepId && (sample.getRawKind() == RawTypes.LIGHT_SLEEP || sample.getRawKind() == RawTypes.DEEP_SLEEP)) {
+            if (isStartSample)
+                state.sleepModifier = sample.getRawKind();
+            if (isEndSample)
+                state.sleepModifier = 0;
+        }
+        if (sample.getSource() == FitnessData.MessageData.stepId) {
+            if (isStartSample)
+                state.insideStepMarker = true;
+            if (isEndSample)
+                state.insideStepMarker = false;
+        }
+
+        if (isEndSample && state.sleepModifier == 0) {
+            // Sample is end sample, add post sample
+            HuaweiActivitySample postSample = new HuaweiActivitySample(
+                    sample.getTimestamp() + 1,
+                    sample.getDeviceId(),
+                    sample.getUserId(),
+                    0,
+                    (byte) 0x00,
+                    ActivitySample.NOT_MEASURED,
+                    0,
+                    ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED
+            );
+            postSample.setProvider(this);
+            processedSamples.add(postSample);
+        }
+
+        if (isEndSample && state.insideStepMarker)
+            LOG.info("End marker inside step marker.");
+    }
+
+    /**
+     * Process workout sample
+     * Raw activity samples with the same timestamp must be handled first!
+     * @param processedSamples Resulting list, see {@link getGBActivitySamples} for requirements on list
+     * @param state Current state
+     * @param workoutSample Sample to process
+     */
+    private void processWorkoutSample(List<HuaweiActivitySample> processedSamples, SampleLoopState state, HuaweiWorkoutDataSample workoutSample) {
+        int processedSize = processedSamples.size();
+        if (processedSize > 1 && processedSamples.get(processedSize - 2).getTimestamp() == workoutSample.getTimestamp()) {
+            processedSamples.get(processedSize - 2).setHeartRate(workoutSample.getHeartRate());
+        } else if (processedSize > 0 && processedSamples.get(processedSize - 1).getTimestamp() == workoutSample.getTimestamp()) {
+            processedSamples.get(processedSize - 1).setHeartRate(workoutSample.getHeartRate());
+        } else {
+            HuaweiActivitySample newSample = new HuaweiActivitySample(
+                    workoutSample.getTimestamp(),
+                    state.deviceId,
+                    state.userId,
+                    0,
+                    (byte) 0x00,
+                    ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED,
+                    workoutSample.getHeartRate()
+            );
+            newSample.setProvider(this);
+            processedSamples.add(newSample);
+        }
     }
 }

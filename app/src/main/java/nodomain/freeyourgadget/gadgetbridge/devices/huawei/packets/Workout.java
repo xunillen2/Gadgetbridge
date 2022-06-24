@@ -215,6 +215,7 @@ public class Workout {
                 // If unknown data is encountered, the whole tlv will be in here so it can be parsed again later
                 public byte[] unknownData = null;
 
+                public byte heartRate = -1;
                 public short speed = -1;
 
                 public short cadence = -1;
@@ -233,6 +234,7 @@ public class Workout {
                 public String toString() {
                     return "Data{" +
                             "unknownData=" + unknownData +
+                            ", heartRate=" + heartRate +
                             ", speed=" + speed +
                             ", cadence=" + cadence +
                             ", stepLength=" + stepLength +
@@ -262,6 +264,16 @@ public class Workout {
 
             public Response(SecretsProvider secretsProvider) {
                 super(secretsProvider);
+            }
+
+            /**
+             * This is to be able to easily reparse the error data, only accepts tlv bytes
+             * @param rawData The TLV bytes
+             */
+            public Response(byte[] rawData) throws ParseException {
+                super(null);
+                this.tlv = new HuaweiTLV().parse(rawData);
+                this.parseTlv();
             }
 
             @Override
@@ -338,6 +350,9 @@ public class Workout {
                     for (byte j = 0; j < 16; j++) {
                         if ((header.bitmap & (1 << j)) != 0) {
                             switch (j) {
+                                case 0:
+                                    data.heartRate = buf.get();
+                                    break;
                                 case 1:
                                     data.speed = buf.getShort();
                                     break;
