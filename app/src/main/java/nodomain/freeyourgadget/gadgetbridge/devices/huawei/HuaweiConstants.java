@@ -25,6 +25,7 @@ public final class HuaweiConstants {
     public static final UUID UUID_SERVICE_HUAWEI_SERVICE = UUID.fromString(String.format(BASE_UUID, "FE86"));
     public static final UUID UUID_CHARACTERISTIC_HUAWEI_WRITE = UUID.fromString(String.format(BASE_UUID, "FE01"));
     public static final UUID UUID_CHARACTERISTIC_HUAWEI_READ = UUID.fromString(String.format(BASE_UUID, "FE02"));
+    public static final UUID UUID_SERVICE_HUAWEI_SDP = UUID.fromString("82FF3820-8411-400C-B85A-55BDB32CF060");
 
     public static final byte HUAWEI_MAGIC = 0x5A;
 

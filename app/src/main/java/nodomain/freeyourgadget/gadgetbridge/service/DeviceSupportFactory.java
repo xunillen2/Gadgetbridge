@@ -72,6 +72,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband5.MiBand
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.miband6.MiBand6Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huami.zeppe.ZeppESupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiBRSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.id115.ID115Support;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.itag.ITagSupport;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.jyou.BFH16DeviceSupport;
