@@ -25,6 +25,8 @@ public class MusicControl {
     public static class MusicStatusResponse extends HuaweiPacket {
         public static final byte id = 0x01;
 
+        public int status = -1;
+
         public MusicStatusResponse(SecretsProvider secretsProvider) {
             super(secretsProvider);
 
@@ -34,8 +36,8 @@ public class MusicControl {
 
         @Override
         protected void parseTlv() {
-            // TODO: I don't know if there is more in these messages yet, they should be decrypted
-            //       in future logs
+            if (this.tlv.contains(0x01) && this.tlv.getBytes(0x01).length == 4)
+                this.status = this.tlv.getInteger(0x01);
         }
     }
 

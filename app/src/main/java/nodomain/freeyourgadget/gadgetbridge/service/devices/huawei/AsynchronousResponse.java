@@ -154,6 +154,12 @@ public class AsynchronousResponse {
             AudioManager audioManager = (AudioManager) this.support.getContext().getSystemService(Context.AUDIO_SERVICE);
 
             if (response.commandId == MusicControl.MusicStatusResponse.id) {
+                MusicControl.MusicStatusResponse resp = (MusicControl.MusicStatusResponse) response;
+                if (resp.status != -1 && resp.status != 0x000186A0) {
+                    LOG.warn("Music information error, will stop here: " + Integer.toHexString(resp.status));
+                    return;
+                }
+
                 LOG.debug("Music information requested, sending acknowledgement and music info.");
                 SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, MusicControl.MusicStatusResponse.id, MusicControl.successValue);
                 try {
