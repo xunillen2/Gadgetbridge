@@ -250,8 +250,9 @@ public class Workout {
                 }
             }
 
-            private final byte[] bitmapLengths = {1, 2, 1, 2, 2, 4, -1, 2};
-            private final byte[] innerBitmapLengths = {2, 2, 2, 1, 2, 1, 1, 1, 1, 2, 2};
+            // TODO: I'm not sure about the lengths
+            private final byte[] bitmapLengths = {1, 2, 1, 2, 2, 4, -1, 2, 2, 1, 1, 1, 1, 1, 1, 1};
+            private final byte[] innerBitmapLengths = {2, 2, 2, 1, 2, 1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1};
 
             public short workoutNumber;
             public short dataNumber;
