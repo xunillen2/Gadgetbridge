@@ -60,6 +60,11 @@ public class HuaweiWatchGT2eCoordinator extends HuaweiCoordinator{
     }
 
     @Override
+    public boolean supportsHeartRateMeasurement(GBDevice device) {
+        return true;
+    }
+
+    @Override
     public int[] getSupportedDeviceSpecificSettings(GBDevice device) {
         return new int[]{
                 R.xml.devicesettings_donotdisturb_allday_liftwirst,
