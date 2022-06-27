@@ -69,6 +69,7 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
 
     public interface RequestCallback {
         public void call();
+        public void handleException(HuaweiPacket.ParseException e);
     }
 
     public Request(HuaweiSupport support, TransactionBuilder builder) {
@@ -122,6 +123,14 @@ public class Request extends AbstractBTLEOperation<HuaweiSupport> {
     protected void processResponse() throws Exception {}
 
     public void handleResponse() throws Exception, GBException {
+        try {
+            this.receivedPacket.parseTlv();
+        } catch (HuaweiPacket.ParseException e) {
+            LOG.error("Parse TLV exception", e);
+            if (finalizeReq != null)
+                finalizeReq.handleException(e);
+            return;
+        }
         processResponse();
         if (nextRequest != null && !stopChain) {
             try {

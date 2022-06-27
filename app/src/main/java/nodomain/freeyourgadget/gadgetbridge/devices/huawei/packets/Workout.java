@@ -51,7 +51,7 @@ public class Workout {
             }
 
             @Override
-            protected void parseTlv() throws ParseException {
+            public void parseTlv() throws ParseException {
                 if (!this.tlv.contains(0x81))
                     throw new MissingTagException(0x81);
 
@@ -127,7 +127,7 @@ public class Workout {
             }
 
             @Override
-            protected void parseTlv() throws ParseException {
+            public void parseTlv() throws ParseException {
                 if (!this.tlv.contains(0x81))
                     throw new MissingTagException(0x81);
 
@@ -278,7 +278,7 @@ public class Workout {
             }
 
             @Override
-            protected void parseTlv() throws ParseException {
+            public void parseTlv() throws ParseException {
                 if (!this.tlv.contains(0x81))
                     throw new MissingTagException(0x81);
 
@@ -460,7 +460,7 @@ public class Workout {
             }
 
             @Override
-            protected void parseTlv() throws ParseException {
+            public void parseTlv() throws ParseException {
                 if (!this.tlv.contains(0x81))
                     throw new MissingTagException(0x81);
 

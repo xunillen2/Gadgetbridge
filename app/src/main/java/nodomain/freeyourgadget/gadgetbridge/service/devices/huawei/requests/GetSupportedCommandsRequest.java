@@ -99,6 +99,9 @@ public class GetSupportedCommandsRequest extends Request {
                     public void call() {
                         support.getCoordinator().printCommandsPerService();
                     }
+
+                    @Override
+                    public void handleException(HuaweiPacket.ParseException e) {}
                 });
             }
         }

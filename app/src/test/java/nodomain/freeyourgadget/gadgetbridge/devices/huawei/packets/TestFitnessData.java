@@ -74,6 +74,8 @@ public class TestFitnessData {
 
         HuaweiPacket packetSleep = new HuaweiPacket(secretsProvider).parse(rawSleep);
         HuaweiPacket packetStep = new HuaweiPacket(secretsProvider).parse(rawStep);
+        packetSleep.parseTlv();
+        packetStep.parseTlv();
 
         Assert.assertEquals(0x07, packetSleep.serviceId);
         Assert.assertEquals(0x0c, packetSleep.commandId);
@@ -139,6 +141,7 @@ public class TestFitnessData {
         );
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x07, packet.serviceId);
         Assert.assertEquals(0x0d, packet.commandId);
@@ -182,6 +185,7 @@ public class TestFitnessData {
         );
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x07, packet.serviceId);
         Assert.assertEquals(0x0b, packet.commandId);
@@ -270,6 +274,7 @@ public class TestFitnessData {
         );
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x07, packet.serviceId);
         Assert.assertEquals(0x0b, packet.commandId);
@@ -386,7 +391,9 @@ public class TestFitnessData {
         tlvField.setAccessible(true);
 
         try {
-            new HuaweiPacket(secretsProvider).parse(raw);
+            HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+            packet.parseTlv();
+            Assert.fail();
         } catch (HuaweiPacket.ParseException e) {
             if (e instanceof HuaweiPacket.MissingTagException) {
                 Assert.assertNotNull(e.getMessage());
@@ -416,6 +423,7 @@ public class TestFitnessData {
         );
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x07, packet.serviceId);
         Assert.assertEquals(0x0b, packet.commandId);

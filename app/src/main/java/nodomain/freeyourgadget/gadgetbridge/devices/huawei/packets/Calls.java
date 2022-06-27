@@ -32,7 +32,7 @@ public class Calls {
         }
 
         @Override
-        protected void parseTlv() throws MissingTagException {
+        public void parseTlv() throws MissingTagException {
             if (this.tlv.contains(0x01)) {
                 if (this.tlv.getByte(0x01) == 0x01) {
                     this.action = Action.CALL_REJECT;

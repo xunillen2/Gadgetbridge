@@ -56,6 +56,13 @@ public class AsynchronousResponse {
     }
 
     public void handleResponse(HuaweiPacket response) {
+        try {
+            response.parseTlv();
+        } catch (HuaweiPacket.ParseException e) {
+            LOG.error("Parse TLV exception", e);
+            return;
+        }
+
         handleFindPhone(response);
         handleMusicControls(response);
         handleCallControls(response);
@@ -218,11 +225,13 @@ public class AsynchronousResponse {
                     audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
                 }
 
-                SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, MusicControl.Control.id, MusicControl.successValue);
-                try {
-                    setMusicStatusRequest.perform();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (resp.buttonPresent || resp.volumePresent) {
+                    SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, MusicControl.Control.id, MusicControl.successValue);
+                    try {
+                        setMusicStatusRequest.perform();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }

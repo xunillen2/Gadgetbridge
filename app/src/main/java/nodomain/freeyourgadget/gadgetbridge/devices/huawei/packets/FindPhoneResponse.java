@@ -19,7 +19,7 @@ public class FindPhoneResponse extends HuaweiPacket {
     }
 
     @Override
-    protected void parseTlv() {
+    public void parseTlv() {
         if (this.tlv.contains(0x01)) {
             this.start = this.tlv.getBoolean(0x01);
         }
