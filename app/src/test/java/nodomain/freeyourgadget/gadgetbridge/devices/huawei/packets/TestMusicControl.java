@@ -80,6 +80,35 @@ public class TestMusicControl {
     }
 
     @Test
+    public void testMusicStatusResponseUnencrypted() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.ParseException {
+        byte[] rawOk = new byte[] {0x5a, 0x00, 0x09, 0x00, 0x25, 0x01, 0x7f, 0x04, 0x00, 0x01, (byte) 0x86, (byte) 0xa0, 0x63, (byte) 0x96};
+        byte[] rawErr = new byte[] {0x5a, 0x00, 0x09, 0x00, 0x25, 0x01, 0x7f, 0x04, 0x00, 0x01, (byte) 0x86, (byte) 0xaa, (byte) 0xc2, (byte) 0xdc};
+
+        Field tlvField = HuaweiPacket.class.getDeclaredField("tlv");
+        tlvField.setAccessible(true);
+
+        HuaweiTLV expectedTlvOk = new HuaweiTLV().put(0x7F, 0x000186A0);
+        HuaweiTLV expectedTlvErr = new HuaweiTLV().put(0x7F, 0x000186AA);
+
+        HuaweiPacket packetOk = new HuaweiPacket(secretsProvider).parse(rawOk);
+        HuaweiPacket packetErr = new HuaweiPacket(secretsProvider).parse(rawErr);
+        packetOk.parseTlv();
+        packetErr.parseTlv();
+
+        Assert.assertEquals(0x25, packetOk.serviceId);
+        Assert.assertEquals(0x01, packetOk.commandId);
+        Assert.assertEquals(expectedTlvOk, tlvField.get(packetOk));
+        Assert.assertTrue(packetOk instanceof MusicControl.MusicStatusResponse);
+        Assert.assertEquals(0x000186A0, ((MusicControl.MusicStatusResponse) packetOk).status);
+
+        Assert.assertEquals(0x25, packetErr.serviceId);
+        Assert.assertEquals(0x01, packetErr.commandId);
+        Assert.assertEquals(expectedTlvErr, tlvField.get(packetErr));
+        Assert.assertTrue(packetErr instanceof MusicControl.MusicStatusResponse);
+        Assert.assertEquals(0x000186AA, ((MusicControl.MusicStatusResponse) packetErr).status);
+    }
+
+    @Test
     public void testMusicInfoRequest() throws NoSuchFieldException, IllegalAccessException, HuaweiPacket.CryptoException {
         String artistName = "Artist";
         String songName = "Song";
