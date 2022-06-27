@@ -36,8 +36,8 @@ public class MusicControl {
 
         @Override
         public void parseTlv() {
-            if (this.tlv.contains(0x01) && this.tlv.getBytes(0x01).length == 4)
-                this.status = this.tlv.getInteger(0x01);
+            if (this.tlv.contains(0x7F) && this.tlv.getBytes(0x7F).length == 4)
+                this.status = this.tlv.getInteger(0x7F);
         }
     }
 
