@@ -218,11 +218,13 @@ public class AsynchronousResponse {
                     audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0);
                 }
 
-                SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, MusicControl.Control.id, MusicControl.successValue);
-                try {
-                    setMusicStatusRequest.perform();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (resp.buttonPresent || resp.volumePresent) {
+                    SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, MusicControl.Control.id, MusicControl.successValue);
+                    try {
+                        setMusicStatusRequest.perform();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
