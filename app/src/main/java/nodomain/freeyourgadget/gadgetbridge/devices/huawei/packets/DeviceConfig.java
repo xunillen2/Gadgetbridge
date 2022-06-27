@@ -314,7 +314,7 @@ public class DeviceConfig {
                 this.complete = true;
             } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
                 e.printStackTrace();
-                throw new CryptoException("Bonding key creation exception");
+                throw new CryptoException("Bonding key creation exception", e);
             }
         }
     }
@@ -440,7 +440,7 @@ public class DeviceConfig {
                          this.tlv.decrypt(secretsProvider.getSecretKey());
                      } catch (HuaweiTLV.CryptoException e) {
                          e.printStackTrace();
-                         throw new CryptoException("Decrypt exception");
+                         throw new CryptoException("Decrypt exception", e);
                      }
                 }
                 if (this.tlv.contains(0x01))

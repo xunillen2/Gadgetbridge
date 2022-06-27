@@ -42,6 +42,10 @@ public class HuaweiPacket {
         ParseException(String message) {
             super(message);
         }
+
+        ParseException(String message, Exception e) {
+            super(message, e);
+        }
     }
 
     public static class LengthMismatchException extends ParseException {
@@ -69,8 +73,8 @@ public class HuaweiPacket {
     }
 
     public static class CryptoException extends ParseException {
-        public CryptoException(String message) {
-            super(message);
+        public CryptoException(String message, Exception e) {
+            super(message, e);
         }
     }
 
@@ -142,7 +146,7 @@ public class HuaweiPacket {
                 this.tlv.decrypt(secretsProvider.getSecretKey());
             } catch (HuaweiTLV.CryptoException e) {
                 e.printStackTrace();
-                throw new CryptoException("Decrypt exception");
+                throw new CryptoException("Decrypt exception", e);
             }
         } else {
             if (this.isEncrypted) {
@@ -278,7 +282,7 @@ public class HuaweiPacket {
                 serializableTlv = this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
             } catch (HuaweiTLV.CryptoException e) {
                 e.printStackTrace();
-                throw new CryptoException("Encrypt exception");
+                throw new CryptoException("Encrypt exception", e);
             }
         } else {
             serializableTlv = this.tlv;
