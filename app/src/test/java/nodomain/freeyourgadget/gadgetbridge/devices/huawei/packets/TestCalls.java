@@ -20,6 +20,7 @@ public class TestCalls {
         HuaweiTLV expectedTlv = new HuaweiTLV().put(0x01, (byte) 0x02);
 
         HuaweiPacket packet = new HuaweiPacket(null).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x04, packet.serviceId);
         Assert.assertEquals(0x01, packet.commandId);
@@ -39,6 +40,7 @@ public class TestCalls {
         HuaweiTLV expectedTlv = new HuaweiTLV().put(0x01, (byte) 0x01);
 
         HuaweiPacket packet = new HuaweiPacket(null).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x04, packet.serviceId);
         Assert.assertEquals(0x01, packet.commandId);

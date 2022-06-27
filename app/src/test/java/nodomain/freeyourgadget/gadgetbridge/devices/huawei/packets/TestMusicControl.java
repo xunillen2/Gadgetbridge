@@ -69,6 +69,7 @@ public class TestMusicControl {
         HuaweiTLV expectedTlv = new HuaweiTLV();
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x25, packet.serviceId);
         Assert.assertEquals(0x01, packet.commandId);
@@ -131,6 +132,10 @@ public class TestMusicControl {
         HuaweiPacket packetErr = new HuaweiPacket(secretsProvider).parse(rawErr);
         HuaweiPacket packetMissing = new HuaweiPacket(secretsProvider).parse(rawMissing);
 
+        packetOk.parseTlv();
+        packetErr.parseTlv();
+        packetMissing.parseTlv();
+
         Assert.assertEquals(0x25, packetOk.serviceId);
         Assert.assertEquals(0x02, packetOk.commandId);
         Assert.assertEquals(okExpectedTlv, tlvField.get(packetOk));
@@ -188,6 +193,14 @@ public class TestMusicControl {
         HuaweiPacket unknownButtonResponse = new HuaweiPacket(secretsProvider).parse(unknownButtonInput);
         HuaweiPacket volumeResponse = new HuaweiPacket(secretsProvider).parse(volumeInput);
         HuaweiPacket combinedResponse = new HuaweiPacket(secretsProvider).parse(combinedInput);
+
+        emptyResponse.parseTlv();
+        playPauseResponse.parseTlv();
+        previousResponse.parseTlv();
+        nextResponse.parseTlv();
+        unknownButtonResponse.parseTlv();
+        volumeResponse.parseTlv();
+        combinedResponse.parseTlv();
 
         Assert.assertEquals(0x25, emptyResponse.serviceId);
         Assert.assertEquals(0x03, emptyResponse.commandId);

@@ -71,6 +71,7 @@ public class TestWorkout {
         );
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x17, packet.serviceId);
         Assert.assertEquals(0x07, packet.commandId);
@@ -134,6 +135,7 @@ public class TestWorkout {
         );
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         // TODO: find out what the status and type can be
 
@@ -258,6 +260,7 @@ public class TestWorkout {
         );
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x17, packet.serviceId);
         Assert.assertEquals(0x0a, packet.commandId);
@@ -365,6 +368,7 @@ public class TestWorkout {
         );
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x17, packet.serviceId);
         Assert.assertEquals(0x0c, packet.commandId);

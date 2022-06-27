@@ -43,7 +43,7 @@ public class FitnessData {
             }
 
             @Override
-            protected void parseTlv() {
+            public void parseTlv() {
                 this.count = this.tlv.getObject(0x81).getShort(0x02);
                 this.complete = true;
             }
@@ -87,7 +87,7 @@ public class FitnessData {
             }
 
             @Override
-            protected void parseTlv() {
+            public void parseTlv() {
                 HuaweiTLV container = this.tlv.getObject(0x81);
                 List<HuaweiTLV> subContainers = container.getObjects(0x83);
 
@@ -166,7 +166,7 @@ public class FitnessData {
             }
 
             @Override
-            protected void parseTlv() throws ParseException {
+            public void parseTlv() throws ParseException {
                 HuaweiTLV container = this.tlv.getObject(0x81);
                 List<HuaweiTLV> subContainers = container.getObjects(0x84);
 
@@ -306,7 +306,7 @@ public class FitnessData {
             }
 
             @Override
-            protected void parseTlv() {
+            public void parseTlv() {
                 HuaweiTLV container = this.tlv.getObject(0x81);
                 List<HuaweiTLV> containers = container.getObjects(0x83);
 

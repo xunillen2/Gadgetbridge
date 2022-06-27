@@ -32,6 +32,7 @@ public class TestFindPhoneResponse {
         HuaweiTLV expectedTlv = new HuaweiTLV().put(0x01, true);
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x0b, packet.serviceId);
         Assert.assertEquals(0x01, packet.commandId);
@@ -51,6 +52,7 @@ public class TestFindPhoneResponse {
         HuaweiTLV expectedTlv = new HuaweiTLV().put(0x01, false);
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x0b, packet.serviceId);
         Assert.assertEquals(0x01, packet.commandId);
@@ -70,6 +72,7 @@ public class TestFindPhoneResponse {
         HuaweiTLV expectedTlv = new HuaweiTLV();
 
         HuaweiPacket packet = new HuaweiPacket(secretsProvider).parse(raw);
+        packet.parseTlv();
 
         Assert.assertEquals(0x0b, packet.serviceId);
         Assert.assertEquals(0x01, packet.commandId);

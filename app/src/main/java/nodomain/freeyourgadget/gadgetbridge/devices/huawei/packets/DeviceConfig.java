@@ -66,7 +66,7 @@ public class DeviceConfig {
             }
 
             @Override
-            protected void parseTlv() throws ParseException {
+            public void parseTlv() throws ParseException {
                 if (this.tlv.contains(0x03))
                     this.mtu = this.tlv.getShort(0x03);
 
@@ -100,7 +100,7 @@ public class DeviceConfig {
             }
 
             @Override
-            protected void parseTlv() throws ParseException {
+            public void parseTlv() throws ParseException {
                 if (this.tlv.contains(0x02)) {
                     this.supportedServices = this.tlv.getBytes(0x02);
                 } else {
@@ -156,7 +156,7 @@ public class DeviceConfig {
             }
 
             @Override
-            protected void parseTlv() throws ParseException {
+            public void parseTlv() throws ParseException {
                 this.commandsLists = new ArrayList<>();
                 CommandsList commandsList = null;
                 HuaweiTLV containerTLV = this.tlv.getObject(0x81);
@@ -273,7 +273,7 @@ public class DeviceConfig {
             }
 
             @Override
-            protected void parseTlv() throws ParseException {
+            public void parseTlv() throws ParseException {
                 if (!this.tlv.contains(0x03)) {
                     throw new MissingTagException(0x03);
                 }
@@ -359,7 +359,7 @@ public class DeviceConfig {
             }
 
             @Override
-            protected void parseTlv() {
+            public void parseTlv() {
                 this.status = this.tlv.getByte(0x01);
                 this.encryptionCounter = this.tlv.getInteger(0x09) & 0xFFFFFFFFL;
             }
@@ -401,7 +401,7 @@ public class DeviceConfig {
             }
 
             @Override
-            protected void parseTlv() {
+            public void parseTlv() {
                 this.challengeResponse = this.tlv.getBytes(0x01);
             }
         }
@@ -434,7 +434,7 @@ public class DeviceConfig {
             }
 
             @Override
-            protected void parseTlv() throws ParseException {
+            public void parseTlv() throws ParseException {
                 if (this.tlv.contains(0x7C) && this.tlv.getByte(0x7C) == 0x01) {
                      try {
                          this.tlv.decrypt(secretsProvider.getSecretKey());
@@ -591,7 +591,7 @@ public class DeviceConfig {
             }
 
             @Override
-            protected void parseTlv() {
+            public void parseTlv() {
                 this.priority = (int) this.tlv.getShort(0x01);
             }
         }

@@ -183,6 +183,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 public void call() {
                     initializeDeviceFinalize();
                 }
+
+                @Override
+                public void handleException(HuaweiPacket.ParseException e) {
+                    LOG.error("Bond params TLV exception", e);
+                }
             };
             bondParamsReq.setFinalizeReq(finalizeReq);
             bondReq.setFinalizeReq(finalizeReq);
@@ -534,14 +539,9 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             LOG.warn("Device is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.");
             // TODO: better way of letting user know?
             // TODO: use string that can be translated
-            GB.toast("Devices is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.", Toast.LENGTH_LONG, 0);
+            GB.toast("Device is already busy with " + getDevice().getBusyTask() + ", so won't fetch data now.", Toast.LENGTH_LONG, 0);
             return;
         }
-
-        // TODO: An exception during the parsing can leave GB thinking that the sync is not yet
-        //       finished, but it won't ever complete because of the parsing exception
-        //       Maybe this can be fixed with an exception handler from the callback? If then
-        //       called from the ResponseManager, it may not be too much work to implement.
 
         if (dataTypes == RecordedDataTypes.TYPE_ACTIVITY) {
             fetchActivityData();
@@ -593,6 +593,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             public void call() {
                 handleSyncFinished();
             }
+
+            @Override
+            public void handleException(HuaweiPacket.ParseException e) {
+                LOG.error("Fitness totals exception", e);
+                handleSyncFinished();
+            }
         });
 
         getStepDataCountRequest.setFinalizeReq(new RequestCallback() {
@@ -606,6 +612,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     e.printStackTrace();
                 }
             }
+
+            @Override
+            public void handleException(HuaweiPacket.ParseException e) {
+                LOG.error("Step data count exception", e);
+                handleSyncFinished();
+            }
         });
 
         getSleepDataCountRequest.setFinalizeReq(new RequestCallback() {
@@ -618,6 +630,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     handleSyncFinished();
                     e.printStackTrace();
                 }
+            }
+
+            @Override
+            public void handleException(HuaweiPacket.ParseException e) {
+                LOG.error("Sleep data count exception", e);
+                handleSyncFinished();
             }
         });
 
@@ -685,6 +703,12 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         getWorkoutCountRequest.setFinalizeReq(new RequestCallback() {
             @Override
             public void call() {
+                handleSyncFinished();
+            }
+
+            @Override
+            public void handleException(HuaweiPacket.ParseException e) {
+                LOG.error("Workout parsing exception", e);
                 handleSyncFinished();
             }
         });

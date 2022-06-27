@@ -56,6 +56,13 @@ public class AsynchronousResponse {
     }
 
     public void handleResponse(HuaweiPacket response) {
+        try {
+            response.parseTlv();
+        } catch (HuaweiPacket.ParseException e) {
+            LOG.error("Parse TLV exception", e);
+            return;
+        }
+
         handleFindPhone(response);
         handleMusicControls(response);
         handleCallControls(response);

@@ -154,17 +154,14 @@ public class HuaweiPacket {
             }
         }
 
-        this.parseTlv();
-
         return this;
     }
 
     /*
      * This function is to set up the subclass for easy usage
+     * Needs to be called separately so the exceptions can be used more easily
      */
-    protected void parseTlv() throws ParseException {
-        throw new UnsupportedOperationException();
-    }
+    public void parseTlv() throws ParseException {}
 
     public HuaweiPacket parse(byte[] data) throws ParseException {
         if (partialPacket != null) {
