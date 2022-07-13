@@ -382,6 +382,15 @@ public class DiscoveryActivity extends AbstractGBActivity implements AdapterView
 
     private void handleDeviceFound(BluetoothDevice device, short rssi) {
         if (device.getName() != null) {
+            // If device has never been connected to host, UUIDs are empty
+            if (isScanning == Scanning.SCANNING_BT || isScanning == Scanning.SCANNING_BT_NEXT_BLE) {
+                if (device.getUuids() == null) {
+                    LOG.debug("Force UUID fetching for BT classic");
+                    if (device.fetchUuidsWithSdp()) {
+                        return;
+                    }
+                }
+            }
             if (handleDeviceFound(device, rssi, null)) {
                 LOG.info("found supported device " + device.getName() + " without scanning services, skipping service scan.");
                 return;
