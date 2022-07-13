@@ -16,15 +16,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR;
 
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.widget.Toast;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.GBException;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiConstants;
@@ -47,8 +43,6 @@ import nodomain.freeyourgadget.gadgetbridge.util.GB;
  */
 
 public class Request {
-    private static final Logger LOG = LoggerFactory.getLogger(Request.class);
-
     public static class RequestCreationException extends Exception { }
 
     protected OperationStatus operationStatus = OperationStatus.INITIAL;
@@ -72,6 +66,7 @@ public class Request {
 
     public interface RequestCallback {
         public void call();
+        public void handleException(HuaweiPacket.ParseException e);
     }
 
     public Request(HuaweiBRSupport support, TransactionBuilder builder) {
@@ -122,6 +117,13 @@ public class Request {
     protected void processResponse() throws Exception {}
 
     public void handleResponse() throws Exception, GBException {
+        try {
+            this.receivedPacket.parseTlv();
+        } catch (HuaweiPacket.ParseException e) {
+            if (finalizeReq != null)
+                finalizeReq.handleException(e);
+            return;
+        }
         processResponse();
         if (nextRequest != null && !stopChain) {
             try {
@@ -195,7 +197,6 @@ public class Request {
     public HuaweiBRSupport getSupport() {
         return support;
     }
-
 
     public String getName() {
         Class thisClass = getClass();

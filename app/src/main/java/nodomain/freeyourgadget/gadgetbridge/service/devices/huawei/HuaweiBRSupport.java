@@ -16,6 +16,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.SharedPreferences;
@@ -75,7 +76,6 @@ import nodomain.freeyourgadget.gadgetbridge.model.NotificationSpec;
 import nodomain.freeyourgadget.gadgetbridge.model.RecordedDataTypes;
 import nodomain.freeyourgadget.gadgetbridge.model.WeatherSpec;
 import nodomain.freeyourgadget.gadgetbridge.service.btbr.AbstractBTBRDeviceSupport;
-import nodomain.freeyourgadget.gadgetbridge.service.btbr.BluetoothSocketCharacteristic;
 import nodomain.freeyourgadget.gadgetbridge.service.btbr.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.btbr.actions.SetDeviceStateAction;
 import nodomain.freeyourgadget.gadgetbridge.service.btbr.actions.SetDeviceBusyAction;
@@ -91,8 +91,9 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.Re
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.Request.RequestCallback;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.GetAuthRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.GetBatteryLevelRequest;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.GetBondParamsRequest;
-import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.GetBondRequest;
+//import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.GetBondParamsRequest;
+//import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.GetBondRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.GetDeviceStatusRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.GetDndPriorityRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.GetLinkParamsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requestsBR.GetProductInformationRequest;
@@ -161,32 +162,43 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
 
     @Override
     protected TransactionBuilder initializeDevice(TransactionBuilder builder) {
+        LOG.debug("initializeDevice");
         builder.setCallback(this);
         deviceMac = gbDevice.getAddress();
         createRandomMacAddress();
         builder.add(new SetDeviceStateAction(getDevice(), GBDevice.State.AUTHENTICATING, getContext()));
         try {
             GetLinkParamsRequest linkParamsReq = new GetLinkParamsRequest(this, builder);
+            GetDeviceStatusRequest deviceStatusReq = new GetDeviceStatusRequest(this);
             GetAuthRequest authReq = new GetAuthRequest(this);
-            GetBondParamsRequest bondParamsReq = new GetBondParamsRequest(this);
-            GetBondRequest bondReq = new GetBondRequest(this);
-            linkParamsReq.nextRequest(authReq);
+            // GetBondParamsRequest bondParamsReq = new GetBondParamsRequest(this);
+            // GetBondRequest bondReq = new GetBondRequest(this);
+            linkParamsReq.nextRequest(deviceStatusReq);
+            deviceStatusReq.nextRequest(authReq);
             authReq.pastRequest(linkParamsReq);
-            authReq.nextRequest(bondParamsReq);
-            bondParamsReq.nextRequest(bondReq);
-            bondReq.pastRequest(linkParamsReq);
+            // authReq.nextRequest(bondParamsReq);
+            // bondParamsReq.nextRequest(bondReq);
+            // bondReq.pastRequest(linkParamsReq);
             responseManager.addHandler(linkParamsReq);
+            responseManager.addHandler(deviceStatusReq);
             responseManager.addHandler(authReq);
-            responseManager.addHandler(bondParamsReq);
-            responseManager.addHandler(bondReq);
+            // responseManager.addHandler(bondParamsReq);
+            // responseManager.addHandler(bondReq);
             RequestCallback finalizeReq = new RequestCallback() {
                 @Override
                 public void call() {
                     initializeDeviceFinalize();
                 }
+
+                @Override
+                public void handleException(HuaweiPacket.ParseException e) {
+                    LOG.error("Auth TLV exception", e);
+                }
+
             };
-            bondParamsReq.setFinalizeReq(finalizeReq);
-            bondReq.setFinalizeReq(finalizeReq);
+            // bondParamsReq.setFinalizeReq(finalizeReq);
+            // bondReq.setFinalizeReq(finalizeReq);
+            authReq.setFinalizeReq(finalizeReq);
             linkParamsReq.doPerform();
         } catch (IOException e) {
             GB.toast(getContext(), "Authenticating Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
@@ -217,24 +229,24 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
             GetProductInformationRequest productInformationReq = new GetProductInformationRequest(this);
             responseManager.addHandler(productInformationReq);
             productInformationReq.doPerform();
-            if (needsAuth) {
-                // Workaround to enable PREF_HUAWEI_ROTATE_WRIST_TO_SWITCH_INFO preference
-                SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
-                SharedPreferences.Editor editor = sharedPrefs.edit();
-                editor.putString(DeviceSettingsPreferenceConst.PREF_ACTIVATE_DISPLAY_ON_LIFT, "p_on");
-                editor.apply();
-                initializeAlarms();
-                // getAlarms();
-                // getCommands();
-                setWearLocation();
-                setActivateOnRotate();
-                setNavigateOnRotate();
-                setActivityReminder();
-                setTrusleep();
-                setNotification();
-                initDnd();
-            }
-            onSetTime();
+            // if (needsAuth) {
+            //     // Workaround to enable PREF_HUAWEI_ROTATE_WRIST_TO_SWITCH_INFO preference
+            //     SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
+            //     SharedPreferences.Editor editor = sharedPrefs.edit();
+            //     editor.putString(DeviceSettingsPreferenceConst.PREF_ACTIVATE_DISPLAY_ON_LIFT, "p_on");
+            //     editor.apply();
+            //     initializeAlarms();
+            //     // getAlarms();
+            //     // getCommands();
+            //     setWearLocation();
+            //     setActivateOnRotate();
+            //     setNavigateOnRotate();
+            //     setActivityReminder();
+            //     setTrusleep();
+            //     setNotification();
+            //     initDnd();
+            // }
+            // onSetTime();
             getBatteryLevel();
             builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZED, getContext()));
             performConnected(builder.getTransaction());
@@ -360,8 +372,8 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
     }
 
     @Override
-    public void onSocketRead(BluetoothSocketCharacteristic characteristic) {
-        byte[] data = characteristic.getValue();
+    public void onSocketRead(byte[] data) {
+        LOG.debug("Data to handle: " + StringUtils.bytesToHex(data));
         responseManager.handleData(data);
     }
 
@@ -595,6 +607,12 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
             public void call() {
                 handleSyncFinished();
             }
+
+            @Override
+            public void handleException(HuaweiPacket.ParseException e) {
+                LOG.error("TLV exception", e);
+            }
+
         });
 
         getStepDataCountRequest.setFinalizeReq(new RequestCallback() {
@@ -608,6 +626,12 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
                     e.printStackTrace();
                 }
             }
+
+            @Override
+            public void handleException(HuaweiPacket.ParseException e) {
+                LOG.error("TLV exception", e);
+            }
+
         });
 
         getSleepDataCountRequest.setFinalizeReq(new RequestCallback() {
@@ -621,6 +645,12 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
                     e.printStackTrace();
                 }
             }
+
+            @Override
+            public void handleException(HuaweiPacket.ParseException e) {
+                LOG.error("TLV exception", e);
+            }
+
         });
 
         try {
@@ -689,6 +719,12 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
             public void call() {
                 handleSyncFinished();
             }
+
+            @Override
+            public void handleException(HuaweiPacket.ParseException e) {
+                LOG.error("TLV exception", e);
+            }
+
         });
 
         try {

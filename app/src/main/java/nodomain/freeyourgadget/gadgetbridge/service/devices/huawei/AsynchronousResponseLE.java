@@ -223,7 +223,7 @@ public class AsynchronousResponseLE {
                 if (resp.buttonPresent || resp.volumePresent) {
                     SetMusicStatusRequest setMusicStatusRequest = new SetMusicStatusRequest(this.support, MusicControl.Control.id, MusicControl.successValue);
                     try {
-                        setMusicStatusRequest.perform();
+                        setMusicStatusRequest.doPerform();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

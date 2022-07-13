@@ -17,24 +17,19 @@
  */
 package nodomain.freeyourgadget.gadgetbridge.service.btbr;
 
-
 /**
  * Callback interface handling io events of a BluetoothSocket.
  * It is the counterpart of GattCallback interface designed for GB.
 */
 public interface SocketCallback {
 
+    void onConnectionEstablished();
+
     /**
      * Read data from InputStream of BluetoothSocket
      *
      * @param data
      */
-    void onSocketRead(BluetoothSocketCharacteristic characteristic);
+    void onSocketRead(byte[] data);
 
-    /**
-     * Write data to OutputStream of BluetoothSocket
-     *
-     * @param data
-     */
-    void onSocketWrite(BluetoothSocketCharacteristic characteristic);
 }

@@ -535,6 +535,45 @@ public class DeviceConfig {
         }
     }
 
+    public static class DeviceStatus {
+        public static final byte id = 0x16;
+
+        public static class Request extends HuaweiPacket {
+            public Request(HuaweiPacket.SecretsProvider secretsProvider) {
+                super(secretsProvider);
+
+                this.serviceId = DeviceConfig.id;
+                this.commandId = id;
+
+                this.tlv = new HuaweiTLV()
+                        .put(0x01);
+                this.isEncrypted = false;
+                this.complete = true;
+            }
+        }
+
+        public static class Response extends HuaweiPacket {
+            public byte status;
+
+            public Response(SecretsProvider secretsProvider) {
+                super(secretsProvider);
+
+                this.serviceId = DeviceConfig.id;
+                this.commandId = id;
+
+                this.isEncrypted = false;
+            }
+
+            @Override
+            public void parseTlv() {
+                this.status = this.tlv.getByte(0x01);
+            }
+        }
+
+
+
+    }
+
     public static class NavigateOnRotateRequest extends HuaweiPacket {
         public static final byte id = 0x1B;
 

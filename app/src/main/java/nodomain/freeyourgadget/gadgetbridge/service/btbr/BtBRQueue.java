@@ -30,102 +30,71 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
+import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 public final class BtBRQueue {
     private static final Logger LOG = LoggerFactory.getLogger(BtBRQueue.class);
 
     private BluetoothAdapter mBtAdapter = null;
     private BluetoothSocket mBtSocket = null;
-    //private InputStream mInStream = null;
-    //private OutputStream mOutStream = null;
     private GBDevice mGbDevice;
-    private AbstractBTBRDeviceSupport mSupport;
+    private SocketCallback mCallback;
+    private UUID mService;
 
     private final BlockingQueue<AbstractTransaction> mTransactions = new LinkedBlockingQueue<>();
     private volatile boolean mDisposed;
     private volatile boolean mCrashed;
-    private volatile boolean mAbortTransaction;
 
     private Context mContext;
     private CountDownLatch mConnectionLatch;
-    private BluetoothSocketCharacteristic mWaitCharacteristic;
-    private CountDownLatch mWaitForActionResultLatch;
-    private final InternalSocketCallback internalSocketCallback;
+    private CountDownLatch mAvailableData;
 
-    private Thread dispatchThread = new Thread("Gadgetbridge IO dispatcher") {
+    private Thread writeThread = new Thread("Gadgetbridge IO writeThread") {
         @Override
         public void run() {
-            LOG.debug("Socket Dispatch Thread started.");
+            LOG.debug("Socket Write Thread started.");
             
             while (!mDisposed && !mCrashed) {
                 try {
-
                     AbstractTransaction qTransaction = mTransactions.take();
-
-                    //try {
-
-                        if (!isConnected()) {
-                            LOG.debug("Not connected, waiting for connection...");
-                            setDeviceConnectionState(GBDevice.State.NOT_CONNECTED);
-                            internalSocketCallback.reset();
-                            // wait until the connection succeeds before running the actions
-                            // Note that no automatic connection is performed. This has to be triggered
-                            // on the outside typically by the DeviceSupport. The reason is that
-                            // devices have different kinds of initializations and this class has no
-                            // idea about them.
-                            mConnectionLatch = new CountDownLatch(1);
-                            mConnectionLatch.await();
-                            mConnectionLatch = null;
+                    if (!isConnected()) {
+                        LOG.debug("Not connected, waiting for connection...");
+                        setDeviceConnectionState(GBDevice.State.NOT_CONNECTED);
+                        // wait until the connection succeeds before running the actions
+                        // Note that no automatic connection is performed. This has to be triggered
+                        // on the outside typically by the DeviceSupport. The reason is that
+                        // devices have different kinds of initializations and this class has no
+                        // idea about them.
+                        mConnectionLatch = new CountDownLatch(1);
+                        mConnectionLatch.await();
+                        mConnectionLatch = null;
+                    }
+                    LOG.info("Ready for a new message exchange.");
+                    Transaction transaction = (Transaction)qTransaction;
+                    for (BtBRAction action : transaction.getActions()) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("About to run action: " + action);
                         }
-                        LOG.info("Ready for a new message exchange.");
-                        Transaction transaction = (Transaction)qTransaction;
-                        internalSocketCallback.setTransactionSocketCallback(transaction.getSocketCallback());
-                        mAbortTransaction = false;
-                        for (BtBRAction action : transaction.getActions()) {
-                            if (mAbortTransaction) {
-                                LOG.info("Abording running transaction");
-                            }
-                            mWaitCharacteristic = action.getCharacteristic();
-                            mWaitForActionResultLatch = new CountDownLatch(1);
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("About to run action: " + action);
-                            }
-                            if (action.run(mBtSocket)) {
-                                boolean waitForResult = action.expectsResult();
-                                if (waitForResult) {
-                                    mWaitForActionResultLatch.await();
-                                    mWaitForActionResultLatch = null;
-                                    if (mAbortTransaction) {
-                                        break;
-                                    }
-                                }
-                            } else {
-                                LOG.error("Action returned false: " + action);
-                                break;
-                            }
+                        if (action.run(mBtSocket)) {
+                            LOG.debug("Action ok: " + action);
+                        } else {
+                            LOG.error("Action returned false: " + action);
+                            break;
                         }
-                    //} catch (SocketTimeoutException ignore) {
-                    //    LOG.debug("socket timeout, we can't help but ignore this");
-                    //} catch (IOException e) {
-                    //    LOG.info(e.getMessage());
-                    //    mBtSocket = null;
-                        //mInStream = null;
-                        //mOutStream = null;
-                    //    LOG.info("Bluetooth socket closed, will quit IO Thread");
-                    //    break;
-                    //}
-                    setDeviceConnectionState(GBDevice.State.NOT_CONNECTED);
+                    }
                 }  catch (InterruptedException ignored) {
                     mConnectionLatch = null;
                     LOG.debug("Thread interrupted");
                 } catch (Throwable ex) {
-                    LOG.error("IO Dispatch Thread died: " + ex.getMessage(), ex);
+                    LOG.error("IO Write Thread died: " + ex.getMessage(), ex);
                     mCrashed = true;
                     mConnectionLatch = null;
                 }
@@ -133,14 +102,53 @@ public final class BtBRQueue {
         }
     };
 
-    public BtBRQueue(BluetoothAdapter btAdapter, GBDevice gbDevice, Context context, SocketCallback externalSocketCallback, AbstractBTBRDeviceSupport support) {
+    private Thread readThread = new Thread("Gadgetbridge IO readThread") {
+        @Override
+        public void run() {
+            LOG.debug("Queue Read Thread started.");
+            while (!mDisposed && !mCrashed) {
+                try {
+                    if (!isConnected()) {
+                        LOG.debug("not connected, waiting for connection...");
+                        // wait until the connection succeeds before running the actions
+                        // Note that no automatic connection is performed. This has to be triggered
+                        // on the outside typically by the DeviceSupport. The reason is that
+                        // devices have different kinds of initializations and this class has no
+                        // idea about them.
+                        mConnectionLatch = new CountDownLatch(1);
+                        mConnectionLatch.await();
+                        mConnectionLatch = null;
+                    }
+                    if (mAvailableData != null) {
+                        if (mBtSocket.getInputStream().available() == 0) {
+                            mAvailableData.countDown();
+                        }
+                    }
+                    byte[] data = new byte[1024];
+                    int len = mBtSocket.getInputStream().read(data);
+                    LOG.debug("Received data: " + StringUtils.bytesToHex(data));
+                    mCallback.onSocketRead(Arrays.copyOf(data, len));
+                }  catch (InterruptedException ignored) {
+                    mConnectionLatch = null;
+                    LOG.debug("Thread interrupted");
+                } catch (Throwable ex) {
+                    LOG.error("IO Read Thread died: " + ex.getMessage(), ex);
+                    mCrashed = true;
+                    mConnectionLatch = null;
+                }
+            }
+        }
+    };
+
+    public BtBRQueue(BluetoothAdapter btAdapter, GBDevice gbDevice, Context context, SocketCallback socketCallback, UUID supportedService) {
         mBtAdapter = btAdapter;
         mGbDevice = gbDevice;
         mContext = context;
-        internalSocketCallback = new InternalSocketCallback(externalSocketCallback);
-        mSupport = support;
+        mCallback = socketCallback;
+        mService = supportedService;
 
-        dispatchThread.start();
+        writeThread.start();
+        readThread.start();
     }
 
     /**
@@ -163,37 +171,51 @@ public final class BtBRQueue {
 
         try {
             BluetoothDevice btDevice = mBtAdapter.getRemoteDevice(mGbDevice.getAddress());
-            ParcelUuid uuids[] = btDevice.getUuids();
-            if (uuids == null) {
-                LOG.warn("Device provided no UUIDs to connect to, giving up: " + mGbDevice);
-                return false;
-            }
-            for (ParcelUuid uuid : uuids) {
-                LOG.info("found service UUID " + uuid);
-            }
-            mBtSocket = btDevice.createRfcommSocketToServiceRecord(mSupport.getSupportedService());
+            //ParcelUuid uuids[] = btDevice.getUuids();
+            // if (uuids == null) {
+            //     LOG.warn("Device provided no UUIDs to connect to, giving up: " + mGbDevice);
+            //     return false;
+            // }
+            //for (ParcelUuid uuid : uuids) {
+            //    LOG.info("found service UUID " + uuid);
+            //}
+            // UUID should be in a BluetoothSocket class and not in BluetoothSocketCharacteristic
+            mBtSocket = btDevice.createRfcommSocketToServiceRecord(mService);
             mBtSocket.connect();
-            setDeviceConnectionState(GBDevice.State.CONNECTED);
+            if (mBtSocket.isConnected()) {
+                setDeviceConnectionState(GBDevice.State.CONNECTED);
+            } else {
+                LOG.debug("Connection not established");
+            }
             if (mConnectionLatch != null) {
                 mConnectionLatch.countDown();
             }
         } catch (IOException e) {
             LOG.error("Server socket cannot be started.", e);
             setDeviceConnectionState(originalState);
-            //mInStream = null;
-            //mOutStream = null;
             mBtSocket = null;
             return false;
         }
 
+        onConnectionEstablished();
+
         return true;
+    }
+
+    protected void onConnectionEstablished() {
+        mCallback.onConnectionEstablished();
     }
 
     public void disconnect() {
         if (mBtSocket != null) {
             try {
+                mAvailableData = new CountDownLatch(1);
+                mAvailableData.await();
+                mAvailableData = null;
                 mBtSocket.close();
             } catch (IOException e) {
+                LOG.error(e.getMessage());
+            } catch (InterruptedException e) {
                 LOG.error(e.getMessage());
             }
         }
@@ -226,7 +248,6 @@ public final class BtBRQueue {
         LOG.debug("about to insert: " + transaction);
         if (!transaction.isEmpty()) {
             List<AbstractTransaction> tail = new ArrayList<>(mTransactions.size() + 2);
-            //mTransactions.drainTo(tail);
             tail.addAll(mTransactions);
             mTransactions.clear();
             mTransactions.add(transaction);
@@ -249,77 +270,10 @@ public final class BtBRQueue {
         }
         mDisposed = true;
         disconnect();
-        dispatchThread.interrupt();
-        dispatchThread = null;
+        writeThread.interrupt();
+        writeThread = null;
+        readThread.interrupt();
+        readThread = null;
     }
-
-    // Implements callback methods for IO events that the app cares about.  For example,
-    // connection change.
-    private final class InternalSocketCallback extends BluetoothSocketCallback {
-        private
-        @Nullable
-        SocketCallback mTransactionSocketCallback;
-        private final SocketCallback mExternalSocketCallback;
-
-        public InternalSocketCallback(SocketCallback externalSocketCallback) {
-            mExternalSocketCallback = externalSocketCallback;
-        }
-
-        public void setTransactionSocketCallback(@Nullable SocketCallback callback) {
-            mTransactionSocketCallback = callback;
-        }
-
-        private SocketCallback getCallbackToUse() {
-            if (mTransactionSocketCallback != null) {
-                return mTransactionSocketCallback;
-            }
-            return mExternalSocketCallback;
-        }
-
-        @Override
-        public void onSocketWrite(BluetoothSocketCharacteristic characteristic) {
-            LOG.debug("characteristic write: " + characteristic.getUuid());
-            if (getCallbackToUse() != null) {
-                getCallbackToUse().onSocketWrite(characteristic);
-            }
-            checkWaitingCharacteristic(characteristic); 
-        }
-
-        @Override
-        public void onSocketRead(BluetoothSocketCharacteristic characteristic) {
-           LOG.debug("characteristic read: " + characteristic.getUuid());
-           if (getCallbackToUse() != null) {
-               try {
-                   getCallbackToUse().onSocketRead(characteristic);
-               } catch (Throwable ex) {
-                   LOG.error("onSocketRead: " + ex.getMessage(), ex);
-               }
-           }
-        }
-
-        private void checkWaitingCharacteristic(BluetoothSocketCharacteristic characteristic) {
-                if (characteristic == null) {
-                    LOG.debug("failed btbr action, aborting transaction");
-                }
-                mAbortTransaction = true;
-            if (characteristic != null && BtBRQueue.this.mWaitCharacteristic != null && characteristic.getUuid().equals(BtBRQueue.this.mWaitCharacteristic.getUuid())) {
-                if (mWaitForActionResultLatch != null) {
-                    mWaitForActionResultLatch.countDown();
-                }
-            } else {
-                if (BtBRQueue.this.mWaitCharacteristic != null) {
-                    LOG.error("checkWaitingCharacteristic: mismatched characteristic received: " + ((characteristic != null && characteristic.getUuid() != null) ? characteristic.getUuid().toString() : "(null)"));
-                }
-            }
-        }
-
-        public void reset() {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("internal io callback set to null");
-            }
-            mTransactionSocketCallback = null;
-        }
-    }
-
 
 }

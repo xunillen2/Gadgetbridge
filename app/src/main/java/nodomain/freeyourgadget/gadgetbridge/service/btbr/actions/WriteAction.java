@@ -26,14 +26,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nodomain.freeyourgadget.gadgetbridge.Logging;
-import nodomain.freeyourgadget.gadgetbridge.service.btbr.BluetoothSocketCallback;
 import nodomain.freeyourgadget.gadgetbridge.service.btbr.BluetoothSocketCharacteristic;
 import nodomain.freeyourgadget.gadgetbridge.service.btbr.BtBRAction;
 
 /**
  * Invokes a write operation on a given socket.
  * The result status will be made available asynchronously through the
- * {@link BluetoothSocketCallback}
+ * {@link SocketCallback}
  */
 public class WriteAction extends BtBRAction {
     private static final Logger LOG = LoggerFactory.getLogger(WriteAction.class);

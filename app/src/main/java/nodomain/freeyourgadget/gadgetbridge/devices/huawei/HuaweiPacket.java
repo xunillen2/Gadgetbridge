@@ -104,6 +104,7 @@ public class HuaweiPacket {
         responsePacketTypes.put((short) 0x010F, DeviceConfig.BondParams.Response.class);
         responsePacketTypes.put((short) 0x0113, DeviceConfig.Auth.Response.class);
         responsePacketTypes.put((short) 0x0108, DeviceConfig.BatteryLevel.Response.class);
+        responsePacketTypes.put((short) 0x0116, DeviceConfig.DeviceStatus.Response.class);
         responsePacketTypes.put((short) 0x011D, DeviceConfig.DndPriority.Response.class);
 
         responsePacketTypes.put((short) 0x0401, Calls.AnswerCallResponse.class);

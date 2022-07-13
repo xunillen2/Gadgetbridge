@@ -93,7 +93,8 @@ public class DeviceManager {
                         } else {
                             deviceList.add(dev);
                         }
-                        if (dev.isInitialized()) {
+                        if (dev.isInitialized() || dev.isConnected()) {
+                            LOG.debug("Force creation of device in DB");
                             try (DBHandler dbHandler = GBApplication.acquireDB()) {
                                 DBHelper.getDevice(dev, dbHandler.getDaoSession()); // implicitly creates the device in database if not present, and updates device attributes
                             } catch (Exception ignore) {

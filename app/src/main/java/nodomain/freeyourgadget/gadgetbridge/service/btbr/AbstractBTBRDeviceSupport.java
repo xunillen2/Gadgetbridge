@@ -54,7 +54,7 @@ public abstract class AbstractBTBRDeviceSupport extends AbstractDeviceSupport im
     @Override
     public boolean connect() {
         if (mQueue == null) {
-            mQueue = new BtBRQueue(getBluetoothAdapter(), getDevice(),getContext(), this, this);
+            mQueue = new BtBRQueue(getBluetoothAdapter(), getDevice(), getContext(), this, mSupportedService);
         }
         return mQueue.connect();
     }
@@ -174,11 +174,9 @@ public abstract class AbstractBTBRDeviceSupport extends AbstractDeviceSupport im
         Logging.logBytes(logger, value);
     }
 
-    @Override
-    public void onSocketWrite(BluetoothSocketCharacteristic characteristics) {}
-
-    @Override
-    public void onSocketRead(BluetoothSocketCharacteristic characteristic) {}
+    public void onConnectionEstablished() {
+       initializeDevice(createTransactionBuilder("Initializing device")).queue(getQueue());
+    }
 
     @Override
     public void onSetFmFrequency(float frequency) {}
