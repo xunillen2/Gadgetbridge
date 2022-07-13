@@ -897,6 +897,7 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
                     ActivitySample.NOT_MEASURED,
                     ActivitySample.NOT_MEASURED,
                     ActivitySample.NOT_MEASURED,
+                    ActivitySample.NOT_MEASURED,
                     ActivitySample.NOT_MEASURED
             );
             activitySample.setProvider(sampleProvider);
@@ -924,7 +925,8 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
                     steps,
                     calories,
                     distance,
-                    spo
+                    spo,
+                    ActivitySample.NOT_MEASURED
             );
             activitySample.setProvider(sampleProvider);
 
@@ -1008,6 +1010,7 @@ public class HuaweiBRSupport extends AbstractBTBRDeviceSupport {
                 HuaweiWorkoutDataSample dataSample = new HuaweiWorkoutDataSample(
                         workoutId,
                         data.timestamp,
+                        data.heartRate,
                         data.speed,
                         data.cadence,
                         data.stepLength,
