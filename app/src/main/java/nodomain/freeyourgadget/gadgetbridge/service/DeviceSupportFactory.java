@@ -326,6 +326,7 @@ public class DeviceSupportFactory {
             case HUAWEIWATCHGT2E:
             case HUAWEIWATCHGT:
             case HUAWEIBANDAW70:
+            case HUAWEIBAND4PRO:
                 return new ServiceDeviceSupport(new HuaweiSupport());
         }
         return null;
