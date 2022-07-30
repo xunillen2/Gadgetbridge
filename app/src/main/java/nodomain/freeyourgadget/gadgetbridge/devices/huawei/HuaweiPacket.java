@@ -36,6 +36,7 @@ public class HuaweiPacket {
     public interface SecretsProvider {
         byte[] getSecretKey();
         byte[] getIv();
+        boolean areTransactionsCrypted();
     }
 
     public static abstract class ParseException extends Exception {
@@ -149,7 +150,7 @@ public class HuaweiPacket {
                 throw new CryptoException("Decrypt exception", e);
             }
         } else {
-            if (this.isEncrypted) {
+            if (this.isEncrypted && secretsProvider.areTransactionsCrypted()) {
                 // TODO: potentially a log message? We expect it to be encrypted, but it isn't.
             }
         }
@@ -274,7 +275,7 @@ public class HuaweiPacket {
         // TODO: maybe use the complete flag to know if it can be serialized?
 
         HuaweiTLV serializableTlv;
-        if (this.isEncrypted) {
+        if (this.isEncrypted && this.secretsProvider.areTransactionsCrypted()) {
             try {
                 serializableTlv = this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
             } catch (HuaweiTLV.CryptoException e) {

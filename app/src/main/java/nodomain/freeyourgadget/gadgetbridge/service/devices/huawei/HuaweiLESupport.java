@@ -128,6 +128,7 @@ public class HuaweiLESupport extends AbstractBTLEDeviceSupport {
     protected String macAddress;
 
     public long encryptionCounter = 0;
+    protected boolean transactionsCrypted = true;
     protected int msgId = 0;
 
     protected ResponseManagerLE responseManager = new ResponseManagerLE(this);
@@ -144,6 +145,11 @@ public class HuaweiLESupport extends AbstractBTLEDeviceSupport {
         @Override
         public byte[] getIv() {
             return HuaweiLESupport.this.getIV();
+        }
+
+        @Override
+        public boolean areTransactionsCrypted() {
+            return HuaweiLESupport.this.areTransactionsCrypted();
         }
     };
 
@@ -270,6 +276,10 @@ public class HuaweiLESupport extends AbstractBTLEDeviceSupport {
         byte[] iv = (byte[])ivCounter.get(0);
         this.encryptionCounter = (long)ivCounter.get(1) & 0xFFFFFFFFL;
         return iv;
+    }
+
+    public boolean areTransactionsCrypted() {
+        return this.transactionsCrypted;
     }
 
     protected void createRandomMacAddress() {
