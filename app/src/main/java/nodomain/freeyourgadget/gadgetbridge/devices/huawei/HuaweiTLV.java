@@ -37,6 +37,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import nodomain.freeyourgadget.gadgetbridge.util.CryptoUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 public class HuaweiTLV {
@@ -311,7 +312,7 @@ public class HuaweiTLV {
     public HuaweiTLV encrypt(byte[] key, byte[] iv) throws CryptoException {
         try {
             byte[] serializedTLV = serialize();
-            byte[] encryptedTLV = HuaweiCrypto.encrypt(serializedTLV, key, iv);
+            byte[] encryptedTLV = CryptoUtils.encryptAES_CBC_Pad(serializedTLV, key, iv);
             return new HuaweiTLV()
                     .put(CryptoTags.encryption, (byte) 0x01)
                     .put(CryptoTags.initVector, iv)
@@ -324,7 +325,7 @@ public class HuaweiTLV {
 
     public void decrypt(byte[] key) throws CryptoException {
         try {
-            byte[] decryptedTLV = HuaweiCrypto.decrypt(getBytes(CryptoTags.cipherText), key, getBytes(CryptoTags.initVector));
+            byte[] decryptedTLV = CryptoUtils.decryptAES_CBC_Pad(getBytes(CryptoTags.cipherText), key, getBytes(CryptoTags.initVector));
             this.valueMap = new ArrayList<>();
             parse(decryptedTLV);
         } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
