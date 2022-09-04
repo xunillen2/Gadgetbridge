@@ -62,8 +62,7 @@ public class GetHiChainRequest extends Request {
                 new Random().nextBytes(seed);
                 isoSalt = new byte[16];
                 new Random().nextBytes(isoSalt);
-                byte[] serviceType = GB.hexStringToByteArray(HuaweiConstants.SERVICE_TYPE);
-                HiCHain.Request.Start start = req.new Start(support.secretsProvider, isoSalt, seed, serviceType );
+                HiCHain.Request.Start start = req.new Start(support.secretsProvider, isoSalt, seed, HuaweiConstants.SERVICE_TYPE );
                 return start.serialize();
             } else if (step == HiChainStep.inter) {
                 // GeneratePSK - needed ?

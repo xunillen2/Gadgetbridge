@@ -94,6 +94,8 @@ public class HuaweiPacket {
     // Encryption is enabled by default, packets which don't use it must disable it
     protected boolean isEncrypted = true;
 
+    protected boolean isSliced = false;
+
     private static final HashMap<Short, Class<? extends HuaweiPacket>> responsePacketTypes = new HashMap<>();
     static {
         responsePacketTypes.put((short) 0x0101, DeviceConfig.LinkParams.Response.class);

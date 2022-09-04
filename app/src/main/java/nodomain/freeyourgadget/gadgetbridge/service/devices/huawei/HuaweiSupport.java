@@ -170,10 +170,33 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         createAndroidID();
         builder.add(new SetDeviceStateAction(getDevice(), GBDevice.State.AUTHENTICATING, getContext()));
         try {
-            GetLinkParamsRequest linkParamsReq = new GetLinkParamsRequest(this, builder);
+            final GetLinkParamsRequest linkParamsReq = new GetLinkParamsRequest(this, builder);
             responseManager.addHandler(linkParamsReq);
+            RequestCallback finalizeReq = new RequestCallback() {
+                @Override
+                public void call() {
+                    initializeDeviceStep(linkParamsReq);
+                }
+
+                @Override
+                public void handleException(HuaweiPacket.ParseException e) {
+                    LOG.error("Link params TLV exception", e);
+                }
+            };
+            linkParamsReq.setFinalizeReq(finalizeReq);
             linkParamsReq.perform();
-            byte authMode = ByteBuffer.wrap(linkParamsReq.getValueReturned()).get(16);
+        } catch (IOException e) {
+            GB.toast(getContext(), "Authenticating Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
+            e.printStackTrace();
+        }
+        return builder;
+    }
+
+    protected void initializeDeviceStep(Request req) {
+        try {
+            LOG.debug("ReturnedValue: " + StringUtils.bytesToHex(req.getValueReturned()));
+            byte authMode = ByteBuffer.wrap(req.getValueReturned()).get(18);
+            LOG.debug("authMode: " + authMode);
             RequestCallback finalizeReq = new RequestCallback() {
                 @Override
                 public void call() {
@@ -199,10 +222,10 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 GetAuthRequest authReq = new GetAuthRequest(this);
                 GetBondParamsRequest bondParamsReq = new GetBondParamsRequest(this);
                 GetBondRequest bondReq = new GetBondRequest(this);
-                authReq.pastRequest(linkParamsReq);
+                authReq.pastRequest(req);
                 authReq.nextRequest(bondParamsReq);
                 bondParamsReq.nextRequest(bondReq);
-                bondReq.pastRequest(linkParamsReq);
+                bondReq.pastRequest(req);
                 responseManager.addHandler(authReq);
                 responseManager.addHandler(bondParamsReq);
                 responseManager.addHandler(bondReq);
@@ -214,7 +237,6 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             GB.toast(getContext(), "Authenticating Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
         }
-        return builder;
     }
 
     @Override

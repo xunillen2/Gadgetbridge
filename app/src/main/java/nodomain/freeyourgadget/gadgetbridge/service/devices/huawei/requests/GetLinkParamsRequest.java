@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
+import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
 import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig.LinkParams;
@@ -74,6 +75,7 @@ public class GetLinkParamsRequest extends Request {
         value
             .put(serverNonce)
             .put(authMode);
+        LOG.debug("Nonce + authMode: " + StringUtils.bytesToHex(value.array()));
         return value.array();
     }
 }

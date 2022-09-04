@@ -36,6 +36,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig.LinkParams.Response;
+import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
 // TODO: complete responses
 
@@ -629,22 +630,24 @@ public class DeviceConfig {
                     //int messageId,
                     byte[] isoSalt,
                     byte[] seed,
-                    byte[] serviceType
+                    String serviceType
                 ) {
                     super(secretsProvider);
+                    this.serviceId = DeviceConfig.id;
+                    this.commandId = HiCHain.id;
                     this.isEncrypted = false;
                     byte[] random16 = new byte[16];
                     new Random().nextBytes(random16);
                     createJson(1); //messageId);
                     try {
                         payload
-                            .put("isoSalt", isoSalt.toString())
+                            .put("isoSalt", StringUtils.bytesToHex(isoSalt))
                             .put("peerAuthId", selfAuthId)
                             .put("operationCode", 0x02)
-                            .put("seed", seed.toString())
+                            .put("seed", StringUtils.bytesToHex(seed))
                             .put("peerUserType", 0x00)
                             .put("pkgName", "com.huawei.devicegroupmanage")
-                            .put("serviceType", serviceType.toString())
+                            .put("serviceType", serviceType)
                             .put("keyLength", 0x20);
                         value
                             .put("payload", payload)
@@ -668,6 +671,8 @@ public class DeviceConfig {
                     byte[] token
                 ) {
                     super(secretsProvider);
+                    this.serviceId = DeviceConfig.id;
+                    this.commandId = HiCHain.id;
                     this.isEncrypted = false;
                     createJson(2); //messageId);
                     try {
@@ -695,6 +700,8 @@ public class DeviceConfig {
                     byte[] encResult
                 ) {
                     super(secretsProvider);
+                    this.serviceId = DeviceConfig.id;
+                    this.commandId = HiCHain.id;
                     this.isEncrypted = false;
                     createJson(3); //messageId);
                     try {
@@ -721,7 +728,7 @@ public class DeviceConfig {
                         .put("currentVersion", "2.0.16");
                     this.value
                         .put("authForm", "0")
-                        .put("message", messageId)
+                        .put("message", messageId|0x10)
                         .put("groupAndModuleVersion", "2.0.1");
                     this.payload
                         .put("version", version);
@@ -736,6 +743,8 @@ public class DeviceConfig {
 
             public Response(SecretsProvider secretsProvider) {
                 super(secretsProvider);
+                this.serviceId = DeviceConfig.id;
+                this.commandId = HiCHain.id;
                 this.isEncrypted = false;
             }
 
