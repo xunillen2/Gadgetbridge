@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -81,6 +82,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.SetDeviceStateA
 import nodomain.freeyourgadget.gadgetbridge.service.btle.GattService;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.StopNotificationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetFitnessTotalsRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetHiChainRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSleepDataCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetStepDataCountRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetWorkoutCountRequest;
@@ -96,6 +98,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetB
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetDndPriorityRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetLinkParamsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetProductInformationRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSecurityNegotiationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSupportedCommandsRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSupportedServicesRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.SendDndAddRequest;
@@ -126,6 +129,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     private boolean needsAuth = false;
     public static String deviceMac; //get it from GB
     protected String macAddress;
+    protected String androidID;
 
     public long encryptionCounter = 0;
     protected int msgId = 0;
@@ -163,21 +167,13 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), true);
         deviceMac = gbDevice.getAddress();
         createRandomMacAddress();
+        createAndroidID();
         builder.add(new SetDeviceStateAction(getDevice(), GBDevice.State.AUTHENTICATING, getContext()));
         try {
             GetLinkParamsRequest linkParamsReq = new GetLinkParamsRequest(this, builder);
-            GetAuthRequest authReq = new GetAuthRequest(this);
-            GetBondParamsRequest bondParamsReq = new GetBondParamsRequest(this);
-            GetBondRequest bondReq = new GetBondRequest(this);
-            linkParamsReq.nextRequest(authReq);
-            authReq.pastRequest(linkParamsReq);
-            authReq.nextRequest(bondParamsReq);
-            bondParamsReq.nextRequest(bondReq);
-            bondReq.pastRequest(linkParamsReq);
             responseManager.addHandler(linkParamsReq);
-            responseManager.addHandler(authReq);
-            responseManager.addHandler(bondParamsReq);
-            responseManager.addHandler(bondReq);
+            linkParamsReq.perform();
+            byte authMode = ByteBuffer.wrap(linkParamsReq.getValueReturned()).get(16);
             RequestCallback finalizeReq = new RequestCallback() {
                 @Override
                 public void call() {
@@ -189,9 +185,31 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                     LOG.error("Bond params TLV exception", e);
                 }
             };
-            bondParamsReq.setFinalizeReq(finalizeReq);
-            bondReq.setFinalizeReq(finalizeReq);
-            linkParamsReq.perform();
+            if ( authMode == 0x04 ) {
+                LOG.debug("HiChain mode");
+                GetSecurityNegotiationRequest securityNegoReq = new GetSecurityNegotiationRequest(this, authMode);
+                GetHiChainRequest hiChainReq = new GetHiChainRequest(this);
+                securityNegoReq.nextRequest(hiChainReq);
+                responseManager.addHandler(securityNegoReq);
+                responseManager.addHandler(hiChainReq);
+                hiChainReq.setFinalizeReq(finalizeReq);
+                securityNegoReq.perform();
+            } else {
+                LOG.debug("Normal mode");
+                GetAuthRequest authReq = new GetAuthRequest(this);
+                GetBondParamsRequest bondParamsReq = new GetBondParamsRequest(this);
+                GetBondRequest bondReq = new GetBondRequest(this);
+                authReq.pastRequest(linkParamsReq);
+                authReq.nextRequest(bondParamsReq);
+                bondParamsReq.nextRequest(bondReq);
+                bondReq.pastRequest(linkParamsReq);
+                responseManager.addHandler(authReq);
+                responseManager.addHandler(bondParamsReq);
+                responseManager.addHandler(bondReq);
+                bondParamsReq.setFinalizeReq(finalizeReq);
+                bondReq.setFinalizeReq(finalizeReq);
+                authReq.perform();
+            }
         } catch (IOException e) {
             GB.toast(getContext(), "Authenticating Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
@@ -300,6 +318,23 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     public String getDeviceMac() {
         return deviceMac;
+    }
+
+    protected void createAndroidID() {
+        SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
+
+        androidID =  sharedPrefs.getString(DeviceSettingsPreferenceConst.PREF_FAKE_ANDROID_ID, null);
+        if (androidID == null || androidID.isEmpty()) {
+            androidID = StringUtils.bytesToHex(HuaweiCrypto.generateNonce());
+            LOG.debug("Created androidID: " + androidID);
+            SharedPreferences.Editor editor = sharedPrefs.edit();
+            editor.putString(DeviceSettingsPreferenceConst.PREF_FAKE_ANDROID_ID, androidID);
+            editor.apply();
+        }
+    }
+
+    public String getAndroidId() {
+        return androidID;
     }
 
     // Do not work on some band, have to check

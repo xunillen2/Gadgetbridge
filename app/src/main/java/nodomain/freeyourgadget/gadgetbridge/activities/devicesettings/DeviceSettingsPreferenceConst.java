@@ -232,4 +232,6 @@ public class DeviceSettingsPreferenceConst {
     public static final String PREF_AUTH_KEY = "authkey";
     public static final String PREF_USER_FITNESS_GOAL = "fitness_goal";
     public static final String PREF_USER_FITNESS_GOAL_NOTIFICATION = "fitness_goal_notification";
+
+    public static final String PREF_FAKE_ANDROID_ID = "fake_android_id";
 }

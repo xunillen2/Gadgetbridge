@@ -22,14 +22,20 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.apache.commons.lang3.ObjectUtils.Null;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiTLV;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig.LinkParams.Response;
 
 // TODO: complete responses
 
@@ -57,6 +63,7 @@ public class DeviceConfig {
         public static class Response extends HuaweiPacket {
             public short mtu = 0x0014;
             public byte[] serverNonce;
+            public byte authMode = 0x00;
 
             public Response(SecretsProvider secretsProvider) {
                 super(secretsProvider);
@@ -74,6 +81,9 @@ public class DeviceConfig {
                     this.serverNonce = this.tlv.getBytes(0x05);
                 else
                     throw new MissingTagException(0x05);
+
+                if (this.tlv.contains(0x07))
+                    this.authMode = this.tlv.getByte(0x07);
             }
         }
     }
@@ -597,6 +607,173 @@ public class DeviceConfig {
         }
     }
 
+    public static class HiCHain {
+        public static final int id = 0x28;
+
+        public static class Request {
+            private JSONObject version = new JSONObject();
+            private JSONObject payload = new JSONObject();
+            private JSONObject value = new JSONObject();
+            private byte[] requestId = new byte[8];
+            private String selfAuthId;
+
+            public Request (byte[] requestId, String selfAuthId) {
+                this.requestId = requestId;
+                this.selfAuthId = selfAuthId;
+            }
+
+            public class Start extends HuaweiPacket {
+
+                public Start (
+                    HuaweiPacket.SecretsProvider secretsProvider,
+                    //int messageId,
+                    byte[] isoSalt,
+                    byte[] seed,
+                    byte[] serviceType
+                ) {
+                    super(secretsProvider);
+                    this.isEncrypted = false;
+                    byte[] random16 = new byte[16];
+                    new Random().nextBytes(random16);
+                    createJson(1); //messageId);
+                    try {
+                        payload
+                            .put("isoSalt", isoSalt.toString())
+                            .put("peerAuthId", selfAuthId)
+                            .put("operationCode", 0x02)
+                            .put("seed", seed.toString())
+                            .put("peerUserType", 0x00)
+                            .put("pkgName", "com.huawei.devicegroupmanage")
+                            .put("serviceType", serviceType.toString())
+                            .put("keyLength", 0x20);
+                        value
+                            .put("payload", payload)
+                            .put("isDeviceLevel", false);
+                        this.tlv = new HuaweiTLV()
+                            .put(0x01, value.toString())
+                            .put(0x02, 0x02)
+                            .put(0x03, requestId)
+                            .put(0x04, 0x00)
+                            .put(0x05, 0x00);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            public class Inter extends HuaweiPacket {
+                public Inter (
+                    HuaweiPacket.SecretsProvider secretsProvider,
+                    //int messageId,
+                    byte[] token
+                ) {
+                    super(secretsProvider);
+                    this.isEncrypted = false;
+                    createJson(2); //messageId);
+                    try {
+                        payload
+                            .put("peerAuthId", selfAuthId)
+                            .put("token", token);
+                        value
+                            .put("payload", payload)
+                            .put("isDeviceLevel", false);
+                        this.tlv = new HuaweiTLV()
+                            .put(0x01, value.toString())
+                            .put(0x02, 0x02)
+                            .put(0x03, requestId);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            public class End extends HuaweiPacket {
+                public End (
+                    HuaweiPacket.SecretsProvider secretsProvider,
+                    //int messageId,
+                    byte[] nonce,
+                    byte[] encResult
+                ) {
+                    super(secretsProvider);
+                    this.isEncrypted = false;
+                    createJson(3); //messageId);
+                    try {
+                        payload
+                            .put("nonce", nonce)
+                            .put("encResult", encResult)
+                            .put("operationCode", 0x02);
+                        value
+                            .put("payload", payload);
+                        this.tlv = new HuaweiTLV()
+                            .put(0x01, value.toString())
+                            .put(0x02, 0x02)
+                            .put(0x03, requestId);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            private void createJson(int messageId) {
+                try {
+                    this.version
+                        .put("minVersion", "1.0.0")
+                        .put("currentVersion", "2.0.16");
+                    this.value
+                        .put("authForm", "0")
+                        .put("message", messageId)
+                        .put("groupAndModuleVersion", "2.0.1");
+                    this.payload
+                        .put("version", version);
+                } catch ( JSONException e ) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public static class Response extends HuaweiPacket {
+            public byte[] json;
+
+            public Response(SecretsProvider secretsProvider) {
+                super(secretsProvider);
+                this.isEncrypted = false;
+            }
+
+            @Override
+            public void parseTlv() {
+                if (this.tlv.contains(0x01)) {
+                    this.json = this.tlv.getBytes(0x01);
+                }
+            }
+        }
+    }
+
+    public static class SecurityNegotiationRequest extends HuaweiPacket {
+        public static final int id = 0x33;
+
+        public SecurityNegotiationRequest (
+                HuaweiPacket.SecretsProvider secretsProvider,
+                byte authMode,
+                String deviceUUID,
+                String phoneModel) {
+            super(secretsProvider);
+
+            this.serviceId = DeviceConfig.id;
+            this.commandId = id;
+
+            this.tlv = new HuaweiTLV()
+                .put(0x01, authMode)
+                .put(0x02, 1)
+                .put(0x05, deviceUUID)
+                .put(0x03, 0x01)
+                .put(0x04, 0x00)
+                .put(0x06)
+                .put(0x07, phoneModel);
+            this.complete = true;
+            this.isEncrypted = false;
+        }
+    }
+
     // TODO: wear location enum?
 
     public static class Date {
@@ -612,5 +789,11 @@ public class DeviceConfig {
 
         public static final int hours12 = 0x01;
         public static final int hours24 = 0x02;
+    }
+
+    public static class HiChainStep {
+        public static final int begin = 0x00;
+        public static final int inter = 0x01;
+        public static final int end = 0x02;
     }
 }

@@ -26,16 +26,20 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 
 import static nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig.LinkParams;
 
+import java.nio.ByteBuffer;
+
 public class GetLinkParamsRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetLinkParamsRequest.class);
 
     private byte[] serverNonce;
+    private byte authMode;
 
     public GetLinkParamsRequest(HuaweiSupport support, TransactionBuilder builder) {
         super(support, builder);
         this.serviceId = DeviceConfig.id;
         this.commandId = LinkParams.id;
         this.serverNonce = new byte[18];
+        this.authMode = 0x00;
         isSelfQueue = false;
     }
 
@@ -61,10 +65,15 @@ public class GetLinkParamsRequest extends Request {
         support.setMtu(((LinkParams.Response) receivedPacket).mtu);
 
         this.serverNonce = ((LinkParams.Response) receivedPacket).serverNonce;
+        this.authMode = ((LinkParams.Response) receivedPacket).authMode;
     }
 
     @Override
     public byte[] getValueReturned() {
-        return serverNonce;
+        ByteBuffer value = ByteBuffer.allocate(19);
+        value
+            .put(serverNonce)
+            .put(authMode);
+        return value.array();
     }
 }

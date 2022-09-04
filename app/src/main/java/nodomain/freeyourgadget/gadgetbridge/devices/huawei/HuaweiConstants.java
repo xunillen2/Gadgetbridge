@@ -26,6 +26,9 @@ public final class HuaweiConstants {
     public static final UUID UUID_CHARACTERISTIC_HUAWEI_WRITE = UUID.fromString(String.format(BASE_UUID, "FE01"));
     public static final UUID UUID_CHARACTERISTIC_HUAWEI_READ = UUID.fromString(String.format(BASE_UUID, "FE02"));
 
+    public static final String SERVICE_TYPE = "7B0BC0CBCE474F6C238D9661C63400B797B166EA7849B3A370FC73A9A236E989";
+    public static final byte[] KEY_TYPE = new byte[]{0x00, 0x07};
+
     public static final byte HUAWEI_MAGIC = 0x5A;
 
     public static final byte PROTOCOL_VERSION = 0x02;
@@ -54,4 +57,5 @@ public final class HuaweiConstants {
     public static final String PREF_HUAWEI_TRUSLEEP = "trusleep";
     public static final String PREF_HUAWEI_DND_PRIORITY = "do_not_disturb_priority"; // SharedPref for 0x01 0x1D
 
+    public static final String PKG_NAME = "com.huawei.devicegroupmanage";
 }
