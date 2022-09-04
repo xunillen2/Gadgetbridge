@@ -323,6 +323,7 @@ public class DeviceSupportFactory {
             case HONORBAND4:
             case HONORBAND5:
             case HUAWEIBAND6:
+            case HUAWEIBAND7:
             case HUAWEIWATCHGT2E:
             case HUAWEIWATCHGT:
             case HUAWEIBANDAW70:

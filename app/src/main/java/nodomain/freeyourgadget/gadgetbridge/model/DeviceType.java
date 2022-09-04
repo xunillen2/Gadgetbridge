@@ -115,6 +115,7 @@ public enum DeviceType {
     HONORBAND5(451, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_honor_band5),
     HUAWEIBANDAW70(452, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_band_aw70),
     HUAWEIBAND6(453, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_band6),
+    HUAWEIBAND7(458, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_band7),
     HUAWEIWATCHGT2E(454, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_watchgt2e),
     HUAWEIWATCHGT(455, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_huawei_watch_gt),
     HONORBAND3(456, R.drawable.ic_device_default, R.drawable.ic_device_default_disabled, R.string.devicetype_honor_band3),
