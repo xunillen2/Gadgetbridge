@@ -37,7 +37,7 @@ public class GetBondRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new DeviceConfig.BondRequest(support.secretsProvider, support.getSerial(), support.getDeviceMac(), huaweiCrypto).serialize();
+            return new DeviceConfig.BondRequest(support.paramsProvider, support.getSerial(), support.getDeviceMac(), huaweiCrypto).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

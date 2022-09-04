@@ -55,12 +55,12 @@ public class GetSupportedCommandsRequest extends Request {
     protected byte[] createRequest() throws RequestCreationException {
         if (commandsRequests.isEmpty()) {
             byte[] activatedServices = pastRequest.getValueReturned();
-            DeviceConfig.SupportedCommands.Request commandsRequest = new DeviceConfig.SupportedCommands.Request(support.secretsProvider);
+            DeviceConfig.SupportedCommands.Request commandsRequest = new DeviceConfig.SupportedCommands.Request(support.paramsProvider);
             for (byte activatedService : activatedServices) {
                 byte[] commandsForService = createCommands(activatedService);
                 if (!commandsRequest.addCommandsForService(activatedService, commandsForService)) {
                     commandsRequests.add(commandsRequest);
-                    commandsRequest = new DeviceConfig.SupportedCommands.Request(support.secretsProvider);
+                    commandsRequest = new DeviceConfig.SupportedCommands.Request(support.paramsProvider);
                     commandsRequest.addCommandsForService(activatedService, commandsForService);
                 }
             }

@@ -36,7 +36,7 @@ public class GetProductInformationRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new DeviceConfig.ProductInfo.Request(support.secretsProvider).serialize();
+            return new DeviceConfig.ProductInfo.Request(support.paramsProvider).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

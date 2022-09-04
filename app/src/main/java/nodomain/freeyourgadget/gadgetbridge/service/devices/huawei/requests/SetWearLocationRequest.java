@@ -42,7 +42,7 @@ public class SetWearLocationRequest extends Request {
             .getString(DeviceSettingsPreferenceConst.PREF_WEARLOCATION, "left");
         byte location = (byte) (locationString.equals("left") ? 1 : 0);
         try {
-            return new DeviceConfig.WearLocationRequest(support.secretsProvider, location).serialize();
+            return new DeviceConfig.WearLocationRequest(support.paramsProvider, location).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

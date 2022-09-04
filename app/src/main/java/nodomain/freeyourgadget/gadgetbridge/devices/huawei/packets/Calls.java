@@ -22,8 +22,8 @@ public class Calls {
 
         public Action action = Action.UNKNOWN;
 
-        public AnswerCallResponse(SecretsProvider secretsProvider) {
-            super(secretsProvider);
+        public AnswerCallResponse(ParamsProvider paramsProvider) {
+            super(paramsProvider);
 
             this.serviceId = Calls.id;
             this.commandId = id;

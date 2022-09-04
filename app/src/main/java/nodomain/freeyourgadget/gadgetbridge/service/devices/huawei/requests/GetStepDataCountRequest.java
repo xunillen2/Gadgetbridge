@@ -27,7 +27,7 @@ public class GetStepDataCountRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new FitnessData.MessageCount.Request(support.secretsProvider, this.commandId, this.start, this.end).serialize();
+            return new FitnessData.MessageCount.Request(support.paramsProvider, this.commandId, this.start, this.end).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

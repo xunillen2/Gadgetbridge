@@ -41,7 +41,7 @@ public class GetSupportedServicesRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new DeviceConfig.SupportedServices.Request(support.secretsProvider, this.allSupportedServices).serialize();
+            return new DeviceConfig.SupportedServices.Request(support.paramsProvider, this.allSupportedServices).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

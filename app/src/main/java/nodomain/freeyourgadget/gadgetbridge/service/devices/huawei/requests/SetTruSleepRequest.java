@@ -41,7 +41,7 @@ public class SetTruSleepRequest extends Request {
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getBoolean(HuaweiConstants.PREF_HUAWEI_TRUSLEEP, false);
         try {
-            return new FitnessData.TruSleep.Request(support.secretsProvider, truSleepSwitch).serialize();
+            return new FitnessData.TruSleep.Request(support.paramsProvider, truSleepSwitch).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             throw new RequestCreationException();
         }

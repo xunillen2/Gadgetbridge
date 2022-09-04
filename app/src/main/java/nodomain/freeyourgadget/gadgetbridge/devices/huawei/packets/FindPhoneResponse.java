@@ -9,8 +9,8 @@ public class FindPhoneResponse extends HuaweiPacket {
 
     public boolean start = false;
 
-    public FindPhoneResponse(SecretsProvider secretsProvider) {
-        super(secretsProvider);
+    public FindPhoneResponse(ParamsProvider paramsProvider) {
+        super(paramsProvider);
 
         this.serviceId = id;
         this.commandId = responseId;

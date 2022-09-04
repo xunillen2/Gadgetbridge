@@ -139,7 +139,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     private MusicStateSpec musicStateSpec = null;
     private MusicSpec musicSpec = null;
 
-    public HuaweiPacket.SecretsProvider secretsProvider = new HuaweiPacket.SecretsProvider() {
+    public HuaweiPacket.ParamsProvider paramsProvider = new HuaweiPacket.ParamsProvider() {
         @Override
         public byte[] getSecretKey() {
             return HuaweiSupport.this.getSecretKey();

@@ -56,7 +56,7 @@ public class ResponseManager {
     public void handleData(byte[] data) {
         try {
             if (receivedPacket == null)
-                receivedPacket = new HuaweiPacket(support.secretsProvider).parse(data);
+                receivedPacket = new HuaweiPacket(support.paramsProvider).parse(data);
             else
                 receivedPacket = receivedPacket.parse(data);
         } catch (HuaweiPacket.ParseException e) {

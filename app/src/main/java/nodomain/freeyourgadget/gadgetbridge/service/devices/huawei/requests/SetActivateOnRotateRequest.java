@@ -41,7 +41,7 @@ public class SetActivateOnRotateRequest extends Request {
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getBoolean(DeviceSettingsPreferenceConst.PREF_LIFTWRIST_NOSHED, false);
         try {
-            return new DeviceConfig.ActivateOnRotateRequest(getSupport().secretsProvider, activate).serialize();
+            return new DeviceConfig.ActivateOnRotateRequest(getSupport().paramsProvider, activate).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

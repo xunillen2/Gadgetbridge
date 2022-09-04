@@ -42,7 +42,7 @@ public class SetWorkModeRequest extends Request {
             .getString(HuaweiConstants.PREF_HUAWEI_WORKMODE, "auto");
         boolean workMode = workModeString.equals("auto");
         try {
-            return new WorkMode.SwitchStatusRequest(support.secretsProvider, workMode).serialize();
+            return new WorkMode.SwitchStatusRequest(support.paramsProvider, workMode).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

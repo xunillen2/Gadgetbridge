@@ -33,7 +33,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.CheckSums;
 
 public class HuaweiPacket {
 
-    public interface SecretsProvider {
+    public interface ParamsProvider {
         byte[] getSecretKey();
         byte[] getIv();
     }
@@ -80,7 +80,7 @@ public class HuaweiPacket {
 
     protected static final int PACKET_MINIMAL_SIZE = 6;
 
-    protected SecretsProvider secretsProvider;
+    protected ParamsProvider paramsProvider;
 
     public byte serviceId = 0;
     public byte commandId = 0;
@@ -128,15 +128,15 @@ public class HuaweiPacket {
         responsePacketTypes.put((short) 0x2503, MusicControl.Control.Response.class);
     }
 
-    public HuaweiPacket(SecretsProvider secretsProvider) {
-        this.secretsProvider = secretsProvider;
+    public HuaweiPacket(ParamsProvider paramsProvider) {
+        this.paramsProvider = paramsProvider;
     }
 
     /*
      * This function is to convert the Packet into the proper subclass
      */
     protected HuaweiPacket fromPacket(HuaweiPacket packet) throws ParseException {
-        this.secretsProvider = packet.secretsProvider;
+        this.paramsProvider = packet.paramsProvider;
         this.serviceId = packet.serviceId;
         this.commandId = packet.commandId;
         this.tlv = packet.tlv;
@@ -146,7 +146,7 @@ public class HuaweiPacket {
 
         if (this.tlv.contains(0x7C) && this.tlv.getBoolean(0x7C)) {
             try {
-                this.tlv.decrypt(secretsProvider.getSecretKey());
+                this.tlv.decrypt(paramsProvider.getSecretKey());
             } catch (HuaweiTLV.CryptoException e) {
                 e.printStackTrace();
                 throw new CryptoException("Decrypt exception", e);
@@ -261,7 +261,7 @@ public class HuaweiPacket {
             return this;
 
         try {
-             return packetType.getDeclaredConstructor(SecretsProvider.class).newInstance(secretsProvider).fromPacket(this);
+             return packetType.getDeclaredConstructor(ParamsProvider.class).newInstance(paramsProvider).fromPacket(this);
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             e.printStackTrace();
             // The new instance cannot be created, so the packet is returned as "raw packet"
@@ -279,7 +279,7 @@ public class HuaweiPacket {
         HuaweiTLV serializableTlv;
         if (this.isEncrypted) {
             try {
-                serializableTlv = this.tlv.encrypt(secretsProvider.getSecretKey(), secretsProvider.getIv());
+                serializableTlv = this.tlv.encrypt(paramsProvider.getSecretKey(), paramsProvider.getIv());
             } catch (HuaweiTLV.CryptoException e) {
                 e.printStackTrace();
                 throw new CryptoException("Encrypt exception", e);

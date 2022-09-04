@@ -17,7 +17,7 @@ public class SetMusicStatusRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new MusicControl.MusicStatusRequest(support.secretsProvider, (byte) commandId, returnValue).serialize();
+            return new MusicControl.MusicStatusRequest(support.paramsProvider, (byte) commandId, returnValue).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

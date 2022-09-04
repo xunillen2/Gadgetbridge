@@ -61,7 +61,7 @@ public class SetActivityReminderRequest extends Request {
 
         try {
             return new FitnessData.ActivityReminder.Request(
-                    support.secretsProvider,
+                    support.paramsProvider,
                     longsitSwitch,
                     (byte) Integer.parseInt(longsitInterval),
                     start,

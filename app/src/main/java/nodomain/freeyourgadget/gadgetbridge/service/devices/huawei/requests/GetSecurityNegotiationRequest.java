@@ -26,7 +26,7 @@ public class GetSecurityNegotiationRequest extends Request {
     protected byte[] createRequest() throws RequestCreationException {
         try {
             return new DeviceConfig.SecurityNegotiationRequest(
-                    support.secretsProvider,
+                    support.paramsProvider,
                     this.authMode,
                     support.getAndroidId(),
                     Build.MODEL

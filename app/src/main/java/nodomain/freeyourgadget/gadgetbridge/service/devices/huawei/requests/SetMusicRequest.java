@@ -44,7 +44,7 @@ public class SetMusicRequest extends Request {
 
         try {
             return new MusicControl.MusicInfo.Request(
-                    support.secretsProvider,
+                    support.paramsProvider,
                     artistName,
                     songName,
                     playState,

@@ -47,8 +47,8 @@ public class DeviceConfig {
         public static final byte id = 0x01;
 
         public static class Request extends HuaweiPacket {
-            public Request(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Request(ParamsProvider paramsProvider) {
+                super(paramsProvider);
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
                 this.tlv = new HuaweiTLV()
@@ -66,8 +66,8 @@ public class DeviceConfig {
             public byte[] serverNonce;
             public byte authMode = 0x00;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
                 this.isEncrypted = false;
@@ -93,8 +93,8 @@ public class DeviceConfig {
         public static final byte id = 0x02;
 
         public static class Request extends HuaweiPacket {
-            public Request(SecretsProvider secretsProvider, byte[] allSupportedServices) {
-                super(secretsProvider);
+            public Request(ParamsProvider paramsProvider, byte[] allSupportedServices) {
+                super(paramsProvider);
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
                 this.tlv = new HuaweiTLV()
@@ -106,8 +106,8 @@ public class DeviceConfig {
         public static class Response extends HuaweiPacket {
             public byte[] supportedServices;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
             }
 
             @Override
@@ -126,9 +126,9 @@ public class DeviceConfig {
 
         public static class Request extends HuaweiPacket {
             public Request(
-                    SecretsProvider secretsProvider
+                    ParamsProvider paramsProvider
             ) {
-                super(secretsProvider);
+                super(paramsProvider);
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
                 this.tlv = new HuaweiTLV();
@@ -159,8 +159,8 @@ public class DeviceConfig {
 
             public List<CommandsList> commandsLists;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
                 this.isEncrypted = false;
@@ -209,11 +209,11 @@ public class DeviceConfig {
         public static final byte id = 0x04;
 
         public SetDateFormatRequest(
-                SecretsProvider secretsProvider,
+                ParamsProvider paramsProvider,
                 byte dateFormat,
                 byte timeFormat
         ) {
-            super(secretsProvider);
+            super(paramsProvider);
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
             this.tlv = new HuaweiTLV()
@@ -229,11 +229,11 @@ public class DeviceConfig {
         public static final byte id = 0x05;
 
         public SetTimeRequest(
-                SecretsProvider secretsProvider,
+                ParamsProvider paramsProvider,
                 int timestamp,
                 short zoneOffset
         ) {
-            super(secretsProvider);
+            super(paramsProvider);
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
             this.tlv = new HuaweiTLV()
@@ -248,8 +248,8 @@ public class DeviceConfig {
 
         public static class Request extends HuaweiPacket {
 
-            public Request(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Request(ParamsProvider paramsProvider) {
+                super(paramsProvider);
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
                 this.tlv = new HuaweiTLV();
@@ -276,8 +276,8 @@ public class DeviceConfig {
             public String softwareVersion;
             public String productModel;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
                 this.isEncrypted = false;
@@ -304,22 +304,22 @@ public class DeviceConfig {
     public static class BondRequest extends HuaweiPacket {
         public static final byte id = 0x0E;
         public BondRequest(
-                SecretsProvider secretsProvider,
+                ParamsProvider paramsProvider,
                 byte[] clientSerial,
                 String mac,
                 HuaweiCrypto huaweiCrypto
         ) throws CryptoException {
-            super(secretsProvider);
+            super(paramsProvider);
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
-            byte[] iv = secretsProvider.getIv();
+            byte[] iv = paramsProvider.getIv();
 
             try {
                 this.tlv = new HuaweiTLV()
                         .put(0x01)
                         .put(0x03, (byte) 0x00)
                         .put(0x05, clientSerial)
-                        .put(0x06, huaweiCrypto.createBondingKey(mac, secretsProvider.getSecretKey(), iv))
+                        .put(0x06, huaweiCrypto.createBondingKey(mac, paramsProvider.getSecretKey(), iv))
                         .put(0x07, iv);
                 this.isEncrypted = false;
                 this.complete = true;
@@ -335,11 +335,11 @@ public class DeviceConfig {
 
         public static class Request extends HuaweiPacket {
             public Request(
-                    SecretsProvider secretsProvider,
+                    ParamsProvider paramsProvider,
                     byte[] clientSerial,
                     byte[] mac
             ) {
-                super(secretsProvider);
+                super(paramsProvider);
 
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
@@ -360,8 +360,8 @@ public class DeviceConfig {
             public byte status;
             public long encryptionCounter;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
 
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
@@ -382,11 +382,11 @@ public class DeviceConfig {
 
         public static class Request extends HuaweiPacket {
             public Request(
-                    SecretsProvider secretsProvider,
+                    ParamsProvider paramsProvider,
                     byte[] challenge,
                     byte[] nonce
             ) {
-                super(secretsProvider);
+                super(paramsProvider);
 
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
@@ -402,8 +402,8 @@ public class DeviceConfig {
         public static class Response extends HuaweiPacket {
             public byte[] challengeResponse;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
 
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
@@ -422,8 +422,8 @@ public class DeviceConfig {
         public static final byte id = 0x08;
 
         public static class Request extends HuaweiPacket {
-            public Request(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Request(ParamsProvider paramsProvider) {
+                super(paramsProvider);
 
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
@@ -437,8 +437,8 @@ public class DeviceConfig {
         public static class Response extends HuaweiPacket {
             public byte level;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
 
                 // This differs per watch, so we handle it ourselves in parseTlv
                 this.isEncrypted = false;
@@ -448,7 +448,7 @@ public class DeviceConfig {
             public void parseTlv() throws ParseException {
                 if (this.tlv.contains(0x7C) && this.tlv.getByte(0x7C) == 0x01) {
                      try {
-                         this.tlv.decrypt(secretsProvider.getSecretKey());
+                         this.tlv.decrypt(paramsProvider.getSecretKey());
                      } catch (HuaweiTLV.CryptoException e) {
                          e.printStackTrace();
                          throw new CryptoException("Decrypt exception", e);
@@ -465,8 +465,8 @@ public class DeviceConfig {
     public static class ActivateOnRotateRequest extends HuaweiPacket {
         public static final byte id = 0x09;
 
-        public ActivateOnRotateRequest(SecretsProvider secretsProvider, boolean activate) {
-            super(secretsProvider);
+        public ActivateOnRotateRequest(ParamsProvider paramsProvider, boolean activate) {
+            super(paramsProvider);
 
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
@@ -481,8 +481,8 @@ public class DeviceConfig {
     public static class DndDeleteRequest extends HuaweiPacket {
         public static final int id = 0x0B;
 
-        public DndDeleteRequest(HuaweiPacket.SecretsProvider secretsProvider) {
-            super(secretsProvider);
+        public DndDeleteRequest(HuaweiPacket.ParamsProvider paramsProvider) {
+            super(paramsProvider);
 
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
@@ -499,7 +499,7 @@ public class DeviceConfig {
         public static final int id = 0x0C;
 
         public DndAddRequest(
-            HuaweiPacket.SecretsProvider secretsProvider,
+            HuaweiPacket.ParamsProvider paramsProvider,
             boolean dndEnable,
             byte[] start,
             byte[] end,
@@ -508,7 +508,7 @@ public class DeviceConfig {
             boolean statusLiftWrist,
             boolean statusDndLiftWrist
         ) {
-            super(secretsProvider);
+            super(paramsProvider);
 
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
@@ -533,8 +533,8 @@ public class DeviceConfig {
     public static class FactoryResetRequest extends HuaweiPacket {
         public static final byte id = 0x0D;
 
-        public FactoryResetRequest(HuaweiPacket.SecretsProvider secretsProvider) {
-            super(secretsProvider);
+        public FactoryResetRequest(HuaweiPacket.ParamsProvider paramsProvider) {
+            super(paramsProvider);
 
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
@@ -549,8 +549,8 @@ public class DeviceConfig {
     public static class NavigateOnRotateRequest extends HuaweiPacket {
         public static final byte id = 0x1B;
 
-        public NavigateOnRotateRequest(HuaweiPacket.SecretsProvider secretsProvider, boolean navigate) {
-            super(secretsProvider);
+        public NavigateOnRotateRequest(HuaweiPacket.ParamsProvider paramsProvider, boolean navigate) {
+            super(paramsProvider);
 
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
@@ -565,8 +565,8 @@ public class DeviceConfig {
     public static class WearLocationRequest extends HuaweiPacket {
         public static final byte id = 0x1A;
 
-        public WearLocationRequest(HuaweiPacket.SecretsProvider secretsProvider, byte location) {
-            super(secretsProvider);
+        public WearLocationRequest(HuaweiPacket.ParamsProvider paramsProvider, byte location) {
+            super(paramsProvider);
 
             this.serviceId = DeviceConfig.id;
             this.commandId = id;
@@ -582,8 +582,8 @@ public class DeviceConfig {
         public static final int id = 0x1D;
 
         public static class Request extends HuaweiPacket {
-            public Request(HuaweiPacket.SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Request(HuaweiPacket.ParamsProvider paramsProvider) {
+                super(paramsProvider);
 
                 this.serviceId = DeviceConfig.id;
                 this.commandId = id;
@@ -597,8 +597,8 @@ public class DeviceConfig {
         public static class Response extends HuaweiPacket {
             public int priority;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
             }
 
             @Override
@@ -626,13 +626,13 @@ public class DeviceConfig {
             public class Start extends HuaweiPacket {
 
                 public Start (
-                    HuaweiPacket.SecretsProvider secretsProvider,
+                    HuaweiPacket.ParamsProvider paramsProvider,
                     //int messageId,
                     byte[] isoSalt,
                     byte[] seed,
                     String serviceType
                 ) {
-                    super(secretsProvider);
+                    super(paramsProvider);
                     this.serviceId = DeviceConfig.id;
                     this.commandId = HiCHain.id;
                     this.isEncrypted = false;
@@ -666,11 +666,11 @@ public class DeviceConfig {
 
             public class Inter extends HuaweiPacket {
                 public Inter (
-                    HuaweiPacket.SecretsProvider secretsProvider,
+                    HuaweiPacket.ParamsProvider paramsProvider,
                     //int messageId,
                     byte[] token
                 ) {
-                    super(secretsProvider);
+                    super(paramsProvider);
                     this.serviceId = DeviceConfig.id;
                     this.commandId = HiCHain.id;
                     this.isEncrypted = false;
@@ -694,12 +694,12 @@ public class DeviceConfig {
 
             public class End extends HuaweiPacket {
                 public End (
-                    HuaweiPacket.SecretsProvider secretsProvider,
+                    HuaweiPacket.ParamsProvider paramsProvider,
                     //int messageId,
                     byte[] nonce,
                     byte[] encResult
                 ) {
-                    super(secretsProvider);
+                    super(paramsProvider);
                     this.serviceId = DeviceConfig.id;
                     this.commandId = HiCHain.id;
                     this.isEncrypted = false;
@@ -741,8 +741,8 @@ public class DeviceConfig {
         public static class Response extends HuaweiPacket {
             public byte[] json;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
                 this.serviceId = DeviceConfig.id;
                 this.commandId = HiCHain.id;
                 this.isEncrypted = false;
@@ -761,11 +761,11 @@ public class DeviceConfig {
         public static final int id = 0x33;
 
         public SecurityNegotiationRequest (
-                HuaweiPacket.SecretsProvider secretsProvider,
+                HuaweiPacket.ParamsProvider paramsProvider,
                 byte authMode,
                 String deviceUUID,
                 String phoneModel) {
-            super(secretsProvider);
+            super(paramsProvider);
 
             this.serviceId = DeviceConfig.id;
             this.commandId = id;

@@ -41,7 +41,7 @@ public class AlarmsRequest extends Request {
         this.serviceId = Alarms.id;
         this.commandId = smart ? SmartAlarmRequest.id : EventAlarmsRequest.id;
         if (!smart)
-            eventAlarmsRequest = new EventAlarmsRequest(support.secretsProvider);
+            eventAlarmsRequest = new EventAlarmsRequest(support.paramsProvider);
     }
 
     /*public void listEventAlarm() {
@@ -66,7 +66,7 @@ public class AlarmsRequest extends Request {
 
     public void buildSmartAlarm(Alarm alarm) {
         this.smartAlarmRequest = new SmartAlarmRequest(
-                support.secretsProvider,
+                support.paramsProvider,
                 (alarm.getEnabled() && !alarm.getUnused()),
                 (short) (alarm.getHour() << 8 + (byte) alarm.getMinute()),
                 (byte) alarm.getRepetition(),

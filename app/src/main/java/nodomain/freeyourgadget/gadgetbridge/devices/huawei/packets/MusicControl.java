@@ -10,8 +10,8 @@ public class MusicControl {
     public static final int successValue = 0x000186A0;
 
     public static class MusicStatusRequest extends HuaweiPacket {
-        public MusicStatusRequest(SecretsProvider secretsProvider, byte commandId, int returnValue) {
-            super(secretsProvider);
+        public MusicStatusRequest(ParamsProvider paramsProvider, byte commandId, int returnValue) {
+            super(paramsProvider);
 
             this.serviceId = MusicControl.id;
             this.commandId = commandId;
@@ -27,8 +27,8 @@ public class MusicControl {
 
         public int status = -1;
 
-        public MusicStatusResponse(SecretsProvider secretsProvider) {
-            super(secretsProvider);
+        public MusicStatusResponse(ParamsProvider paramsProvider) {
+            super(paramsProvider);
 
             this.serviceId = MusicControl.id;
             this.commandId = id;
@@ -46,14 +46,14 @@ public class MusicControl {
 
         public static class Request extends HuaweiPacket {
             public Request(
-                    SecretsProvider secretsProvider,
+                    ParamsProvider paramsProvider,
                     String artistName,
                     String songName,
                     byte playState,
                     byte maxVolume,
                     byte currentVolume
             ) {
-                super(secretsProvider);
+                super(paramsProvider);
                 this.serviceId = MusicControl.id;
                 this.commandId = id;
                 this.tlv = new HuaweiTLV()
@@ -70,8 +70,8 @@ public class MusicControl {
             public boolean ok = false;
             public String error = "No input has been parsed yet";
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
 
                 this.serviceId = MusicControl.id;
                 this.commandId = id;
@@ -115,8 +115,8 @@ public class MusicControl {
 
             public Button button = null;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
 
                 this.serviceId = MusicControl.id;
                 this.commandId = id;

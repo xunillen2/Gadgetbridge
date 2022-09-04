@@ -15,7 +15,7 @@ public class StopNotificationRequest extends Request {
     protected byte[] createRequest() throws RequestCreationException {
         try {
             return new Notifications.NotificationActionRequest(
-                    super.getSupport().secretsProvider,
+                    super.getSupport().paramsProvider,
                     (short) support.getNotificationId(),
                     Notifications.NotificationType.stopNotification,
                     false,

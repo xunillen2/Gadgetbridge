@@ -65,7 +65,7 @@ public class SetDateFormatRequest extends Request {
                 date = DeviceConfig.Date.yearFirst;
         }
         try {
-            return new DeviceConfig.SetDateFormatRequest(support.secretsProvider, (byte) date, (byte) time).serialize();
+            return new DeviceConfig.SetDateFormatRequest(support.paramsProvider, (byte) date, (byte) time).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

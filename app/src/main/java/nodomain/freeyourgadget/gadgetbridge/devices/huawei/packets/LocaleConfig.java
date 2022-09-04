@@ -26,11 +26,11 @@ public class LocaleConfig {
         public static final byte id = 0x01;
 
         public SetLocaleRequest(
-                SecretsProvider secretsProvider,
+                ParamsProvider paramsProvider,
                 byte[] locale,
                 byte measurement
         ) {
-            super(secretsProvider);
+            super(paramsProvider);
 
             this.serviceId = LocaleConfig.id;
             this.commandId = id;

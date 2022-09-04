@@ -28,7 +28,7 @@ public class GetWorkoutCountRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new Workout.WorkoutCount.Request(support.secretsProvider, this.start, this.end).serialize();
+            return new Workout.WorkoutCount.Request(support.paramsProvider, this.start, this.end).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

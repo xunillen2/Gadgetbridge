@@ -36,7 +36,7 @@ public class SendFactoryResetRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new DeviceConfig.FactoryResetRequest(support.secretsProvider).serialize();
+            return new DeviceConfig.FactoryResetRequest(support.paramsProvider).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

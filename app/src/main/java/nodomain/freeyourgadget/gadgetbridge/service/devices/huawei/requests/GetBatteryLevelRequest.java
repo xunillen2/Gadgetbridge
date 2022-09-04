@@ -37,7 +37,7 @@ public class GetBatteryLevelRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new DeviceConfig.BatteryLevel.Request(support.secretsProvider).serialize();
+            return new DeviceConfig.BatteryLevel.Request(support.paramsProvider).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

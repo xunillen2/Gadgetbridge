@@ -34,8 +34,8 @@ public class WorkMode {
         public static final byte id = 0x02;
         public static final int setStatus  = 0x01;
 
-        public SwitchStatusRequest(SecretsProvider secretsProvider, boolean autoWorkMode) {
-            super(secretsProvider);
+        public SwitchStatusRequest(ParamsProvider paramsProvider, boolean autoWorkMode) {
+            super(paramsProvider);
 
             this.serviceId = WorkMode.id;
             this.commandId = id;

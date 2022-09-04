@@ -36,7 +36,7 @@ public class SendDndDeleteRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new DeviceConfig.DndDeleteRequest(support.secretsProvider).serialize();
+            return new DeviceConfig.DndDeleteRequest(support.paramsProvider).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

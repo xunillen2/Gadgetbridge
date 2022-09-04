@@ -17,7 +17,7 @@ public class GetFitnessTotalsRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new FitnessData.FitnessTotals.Request(support.secretsProvider).serialize();
+            return new FitnessData.FitnessTotals.Request(support.paramsProvider).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

@@ -58,7 +58,7 @@ public class SetTimeRequest extends Request {
                 .getShort(0);
 
         try {
-            return new DeviceConfig.SetTimeRequest(support.secretsProvider, timestampSec, zoneOffset).serialize();
+            return new DeviceConfig.SetTimeRequest(support.paramsProvider, timestampSec, zoneOffset).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

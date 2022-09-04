@@ -67,7 +67,7 @@ public class SendDndAddRequest extends Request {
 
         try {
             return new DeviceConfig.DndAddRequest(
-                    support.secretsProvider,
+                    support.paramsProvider,
                     dndEnable,
                     start,
                     end,

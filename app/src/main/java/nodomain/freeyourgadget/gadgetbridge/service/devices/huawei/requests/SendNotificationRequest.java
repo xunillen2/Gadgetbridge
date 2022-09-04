@@ -52,7 +52,7 @@ public class SendNotificationRequest extends Request {
             title = notificationSpec.sourceName;
 
         this.packet = new Notifications.NotificationActionRequest(
-                support.secretsProvider,
+                support.paramsProvider,
                 (short) support.getNotificationId(),
                 getNotificationType(notificationSpec.type),
                 vibrate,
@@ -68,7 +68,7 @@ public class SendNotificationRequest extends Request {
 
     public void buildNotificationTLVFromCallSpec(CallSpec callSpec) {
         this.packet = new Notifications.NotificationActionRequest(
-                support.secretsProvider,
+                support.paramsProvider,
                 (short) support.getNotificationId(),
                 Notifications.NotificationType.call,
                 vibrate,

@@ -62,7 +62,7 @@ public class SetLocaleRequest extends Request {
         LOG.debug("measurementString: " + measurementString);
         byte measurement = measurementString.equals("metric") ? LocaleConfig.MeasurementSystem.metric : LocaleConfig.MeasurementSystem.imperial;
         try {
-            return new LocaleConfig.SetLocaleRequest(support.secretsProvider, localeString.getBytes(StandardCharsets.UTF_8), measurement).serialize();
+            return new LocaleConfig.SetLocaleRequest(support.paramsProvider, localeString.getBytes(StandardCharsets.UTF_8), measurement).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

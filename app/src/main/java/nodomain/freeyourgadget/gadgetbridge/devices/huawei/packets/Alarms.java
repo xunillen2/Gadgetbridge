@@ -15,8 +15,8 @@ public class Alarms {
         byte count;
         HuaweiTLV alarms;
 
-        public EventAlarmsRequest(SecretsProvider secretsProvider) {
-            super(secretsProvider);
+        public EventAlarmsRequest(ParamsProvider paramsProvider) {
+            super(paramsProvider);
 
             this.serviceId = Alarms.id;
             this.commandId = id;
@@ -62,13 +62,13 @@ public class Alarms {
         public static final int id = 0x02;
 
         public SmartAlarmRequest(
-                SecretsProvider secretsProvider,
+                ParamsProvider paramsProvider,
                 boolean status,
                 short startTime,
                 byte repeat,
                 byte aheadTime
         ) {
-            super(secretsProvider);
+            super(paramsProvider);
 
             this.serviceId = Alarms.id;
             this.commandId = id;

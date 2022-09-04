@@ -56,7 +56,7 @@ public class GetAuthRequest extends Request {
                                             .put(authVersion)
                                             .put(clientNonce)
                                             .array();
-            return new DeviceConfig.Auth.Request(support.secretsProvider, challenge, nonce).serialize();
+            return new DeviceConfig.Auth.Request(support.paramsProvider, challenge, nonce).serialize();
         } catch (NoSuchAlgorithmException | InvalidKeyException | HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

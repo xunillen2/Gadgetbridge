@@ -41,7 +41,7 @@ public class SetNavigateOnRotateRequest extends Request {
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getBoolean(MiBandConst.PREF_MI2_ROTATE_WRIST_TO_SWITCH_INFO, false);
         try {
-            return new DeviceConfig.NavigateOnRotateRequest(support.secretsProvider, navigate).serialize();
+            return new DeviceConfig.NavigateOnRotateRequest(support.paramsProvider, navigate).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

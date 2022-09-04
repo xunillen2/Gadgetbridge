@@ -16,12 +16,12 @@ public class FitnessData {
 
         public static class Request extends HuaweiPacket {
             public Request(
-                    SecretsProvider secretsProvider,
+                    ParamsProvider paramsProvider,
                     byte commandId,
                     int start,
                     int end
             ) {
-                super(secretsProvider);
+                super(paramsProvider);
 
                 this.serviceId = FitnessData.id;
                 this.commandId = commandId;
@@ -38,8 +38,8 @@ public class FitnessData {
         public static class Response extends HuaweiPacket {
             public short count;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
             }
 
             @Override
@@ -55,8 +55,8 @@ public class FitnessData {
         public static final byte stepId = 0x0B;
 
         public static class Request extends HuaweiPacket {
-            public Request(SecretsProvider secretsProvider, byte commandId, short count) {
-                super(secretsProvider);
+            public Request(ParamsProvider paramsProvider, byte commandId, short count) {
+                super(paramsProvider);
 
                 this.serviceId = FitnessData.id;
                 this.commandId = commandId;
@@ -79,8 +79,8 @@ public class FitnessData {
             public short number;
             public List<SubContainer> containers;
 
-            public SleepResponse(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public SleepResponse(ParamsProvider paramsProvider) {
+                super(paramsProvider);
 
                 this.serviceId = FitnessData.id;
                 this.commandId = sleepId;
@@ -158,8 +158,8 @@ public class FitnessData {
                 singleByteTagListBitmap1.add((byte) 0x40);
             }
 
-            public StepResponse(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public StepResponse(ParamsProvider paramsProvider) {
+                super(paramsProvider);
 
                 this.serviceId = FitnessData.id;
                 this.commandId = stepId;
@@ -279,8 +279,8 @@ public class FitnessData {
         public static final byte id = 0x03;
 
         public static class Request extends HuaweiPacket {
-            public Request(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Request(ParamsProvider paramsProvider) {
+                super(paramsProvider);
 
                 this.serviceId = FitnessData.id;
                 this.commandId = id;
@@ -298,8 +298,8 @@ public class FitnessData {
             public int totalCalories = 0;
             public int totalDistance = 0;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
 
                 this.serviceId = FitnessData.id;
                 this.commandId = id;
@@ -329,14 +329,14 @@ public class FitnessData {
 
         public static class Request extends HuaweiPacket {
             public Request(
-                    SecretsProvider secretsProvider,
+                    ParamsProvider paramsProvider,
                     boolean longSitSwitch,
                     byte longSitInterval,
                     byte[] longSitStart,
                     byte[] longSitEnd,
                     byte cycle
             ) {
-                super(secretsProvider);
+                super(paramsProvider);
 
                 this.serviceId = FitnessData.id;
                 this.commandId = id;
@@ -359,8 +359,8 @@ public class FitnessData {
         public static final byte id = 0x16;
 
         public static class Request extends HuaweiPacket {
-            public Request(SecretsProvider secretsProvider, boolean truSleepSwitch) {
-                super(secretsProvider);
+            public Request(ParamsProvider paramsProvider, boolean truSleepSwitch) {
+                super(paramsProvider);
 
                 this.serviceId = FitnessData.id;
                 this.commandId = id;

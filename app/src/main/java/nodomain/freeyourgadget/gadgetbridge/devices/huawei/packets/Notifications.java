@@ -29,7 +29,7 @@ public class Notifications {
         //        public static final int textItem = 0x8D;
 
         public NotificationActionRequest(
-                SecretsProvider secretsProvider,
+                ParamsProvider paramsProvider,
                 short notificationId,
                 byte notificationType,
                 boolean vibrate,
@@ -41,7 +41,7 @@ public class Notifications {
                 String bodyContent,
                 String sourceAppId
         ) {
-            super(secretsProvider);
+            super(paramsProvider);
 
             this.serviceId = Notifications.id;
             this.commandId = id;
@@ -126,10 +126,10 @@ public class Notifications {
         public static final byte id = 0x04;
 
         public SetNotificationRequest(
-                SecretsProvider secretsProvider,
+                ParamsProvider paramsProvider,
                 boolean activate
         ) {
-            super(secretsProvider);
+            super(paramsProvider);
 
             this.serviceId = Notifications.id;
             this.commandId = id;
@@ -148,10 +148,10 @@ public class Notifications {
         public static final byte id = 0x08;
 
         public SetWearMessagePushRequest(
-                SecretsProvider secretsProvider,
+                ParamsProvider paramsProvider,
                 boolean activate
         ) {
-            super(secretsProvider);
+            super(paramsProvider);
 
             this.serviceId = Notifications.id;
             this.commandId = id;

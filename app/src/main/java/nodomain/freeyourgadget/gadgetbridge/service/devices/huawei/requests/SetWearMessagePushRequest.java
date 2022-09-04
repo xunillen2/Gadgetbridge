@@ -25,7 +25,7 @@ public class SetWearMessagePushRequest extends Request {
             .getDeviceSpecificSharedPrefs(support.getDevice().getAddress())
             .getBoolean(DeviceSettingsPreferenceConst.PREF_NOTIFICATION_ENABLE, false);
         try {
-            return new Notifications.SetWearMessagePushRequest(support.secretsProvider, activate).serialize();
+            return new Notifications.SetWearMessagePushRequest(support.paramsProvider, activate).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();

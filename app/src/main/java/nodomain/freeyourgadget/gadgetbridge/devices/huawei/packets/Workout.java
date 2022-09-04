@@ -15,11 +15,11 @@ public class Workout {
 
         public static class Request extends HuaweiPacket {
             public Request(
-                    SecretsProvider secretsProvider,
+                    ParamsProvider paramsProvider,
                     int start,
                     int end
             ) {
-                super(secretsProvider);
+                super(paramsProvider);
 
                 this.serviceId = Workout.id;
                 this.commandId = id;
@@ -46,8 +46,8 @@ public class Workout {
             public short count;
             public List<WorkoutNumbers> workoutNumbers;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
             }
 
             @Override
@@ -94,8 +94,8 @@ public class Workout {
 
         public static class Request extends HuaweiPacket {
 
-            public Request(SecretsProvider secretsProvider, short number) {
-                super(secretsProvider);
+            public Request(ParamsProvider paramsProvider, short number) {
+                super(paramsProvider);
 
                 this.serviceId = Workout.id;
                 this.commandId = id;
@@ -122,8 +122,8 @@ public class Workout {
             public int duration = -1;
             public byte type = -1; // TODO: enum?
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
             }
 
             @Override
@@ -169,11 +169,11 @@ public class Workout {
         public static class Request extends HuaweiPacket {
 
             public Request(
-                    SecretsProvider secretsProvider,
+                    ParamsProvider paramsProvider,
                     short workoutNumber,
                     short dataNumber
             ) {
-                super(secretsProvider);
+                super(paramsProvider);
 
                 this.serviceId = Workout.id;
                 this.commandId = id;
@@ -263,8 +263,8 @@ public class Workout {
             public Header header;
             public List<Data> dataList;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
             }
 
             /**
@@ -415,11 +415,11 @@ public class Workout {
         public static class Request extends HuaweiPacket {
 
             public Request(
-                    SecretsProvider secretsProvider,
+                    ParamsProvider paramsProvider,
                     short workoutNumber,
                     short paceNumber
             ) {
-                super(secretsProvider);
+                super(paramsProvider);
 
                 this.serviceId = Workout.id;
                 this.commandId = id;
@@ -455,8 +455,8 @@ public class Workout {
             public short paceNumber;
             public List<Block> blocks;
 
-            public Response(SecretsProvider secretsProvider) {
-                super(secretsProvider);
+            public Response(ParamsProvider paramsProvider) {
+                super(paramsProvider);
             }
 
             @Override

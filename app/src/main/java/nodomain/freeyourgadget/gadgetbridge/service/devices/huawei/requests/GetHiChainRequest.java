@@ -62,7 +62,7 @@ public class GetHiChainRequest extends Request {
                 new Random().nextBytes(seed);
                 isoSalt = new byte[16];
                 new Random().nextBytes(isoSalt);
-                HiCHain.Request.Start start = req.new Start(support.secretsProvider, isoSalt, seed, HuaweiConstants.SERVICE_TYPE );
+                HiCHain.Request.Start start = req.new Start(support.paramsProvider, isoSalt, seed, HuaweiConstants.SERVICE_TYPE );
                 return start.serialize();
             } else if (step == HiChainStep.inter) {
                 // GeneratePSK - needed ?
@@ -95,12 +95,12 @@ public class GetHiChainRequest extends Request {
                     .put(authIdSelf)
                     .array();
                 byte[] token = CryptoUtils.calcHmacSha256(support.getSecretKey(), message);
-                HiCHain.Request.Inter inter = req.new Inter(support.secretsProvider, token);
+                HiCHain.Request.Inter inter = req.new Inter(support.paramsProvider, token);
                 return inter.serialize();
             } else if (step == HiChainStep.end) {
                 byte[] nonce = new byte[0];
                 byte[] encResult = new byte[0];
-                HiCHain.Request.End end = req.new End(support.secretsProvider, nonce, encResult);
+                HiCHain.Request.End end = req.new End(support.paramsProvider, nonce, encResult);
                 return end.serialize();
             }
         } catch (HuaweiPacket.CryptoException e) {

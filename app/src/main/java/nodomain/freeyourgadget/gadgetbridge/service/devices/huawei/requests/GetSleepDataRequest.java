@@ -27,7 +27,7 @@ public class GetSleepDataRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         try {
-            return new FitnessData.MessageData.Request(support.secretsProvider, this.commandId, this.count).serialize();
+            return new FitnessData.MessageData.Request(support.paramsProvider, this.commandId, this.count).serialize();
         } catch (HuaweiPacket.CryptoException e) {
             e.printStackTrace();
             throw new RequestCreationException();
