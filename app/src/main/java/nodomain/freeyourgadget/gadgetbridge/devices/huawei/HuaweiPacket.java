@@ -36,6 +36,7 @@ public class HuaweiPacket {
     public interface ParamsProvider {
         byte[] getSecretKey();
         byte[] getIv();
+        int getMtu();
     }
 
     public static abstract class ParseException extends Exception {

@@ -149,6 +149,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         public byte[] getIv() {
             return HuaweiSupport.this.getIV();
         }
+
+        @Override
+        public int getMtu() {
+            return HuaweiSupport.this.getMtu();
+        }
     };
 
     public HuaweiSupport() {
