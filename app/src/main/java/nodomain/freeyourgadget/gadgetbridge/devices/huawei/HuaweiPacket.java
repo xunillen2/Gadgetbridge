@@ -289,21 +289,63 @@ public class HuaweiPacket {
             serializableTlv = this.tlv;
         }
 
-        int headerLength = 4; // Magic + (bodyLength + 1) + 0x00
-        byte[] serializedTLV = serializableTlv.serialize();
-        int bodyLength = 2 + serializedTLV.length;
-        ByteBuffer buffer = ByteBuffer.allocate(headerLength + bodyLength);
-        buffer.put((byte) 0x5A);
-        buffer.putShort((short)(bodyLength + 1));
-        buffer.put((byte) 0x00);
-        buffer.put(this.serviceId);
-        buffer.put(this.commandId);
-        buffer.put(serializedTLV);
-        int crc16 = CheckSums.getCRC16(buffer.array(), 0x0000);
+        int headerLength = 4; // Magic + (short)(bodyLength + 1) + 0x00
+        int bodyHeaderLength = 2; // sID + cID
         int footerLength = 2; //CRC16
-        ByteBuffer finalBuffer = ByteBuffer.allocate(buffer.capacity() + footerLength);
-        finalBuffer.put(buffer.array());
-        finalBuffer.putShort((short)crc16);
-        return finalBuffer.array();
+        byte[] serializedTLV = serializableTlv.serialize();
+        if (isSliced) {
+            headerLength += 1; //Add extra slice info
+            ByteBuffer tlvBuffer = ByteBuffer.wrap(serializedTLV);
+            int numberPacket = (int)Math.ceil(tlvBuffer.capacity() / paramsProvider.getMtu());
+            int numberSlice = (int)Math.ceil(numberPacket);
+            if (numberSlice >= 3) {numberSlice = 3;}
+            int numberPacektInSlice = (int)Math.ceil(numberPacket / numberSlice);
+            int maxSliceSize = paramsProvider.getMtu() * numberPacektInSlice;
+            byte[] packet = new byte[tlvBuffer.capacity() + numberSlice*(headerLength + footerLength) + bodyHeaderLength];
+            int packetPos = 0x00;
+            int slice = 0x00;
+            int bodyPos = 0x00;
+            while (tlvBuffer.hasRemaining()) {
+                int bufferSize = Math.min(maxSliceSize - footerLength, (tlvBuffer.remaining() + headerLength));
+                ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
+                buffer.put((byte) 0x5A);
+                int bodyLength = bufferSize - headerLength;
+                if (slice == 0x00) bodyLength -= bodyHeaderLength;
+                buffer.putShort((short)(bodyLength + bodyHeaderLength + footerLength));
+                if (tlvBuffer.remaining() < (maxSliceSize - (headerLength + footerLength))) slice = 0x02;
+                buffer.put((byte)(slice + 1))
+                    .put((byte)slice);
+                if (slice == 0x00) {
+                    buffer.put(this.serviceId)
+                        .put(this.commandId)
+                        .put(serializedTLV, bodyPos, bodyLength);
+                } else {
+                    buffer.put(serializedTLV, bodyPos, bodyLength);
+                }
+                int crc16 = CheckSums.getCRC16(buffer.array(), 0x0000);
+                ByteBuffer finalBuffer = ByteBuffer.allocate(buffer.capacity() + footerLength);
+                finalBuffer.put(buffer)
+                    .putShort((short)crc16);
+                slice += 0x01;
+                bodyPos += bodyLength;
+                finalBuffer.get(packet, packetPos, finalBuffer.capacity());
+                packetPos += finalBuffer.capacity();
+            }
+            return packet;
+        } else {
+            int bodyLength = bodyHeaderLength + serializedTLV.length;
+            ByteBuffer buffer = ByteBuffer.allocate(headerLength + bodyLength);
+            buffer.put((byte) 0x5A);
+            buffer.putShort((short)(bodyLength + 1));
+            buffer.put((byte) 0x00);
+            buffer.put(this.serviceId);
+            buffer.put(this.commandId);
+            buffer.put(serializedTLV);
+            int crc16 = CheckSums.getCRC16(buffer.array(), 0x0000);
+            ByteBuffer finalBuffer = ByteBuffer.allocate(buffer.capacity() + footerLength);
+            finalBuffer.put(buffer.array());
+            finalBuffer.putShort((short)crc16);
+            return finalBuffer.array();
+        }
     }
 }
