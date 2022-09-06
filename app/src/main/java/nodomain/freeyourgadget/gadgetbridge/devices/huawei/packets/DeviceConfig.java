@@ -635,6 +635,7 @@ public class DeviceConfig {
                     super(paramsProvider);
                     this.serviceId = DeviceConfig.id;
                     this.commandId = HiCHain.id;
+                    this.isSliced = true;
                     this.isEncrypted = false;
                     byte[] random16 = new byte[16];
                     new Random().nextBytes(random16);
@@ -673,6 +674,7 @@ public class DeviceConfig {
                     super(paramsProvider);
                     this.serviceId = DeviceConfig.id;
                     this.commandId = HiCHain.id;
+                    this.isSliced = true;
                     this.isEncrypted = false;
                     createJson(2); //messageId);
                     try {
@@ -702,6 +704,7 @@ public class DeviceConfig {
                     super(paramsProvider);
                     this.serviceId = DeviceConfig.id;
                     this.commandId = HiCHain.id;
+                    this.isSliced = true;
                     this.isEncrypted = false;
                     createJson(3); //messageId);
                     try {
