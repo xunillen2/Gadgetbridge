@@ -33,6 +33,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FindPhoneResp
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.FitnessData;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.MusicControl;
 import nodomain.freeyourgadget.gadgetbridge.util.CheckSums;
+import nodomain.freeyourgadget.gadgetbridge.util.GB;
 
 public class HuaweiPacket {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiPacket.class);
@@ -297,49 +298,68 @@ public class HuaweiPacket {
         int bodyHeaderLength = 2; // sID + cID
         int footerLength = 2; //CRC16
         byte[] serializedTLV = serializableTlv.serialize();
+        LOG.debug("serializedTLV: " + GB.hexdump(serializedTLV));
         if (isSliced) {
             headerLength += 1; //Add extra slice info
-            ByteBuffer tlvBuffer = ByteBuffer.wrap(serializedTLV);
-            int numberPacket = (int)Math.ceil(tlvBuffer.capacity() / paramsProvider.getMtu());
-            int numberSlice = (int)Math.ceil(numberPacket);
+            // ByteBuffer tlvBuffer = ByteBuffer.wrap(serializedTLV);
+            // int numberPacket = (tlvBuffer.capacity() + paramsProvider.getMtu() - 1) / paramsProvider.getMtu();
+            int numberPacket = (serializedTLV.length + paramsProvider.getMtu() - 1) / paramsProvider.getMtu();
+            int numberSlice = numberPacket;
             if (numberSlice >= 3) {numberSlice = 3;}
-            int numberPacektInSlice = (int)Math.ceil(numberPacket / numberSlice);
+            int numberPacektInSlice = (numberPacket + numberSlice - 1) / numberSlice;
             int maxSliceSize = paramsProvider.getMtu() * numberPacektInSlice;
-            byte[] packet = new byte[tlvBuffer.capacity() + numberSlice*(headerLength + footerLength) + bodyHeaderLength];
+            // byte[] packet = new byte[tlvBuffer.capacity() + numberSlice*(headerLength + footerLength) + bodyHeaderLength];
+            byte[] packet = new byte[serializedTLV.length + numberSlice*(headerLength + footerLength) + bodyHeaderLength];
+            LOG.debug("packet size: " + packet.length);
             int packetPos = 0x00;
             int slice = 0x00;
             int bodyPos = 0x00;
-            while (tlvBuffer.hasRemaining()) {
+            int remaining = serializedTLV.length - bodyPos;
+            // while (tlvBuffer.hasRemaining()) {
+            while (remaining > 0) {
+                // LOG.debug("remaining: " + tlvBuffer.remaining());
+                LOG.debug("remaining: " + remaining);
                 LOG.debug("slice: " + slice + " packetPos: " + packetPos + " bodyPos: " + bodyPos);
-                LOG.debug("maxSlice: " + maxSliceSize + " remaining+header: " + (tlvBuffer.remaining() + headerLength));
-                int bufferSize = Math.min(maxSliceSize - footerLength, (tlvBuffer.remaining() + headerLength));
+                // LOG.debug("maxSlice: " + maxSliceSize + " remaining+header(5): " + (tlvBuffer.remaining() + headerLength));
+                LOG.debug("maxSlice: " + maxSliceSize + " remaining+header(5): " + (remaining + headerLength));
+                // int bufferSize = Math.min(maxSliceSize - footerLength, (tlvBuffer.remaining() + headerLength));
+                int bufferSize = Math.min(maxSliceSize - footerLength, (remaining + headerLength));
                 LOG.debug("bufferize: " + bufferSize);
                 ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
                 buffer.put((byte) 0x5A);
                 int bodyLength = bufferSize - headerLength;
-                LOG.debug("bodyLength: " + bodyLength);
+                buffer.putShort((short)(bodyLength + 2));
                 if (slice == 0x00) bodyLength -= bodyHeaderLength;
-                buffer.putShort((short)(bodyLength + bodyHeaderLength + footerLength));
-                if (tlvBuffer.remaining() < (maxSliceSize - (headerLength + footerLength))) slice = 0x02;
+                LOG.debug("bodyLength after slice: " + bodyLength);
+                // if (tlvBuffer.remaining() < (maxSliceSize - (headerLength + footerLength))) slice = 0x02;
+                if (remaining < (maxSliceSize - (headerLength + footerLength))) slice = 0x02;
                 LOG.debug("slice: " + slice);
                 buffer.put((byte)(slice + 1))
                     .put((byte)slice);
                 if (slice == 0x00) {
                     buffer.put(this.serviceId)
-                        .put(this.commandId)
-                        .put(serializedTLV, bodyPos, bodyLength);
-                } else {
-                    buffer.put(serializedTLV, bodyPos, bodyLength);
-                }
+                        .put(this.commandId);
+                        //.put(serializedTLV, bodyPos, bodyLength);
+                } //else {
+                LOG.debug("buffer1: " + GB.hexdump(buffer.array()));
+                // buffer.put(tlvBuffer.array(), bodyPos, bodyLength);
+                buffer.put(serializedTLV, bodyPos, bodyLength);
+                LOG.debug("buffer2: " + GB.hexdump(buffer.array()));
+                // tlvBuffer.position(tlvBuffer.position() + bodyLength);
+                // LOG.debug("tlvbuf.position: " + tlvBuffer.position());
+                //}
+                remaining -= bodyLength;
                 int crc16 = CheckSums.getCRC16(buffer.array(), 0x0000);
-                LOG.debug("buffer capacity: " + buffer.capacity());
                 ByteBuffer finalBuffer = ByteBuffer.allocate(buffer.capacity() + footerLength);
+                buffer.rewind();
                 finalBuffer.put(buffer)
                     .putShort((short)crc16);
                 slice += 0x01;
                 bodyPos += bodyLength;
-                LOG.debug("Packet size: " + packet.length + " finalbuffer capacity: " + finalBuffer.capacity());
-                finalBuffer.get(packet, packetPos, finalBuffer.capacity());
+                //finalBuffer.get(packet, packetPos, finalBuffer.capacity());
+                System.arraycopy(finalBuffer.array(), 0, packet, packetPos, finalBuffer.capacity());
+                LOG.debug("finalBuffer: " + GB.hexdump(finalBuffer.array()));
+                LOG.debug("packet: " + GB.hexdump(packet));
                 packetPos += finalBuffer.capacity();
             }
             return packet;
