@@ -23,6 +23,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Calls;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.Workout;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
@@ -32,6 +35,7 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.MusicControl;
 import nodomain.freeyourgadget.gadgetbridge.util.CheckSums;
 
 public class HuaweiPacket {
+    private static final Logger LOG = LoggerFactory.getLogger(HuaweiPacket.class);
 
     public interface ParamsProvider {
         byte[] getSecretKey();
@@ -306,13 +310,18 @@ public class HuaweiPacket {
             int slice = 0x00;
             int bodyPos = 0x00;
             while (tlvBuffer.hasRemaining()) {
+                LOG.debug("slice: " + slice + " packetPos: " + packetPos + " bodyPos: " + bodyPos);
+                LOG.debug("maxSlice: " + maxSliceSize + " remaining+header: " + (tlvBuffer.remaining() + headerLength));
                 int bufferSize = Math.min(maxSliceSize - footerLength, (tlvBuffer.remaining() + headerLength));
+                LOG.debug("bufferize: " + bufferSize);
                 ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
                 buffer.put((byte) 0x5A);
                 int bodyLength = bufferSize - headerLength;
+                LOG.debug("bodyLength: " + bodyLength);
                 if (slice == 0x00) bodyLength -= bodyHeaderLength;
                 buffer.putShort((short)(bodyLength + bodyHeaderLength + footerLength));
                 if (tlvBuffer.remaining() < (maxSliceSize - (headerLength + footerLength))) slice = 0x02;
+                LOG.debug("slice: " + slice);
                 buffer.put((byte)(slice + 1))
                     .put((byte)slice);
                 if (slice == 0x00) {
@@ -323,11 +332,13 @@ public class HuaweiPacket {
                     buffer.put(serializedTLV, bodyPos, bodyLength);
                 }
                 int crc16 = CheckSums.getCRC16(buffer.array(), 0x0000);
+                LOG.debug("buffer capacity: " + buffer.capacity());
                 ByteBuffer finalBuffer = ByteBuffer.allocate(buffer.capacity() + footerLength);
                 finalBuffer.put(buffer)
                     .putShort((short)crc16);
                 slice += 0x01;
                 bodyPos += bodyLength;
+                LOG.debug("Packet size: " + packet.length + " finalbuffer capacity: " + finalBuffer.capacity());
                 finalBuffer.get(packet, packetPos, finalBuffer.capacity());
                 packetPos += finalBuffer.capacity();
             }
