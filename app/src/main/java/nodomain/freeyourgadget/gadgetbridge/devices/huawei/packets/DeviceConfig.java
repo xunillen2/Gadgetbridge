@@ -655,7 +655,7 @@ public class DeviceConfig {
                             .put("isDeviceLevel", false);
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
-                            .put(0x02, 0x02)
+                            .put(0x02, (byte)0x02)
                             .put(0x03, requestId);
                             //.put(0x04, 0x00)
                             //.put(0x05, 0x00);
@@ -686,7 +686,7 @@ public class DeviceConfig {
                             .put("isDeviceLevel", false);
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
-                            .put(0x02, 0x02)
+                            .put(0x02, (byte)0x02)
                             .put(0x03, requestId);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -716,7 +716,7 @@ public class DeviceConfig {
                             .put("payload", payload);
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
-                            .put(0x02, 0x02)
+                            .put(0x02, (byte)0x02)
                             .put(0x03, requestId);
                     } catch (JSONException e) {
                         e.printStackTrace();
