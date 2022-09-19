@@ -656,9 +656,9 @@ public class DeviceConfig {
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
                             .put(0x02, 0x02)
-                            .put(0x03, requestId)
-                            .put(0x04, 0x00)
-                            .put(0x05, 0x00);
+                            .put(0x03, requestId);
+                            //.put(0x04, 0x00)
+                            //.put(0x05, 0x00);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
