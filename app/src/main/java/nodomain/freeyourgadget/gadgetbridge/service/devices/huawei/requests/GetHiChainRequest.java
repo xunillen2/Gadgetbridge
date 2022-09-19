@@ -56,6 +56,7 @@ public class GetHiChainRequest extends Request {
             new Random().nextBytes(requestId);
         }
         HiCHain.Request req = new HiCHain.Request(requestId, support.getAndroidId());
+        LOG.debug("step: " + step);
         try {
             if (step == HiChainStep.begin) {
                 seed = new byte[32];

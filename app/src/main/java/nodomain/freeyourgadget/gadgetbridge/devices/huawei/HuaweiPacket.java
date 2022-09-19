@@ -310,7 +310,6 @@ public class HuaweiPacket {
             int maxSliceSize = paramsProvider.getMtu() * numberPacektInSlice;
             // byte[] packet = new byte[tlvBuffer.capacity() + numberSlice*(headerLength + footerLength) + bodyHeaderLength];
             byte[] packet = new byte[serializedTLV.length + numberSlice*(headerLength + footerLength) + bodyHeaderLength];
-            LOG.debug("packet size: " + packet.length);
             int packetPos = 0x00;
             int slice = 0x00;
             int bodyPos = 0x00;
@@ -318,22 +317,16 @@ public class HuaweiPacket {
             // while (tlvBuffer.hasRemaining()) {
             while (remaining > 0) {
                 // LOG.debug("remaining: " + tlvBuffer.remaining());
-                LOG.debug("remaining: " + remaining);
-                LOG.debug("slice: " + slice + " packetPos: " + packetPos + " bodyPos: " + bodyPos);
                 // LOG.debug("maxSlice: " + maxSliceSize + " remaining+header(5): " + (tlvBuffer.remaining() + headerLength));
-                LOG.debug("maxSlice: " + maxSliceSize + " remaining+header(5): " + (remaining + headerLength));
                 // int bufferSize = Math.min(maxSliceSize - footerLength, (tlvBuffer.remaining() + headerLength));
                 int bufferSize = Math.min(maxSliceSize - footerLength, (remaining + headerLength));
-                LOG.debug("bufferize: " + bufferSize);
                 ByteBuffer buffer = ByteBuffer.allocate(bufferSize);
                 buffer.put((byte) 0x5A);
                 int bodyLength = bufferSize - headerLength;
                 buffer.putShort((short)(bodyLength + 2));
                 if (slice == 0x00) bodyLength -= bodyHeaderLength;
-                LOG.debug("bodyLength after slice: " + bodyLength);
                 // if (tlvBuffer.remaining() < (maxSliceSize - (headerLength + footerLength))) slice = 0x02;
                 if (remaining < (maxSliceSize - (headerLength + footerLength))) slice = 0x02;
-                LOG.debug("slice: " + slice);
                 buffer.put((byte)(slice + 1))
                     .put((byte)slice);
                 if (slice == 0x00) {
@@ -341,10 +334,9 @@ public class HuaweiPacket {
                         .put(this.commandId);
                         //.put(serializedTLV, bodyPos, bodyLength);
                 } //else {
-                LOG.debug("buffer1: " + GB.hexdump(buffer.array()));
                 // buffer.put(tlvBuffer.array(), bodyPos, bodyLength);
                 buffer.put(serializedTLV, bodyPos, bodyLength);
-                LOG.debug("buffer2: " + GB.hexdump(buffer.array()));
+                LOG.debug("buffer: " + GB.hexdump(buffer.array()));
                 // tlvBuffer.position(tlvBuffer.position() + bodyLength);
                 // LOG.debug("tlvbuf.position: " + tlvBuffer.position());
                 //}
