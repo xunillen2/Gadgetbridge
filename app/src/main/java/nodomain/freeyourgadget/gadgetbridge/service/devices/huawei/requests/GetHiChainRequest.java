@@ -4,6 +4,7 @@ package nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Random;
 
 import javax.crypto.NoSuchPaddingException;
@@ -31,7 +32,7 @@ public class GetHiChainRequest extends Request {
     private byte[] seed = null;
     private byte[] randSelf = null;
     private byte[] randPeer = null;
-    private byte[] requestId = null; //new byte[8];
+    private long requestId = 0x00;
     private JSONObject json = null;
 
 
@@ -54,7 +55,7 @@ public class GetHiChainRequest extends Request {
         this.serviceId = DeviceConfig.id;
         this.commandId = DeviceConfig.HiCHain.id;
         try {
-            this.requestId = json.getString("requestId").getBytes(StandardCharsets.UTF_8);
+            this.requestId = json.getLong("requestId");
             this.operationCode = (byte)json.getInt("operationCode");
             this.step = (byte)json.getInt("step");
             this.seed = json.getString("seed").getBytes(StandardCharsets.UTF_8);
@@ -68,9 +69,14 @@ public class GetHiChainRequest extends Request {
 
     @Override
     protected byte[] createRequest() throws RequestCreationException {
-        if (requestId == null) {
-            requestId = new byte[8];
-            new Random().nextBytes(requestId);
+        if (requestId == 0x00) {
+            // requestId = new byte[8];
+            // new Random().nextBytes(requestId);
+            SecureRandom random = new SecureRandom();
+            do {
+                requestId = random.nextLong() & ((1L << 44) - 1 );
+            } while (requestId == 0);
+            // requestId = ByteBuffer.allocate(8).putLong(id).array();
         }
 
         LOG.debug("operationCode: " + operationCode + " - step: " + step);
@@ -158,7 +164,7 @@ public class GetHiChainRequest extends Request {
             json = new JSONObject(new String(((DeviceConfig.HiCHain.Response) receivedPacket).json));
             // Use the JSONObject to transmit data
             json
-                .put("requestId", GB.hexdump(requestId))
+                .put("requestId", requestId)
                 .put("operationCode", operationCode)
                 .put("step", step + 1)
                 .put("seed", GB.hexdump(seed))

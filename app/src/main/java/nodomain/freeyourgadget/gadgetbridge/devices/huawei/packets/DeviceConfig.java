@@ -614,14 +614,14 @@ public class DeviceConfig {
 
         public static class Request {
             private int operationCode;
-            private byte[] requestId = new byte[8];
+            private long requestId;
             private byte[] selfAuthId;
             private String groupId;
             private JSONObject version = new JSONObject();
             private JSONObject payload = new JSONObject();
             private JSONObject value = new JSONObject();
 
-            public Request (int operationCode, byte[] requestId, byte[] selfAuthId, String groupId) {
+            public Request (int operationCode, long requestId, byte[] selfAuthId, String groupId) {
                 this.operationCode = operationCode;
                 this.requestId = requestId;
                 this.selfAuthId = selfAuthId;
@@ -669,7 +669,7 @@ public class DeviceConfig {
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
                             .put(0x02, (byte)operationCode)
-                            .put(0x03, requestId);
+                            .put(0x03, ByteBuffer.allocate(8).putLong(requestId).array());
                             //.put(0x04, 0x00)
                             //.put(0x05, 0x00);
                     } catch (JSONException e) {
@@ -698,7 +698,7 @@ public class DeviceConfig {
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
                             .put(0x02, (byte)operationCode)
-                            .put(0x03, requestId);
+                            .put(0x03, ByteBuffer.allocate(8).putLong(requestId).array());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -720,7 +720,7 @@ public class DeviceConfig {
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
                             .put(0x02, (byte)operationCode)
-                            .put(0x03, requestId);
+                            .put(0x03, ByteBuffer.allocate(8).putLong(requestId).array());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -749,7 +749,7 @@ public class DeviceConfig {
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
                             .put(0x02, (byte)operationCode)
-                            .put(0x03, requestId);
+                            .put(0x03, ByteBuffer.allocate(8).putLong(requestId).array());
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -773,7 +773,7 @@ public class DeviceConfig {
                         .put("message", messageId);
                     if (operationCode == 0x01) {
                         value
-                            .put("requestId", ByteBuffer.wrap(requestId).getLong())
+                            .put("requestId", Long.toString(requestId))
                             .put("groupId", groupId)
                             .put("groupName", "health_group_name")
                             .put("groupOp", 2)
