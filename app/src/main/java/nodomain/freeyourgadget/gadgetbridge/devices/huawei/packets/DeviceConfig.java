@@ -660,10 +660,12 @@ public class DeviceConfig {
                                 .put("pkgName", "com.huawei.devicegroupmanage")
                                 .put("serviceType", groupId)
                                 .put("keyLength", 0x20);
-                        } 
-                        value
-                            //.put("payload", payload) // Here or not ?
-                            .put("isDeviceLevel", false);
+                        }
+                        if (operationCode == 0x02) {
+                            value
+                                //.put("payload", payload) // Here or not ?
+                                .put("isDeviceLevel", false);
+                        }
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
                             .put(0x02, (byte)operationCode)
@@ -688,9 +690,11 @@ public class DeviceConfig {
                         payload
                             .put("peerAuthId", StringUtils.bytesToHex(selfAuthId))
                             .put("token", token);
-                        value
-                            //.put("payload", payload) // Here or not ?
-                            .put("isDeviceLevel", false);
+                        if (operationCode == 0x02) {
+                            value
+                                //.put("payload", payload) // Here or not ?
+                                .put("isDeviceLevel", false);
+                        }
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
                             .put(0x02, (byte)operationCode)
