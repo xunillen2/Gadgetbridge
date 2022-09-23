@@ -216,7 +216,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             if ( authMode == 0x04 ) {
                 LOG.debug("HiChain mode");
                 GetSecurityNegotiationRequest securityNegoReq = new GetSecurityNegotiationRequest(this, authMode);
-                GetHiChainRequest hiChainReq = new GetHiChainRequest(this);
+                GetHiChainRequest hiChainReq = new GetHiChainRequest(this, needsAuth);
                 securityNegoReq.nextRequest(hiChainReq);
                 responseManager.addHandler(securityNegoReq);
                 responseManager.addHandler(hiChainReq);
@@ -360,8 +360,8 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         }
     }
 
-    public String getAndroidId() {
-        return androidID;
+    public byte[] getAndroidId() {
+        return androidID.getBytes(StandardCharsets.UTF_8);
     }
 
     // Do not work on some band, have to check

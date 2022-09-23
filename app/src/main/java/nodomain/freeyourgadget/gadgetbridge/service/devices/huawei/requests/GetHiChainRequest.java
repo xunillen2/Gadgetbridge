@@ -6,6 +6,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 
+import javax.crypto.NoSuchPaddingException;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -24,29 +26,44 @@ import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig.
 
 public class GetHiChainRequest extends Request {
     private static final Logger LOG = LoggerFactory.getLogger(GetHiChainRequest.class);
-    private int step;
+    private byte operationCode = 0x02;
+    private byte step;
     private byte[] seed = null;
-    private byte[] isoSalt = null;
+    private byte[] randSelf = null;
+    private byte[] randPeer = null;
     private byte[] requestId = null; //new byte[8];
     private JSONObject json = null;
 
 
-    public GetHiChainRequest(HuaweiSupport support) {
+    public GetHiChainRequest(HuaweiSupport support, boolean firstConnection) {
         super(support);
         this.serviceId = DeviceConfig.id;
         this.commandId = DeviceConfig.HiCHain.id;
-        this.step = HiChainStep.begin;
+        if (firstConnection) {
+            operationCode = 0x01;
+        }
+        this.step = 0x01;
     }
 
-    public GetHiChainRequest(HuaweiSupport support, TransactionBuilder builder, byte[] requestId, int step, byte[] seed, byte[] isoSalt, JSONObject json) {
+    public GetHiChainRequest(
+            HuaweiSupport support,
+            TransactionBuilder builder,
+            JSONObject json
+    ) {
         super(support, builder);
         this.serviceId = DeviceConfig.id;
         this.commandId = DeviceConfig.HiCHain.id;
-        this.requestId = requestId;
-        this.step = step;
-        this.seed = seed;
-        this.isoSalt = isoSalt;
-        this.json = json;
+        try {
+            this.requestId = json.getString("requestId").getBytes(StandardCharsets.UTF_8);
+            this.operationCode = (byte)json.getInt("operationCode");
+            this.step = (byte)json.getInt("step");
+            this.seed = json.getString("seed").getBytes(StandardCharsets.UTF_8);
+            this.randSelf = json.getString("randSelf").getBytes(StandardCharsets.UTF_8);
+            this.randPeer = json.getString("randPeer").getBytes(StandardCharsets.UTF_8);
+            this.json = json;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -55,17 +72,18 @@ public class GetHiChainRequest extends Request {
             requestId = new byte[8];
             new Random().nextBytes(requestId);
         }
-        HiCHain.Request req = new HiCHain.Request(requestId, support.getAndroidId());
-        LOG.debug("step: " + step);
+
+        LOG.debug("operationCode: " + operationCode + " - step: " + step);
+        HiCHain.Request req = new HiCHain.Request(operationCode, requestId, support.getAndroidId(), HuaweiConstants.GROUP_ID );
         try {
-            if (step == HiChainStep.begin) {
+            if (step == 0x01) {
                 seed = new byte[32];
                 new Random().nextBytes(seed);
-                isoSalt = new byte[16];
-                new Random().nextBytes(isoSalt);
-                HiCHain.Request.Start start = req.new Start(support.paramsProvider, isoSalt, seed, HuaweiConstants.SERVICE_TYPE );
-                return start.serialize();
-            } else if (step == HiChainStep.inter) {
+                randSelf = new byte[16];
+                new Random().nextBytes(randSelf);
+                HiCHain.Request.StepOne stepOne = req.new StepOne(support.paramsProvider, randSelf, seed );
+                return stepOne.serialize();
+            } else if (step == 0x02) {
                 // GeneratePSK - needed ?
                 // byte[] serviceType = GB.hexStringToByteArray(HuaweiConstants.SERVICE_TYPE);
                 // byte[] pkgName = HuaweiConstants.PKG_NAME.getBytes(StandardCharsets.UTF_8);
@@ -84,36 +102,42 @@ public class GetHiChainRequest extends Request {
                 //     .put(authId)
                 //     .array();
                 // keyAlias = CryptoUtils.digest(keyAlias);
-                byte[] authIdSelf = support.getAndroidId().getBytes(StandardCharsets.UTF_8);
+                byte[] authIdSelf = support.getAndroidId();
                 JSONObject payload = json.getJSONObject("payload");
                 byte[] authIdPeer = GB.hexStringToByteArray(payload.getString("peerAuthId")); //or authId == selfAuthId
-                byte[] randPeer = GB.hexStringToByteArray(payload.getString("isoSalt"));
+                randPeer = GB.hexStringToByteArray(payload.getString("isoSalt"));
                 byte[] message = ByteBuffer
-                    .allocate(randPeer.length + isoSalt.length + authIdSelf.length + authIdPeer.length)
-                    .put(isoSalt)
+                    .allocate(randPeer.length + randSelf.length + authIdSelf.length + authIdPeer.length)
+                    .put(randSelf)
                     .put(randPeer)
                     .put(authIdPeer)
                     .put(authIdSelf)
                     .array();
                 byte[] token = CryptoUtils.calcHmacSha256(support.getSecretKey(), message);
-                HiCHain.Request.Inter inter = req.new Inter(support.paramsProvider, token);
-                return inter.serialize();
-            } else if (step == HiChainStep.end) {
+                HiCHain.Request.StepTwo stepTwo = req.new StepTwo(support.paramsProvider, token);
+                return stepTwo.serialize();
+            } else if (step == 0x03) { // Only for operationCode == 0x01
+                                       // Should check returnCodeMac ? hmac(secretKey, 0)
+                byte[] nonce = new byte[0]; //generateRandom
+                byte[] salt = ByteBuffer
+                    .allocate( randSelf.length + randPeer.length)
+                    .put(randSelf)
+                    .put(randPeer)
+                    .array();
+                byte[] sessionKey = CryptoUtils.hkdfSha256(support.getSecretKey(), salt, 32);
+                byte[] challenge = new byte[0]; //generateRandom
+                byte[] aad = "hichain_iso_exchange".getBytes(StandardCharsets.UTF_8);
+                byte[] encData = CryptoUtils.encryptAES_GCM_NoPad(challenge, sessionKey, nonce, aad); //aesGCMNoPadding encrypt(sessionKey as key, challenge to encrypt, nonce as iv)
+                HiCHain.Request.StepThree stepThree = req.new StepThree(support.paramsProvider, nonce, encData);
+                return stepThree.serialize();
+            } else if (step == 0x04) {
                 byte[] nonce = new byte[0];
                 byte[] encResult = new byte[0];
-                HiCHain.Request.End end = req.new End(support.paramsProvider, nonce, encResult);
-                return end.serialize();
+                HiCHain.Request.StepFour stepFour = req.new StepFour(support.paramsProvider, nonce, encResult);
+                return stepFour.serialize();
+
             }
-        } catch (HuaweiPacket.CryptoException e) {
-            e.printStackTrace();
-            throw new RequestCreationException();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            throw new RequestCreationException();
-        } catch (JSONException e) {
-            e.printStackTrace();
-            throw new RequestCreationException();
-        } catch (InvalidKeyException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new RequestCreationException();
         }
@@ -127,12 +151,27 @@ public class GetHiChainRequest extends Request {
             return;
         }
 
+        if (step == 0x02 && operationCode == 0x02) {
+            step += 0x01;
+        }
         try {
             json = new JSONObject(new String(((DeviceConfig.HiCHain.Response) receivedPacket).json));
+            // Use the JSONObject to transmit data
+            json
+                .put("requestId", GB.hexdump(requestId))
+                .put("operationCode", operationCode)
+                .put("step", step + 1)
+                .put("seed", GB.hexdump(seed))
+                .put("randSelf", GB.hexdump(randSelf))
+                .put("randPeer", GB.hexdump(randPeer));
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        GetHiChainRequest nextRequest = new GetHiChainRequest(this.support, this.builder, requestId, step + 1, seed, isoSalt, json);
+        GetHiChainRequest nextRequest = new GetHiChainRequest(
+                this.support,
+                this.builder,
+                json
+            );
         this.support.addInProgressRequest(nextRequest);
         this.nextRequest(nextRequest);
     }

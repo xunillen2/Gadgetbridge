@@ -17,6 +17,7 @@
 package nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -612,50 +613,60 @@ public class DeviceConfig {
         public static final int id = 0x28;
 
         public static class Request {
+            private int operationCode;
+            private byte[] requestId = new byte[8];
+            private byte[] selfAuthId;
+            private String groupId;
             private JSONObject version = new JSONObject();
             private JSONObject payload = new JSONObject();
             private JSONObject value = new JSONObject();
-            private byte[] requestId = new byte[8];
-            private String selfAuthId;
 
-            public Request (byte[] requestId, String selfAuthId) {
+            public Request (int operationCode, byte[] requestId, byte[] selfAuthId, String groupId) {
+                this.operationCode = operationCode;
                 this.requestId = requestId;
                 this.selfAuthId = selfAuthId;
+                this.groupId = groupId;
             }
 
-            public class Start extends HuaweiPacket {
-
-                public Start (
-                    HuaweiPacket.ParamsProvider paramsProvider,
-                    //int messageId,
-                    byte[] isoSalt,
-                    byte[] seed,
-                    String serviceType
-                ) {
+            public class BaseStep extends HuaweiPacket {
+                public BaseStep (HuaweiPacket.ParamsProvider paramsProvider) {
                     super(paramsProvider);
                     this.serviceId = DeviceConfig.id;
                     this.commandId = HiCHain.id;
                     this.isSliced = true;
                     this.isEncrypted = false;
-                    byte[] random16 = new byte[16];
-                    new Random().nextBytes(random16);
+                }
+            }
+
+            public class StepOne extends BaseStep {
+
+                public StepOne (
+                    HuaweiPacket.ParamsProvider paramsProvider,
+                    //int messageId,
+                    byte[] isoSalt,
+                    byte[] seed
+                ) {
+                    super(paramsProvider);
                     createJson(1); //messageId);
                     try {
                         payload
                             .put("isoSalt", StringUtils.bytesToHex(isoSalt))
-                            .put("peerAuthId", selfAuthId)
-                            .put("operationCode", 0x02)
+                            .put("peerAuthId",  StringUtils.bytesToHex(selfAuthId))
+                            .put("operationCode", operationCode)
                             .put("seed", StringUtils.bytesToHex(seed))
-                            .put("peerUserType", 0x00)
-                            .put("pkgName", "com.huawei.devicegroupmanage")
-                            .put("serviceType", serviceType)
-                            .put("keyLength", 0x20);
+                            .put("peerUserType", 0x00);
+                        if (operationCode == 0x02) {
+                            payload
+                                .put("pkgName", "com.huawei.devicegroupmanage")
+                                .put("serviceType", groupId)
+                                .put("keyLength", 0x20);
+                        } 
                         value
-                            .put("payload", payload)
+                            //.put("payload", payload) // Here or not ?
                             .put("isDeviceLevel", false);
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
-                            .put(0x02, (byte)0x02)
+                            .put(0x02, (byte)operationCode)
                             .put(0x03, requestId);
                             //.put(0x04, 0x00)
                             //.put(0x05, 0x00);
@@ -665,28 +676,24 @@ public class DeviceConfig {
                 }
             }
 
-            public class Inter extends HuaweiPacket {
-                public Inter (
+            public class StepTwo extends BaseStep {
+                public StepTwo (
                     HuaweiPacket.ParamsProvider paramsProvider,
                     //int messageId,
                     byte[] token
                 ) {
                     super(paramsProvider);
-                    this.serviceId = DeviceConfig.id;
-                    this.commandId = HiCHain.id;
-                    this.isSliced = true;
-                    this.isEncrypted = false;
                     createJson(2); //messageId);
                     try {
                         payload
-                            .put("peerAuthId", selfAuthId)
+                            .put("peerAuthId", StringUtils.bytesToHex(selfAuthId))
                             .put("token", token);
                         value
-                            .put("payload", payload)
+                            //.put("payload", payload) // Here or not ?
                             .put("isDeviceLevel", false);
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
-                            .put(0x02, (byte)0x02)
+                            .put(0x02, (byte)operationCode)
                             .put(0x03, requestId);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -694,29 +701,50 @@ public class DeviceConfig {
                 }
             }
 
-            public class End extends HuaweiPacket {
-                public End (
+            public class StepThree extends BaseStep {
+                public StepThree (
+                    HuaweiPacket.ParamsProvider paramsProvider,
+                    byte[] nonce,
+                    byte[] encData
+                ) {
+                    super(paramsProvider);
+                    createJson(3);
+                    try {
+                        payload
+                            .put("nonce", StringUtils.bytesToHex(nonce))
+                            .put("encData", StringUtils.bytesToHex(encData));
+                        this.tlv = new HuaweiTLV()
+                            .put(0x01, value.toString())
+                            .put(0x02, (byte)operationCode)
+                            .put(0x03, requestId);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            public class StepFour extends BaseStep {
+                public StepFour (
                     HuaweiPacket.ParamsProvider paramsProvider,
                     //int messageId,
                     byte[] nonce,
                     byte[] encResult
                 ) {
                     super(paramsProvider);
-                    this.serviceId = DeviceConfig.id;
-                    this.commandId = HiCHain.id;
-                    this.isSliced = true;
-                    this.isEncrypted = false;
-                    createJson(3); //messageId);
+                    if (operationCode == 0x01) {
+                        createJson(4); //messageId);
+                    } else {
+                        createJson(3);
+                    }
                     try {
                         payload
-                            .put("nonce", nonce)
+                            .put("nonce", nonce) //generateRandom
                             .put("encResult", encResult)
                             .put("operationCode", 0x02);
-                        value
-                            .put("payload", payload);
+                        //value.put("payload", payload); //Here or not ?
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
-                            .put(0x02, (byte)0x02)
+                            .put(0x02, (byte)operationCode)
                             .put(0x03, requestId);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -725,16 +753,32 @@ public class DeviceConfig {
             }
 
             private void createJson(int messageId) {
+                if (operationCode == 0x02) {
+                    messageId |= 0x10;
+                }
                 try {
-                    this.version
+                    version
                         .put("minVersion", "1.0.0")
                         .put("currentVersion", "2.0.16");
-                    this.value
-                        .put("authForm", "0")
-                        .put("message", messageId|0x10)
-                        .put("groupAndModuleVersion", "2.0.1");
-                    this.payload
+                    payload
                         .put("version", version);
+                    value
+                        .put("authForm", "0")
+                        .put("payload", payload)
+                        .put("groupAndModuleVersion", "2.0.1")
+                        .put("message", messageId);
+                    if (operationCode == 0x01) {
+                        value
+                            .put("requestId", ByteBuffer.wrap(requestId).getLong())
+                            .put("groupId", groupId)
+                            .put("groupName", "health_group_name")
+                            .put("groupOp", 2)
+                            .put("groupType", 256)
+                            .put("peerDeviceId", new String(selfAuthId, StandardCharsets.UTF_8)) 
+                            .put("connDeviceId", new String(selfAuthId, StandardCharsets.UTF_8))
+                            .put("appId", "com.huawei.health")
+                            .put("ownerName", "");
+                    }
                 } catch ( JSONException e ) {
                     e.printStackTrace();
                 }
@@ -766,7 +810,7 @@ public class DeviceConfig {
         public SecurityNegotiationRequest (
                 HuaweiPacket.ParamsProvider paramsProvider,
                 byte authMode,
-                String deviceUUID,
+                byte[] deviceUUID,
                 String phoneModel) {
             super(paramsProvider);
 
@@ -804,8 +848,9 @@ public class DeviceConfig {
     }
 
     public static class HiChainStep {
-        public static final int begin = 0x00;
-        public static final int inter = 0x01;
-        public static final int end = 0x02;
+        public static final int one = 0x01;
+        public static final int two = 0x02;
+        public static final int three = 0x03;
+        public static final int four = 0x04;
     }
 }
