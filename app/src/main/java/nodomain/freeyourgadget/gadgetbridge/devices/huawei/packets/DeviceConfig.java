@@ -660,11 +660,7 @@ public class DeviceConfig {
                                 .put("pkgName", "com.huawei.devicegroupmanage")
                                 .put("serviceType", groupId)
                                 .put("keyLength", 0x20);
-                        }
-                        if (operationCode == 0x02) {
-                            value
-                                //.put("payload", payload) // Here or not ?
-                                .put("isDeviceLevel", false);
+                            value.put("isDeviceLevel", false);
                         }
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
@@ -689,12 +685,8 @@ public class DeviceConfig {
                     try {
                         payload
                             .put("peerAuthId", StringUtils.bytesToHex(selfAuthId))
-                            .put("token", token);
-                        if (operationCode == 0x02) {
-                            value
-                                //.put("payload", payload) // Here or not ?
-                                .put("isDeviceLevel", false);
-                        }
+                            .put("token", StringUtils.bytesToHex(token));
+                        if (operationCode == 0x02) value.put("isDeviceLevel", false);
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
                             .put(0x02, (byte)operationCode)
@@ -742,10 +734,9 @@ public class DeviceConfig {
                     }
                     try {
                         payload
-                            .put("nonce", nonce) //generateRandom
-                            .put("encResult", encResult)
+                            .put("nonce", StringUtils.bytesToHex(nonce)) //generateRandom
+                            .put("encResult", StringUtils.bytesToHex(encResult))
                             .put("operationCode", 0x02);
-                        //value.put("payload", payload); //Here or not ?
                         this.tlv = new HuaweiTLV()
                             .put(0x01, value.toString())
                             .put(0x02, (byte)operationCode)
