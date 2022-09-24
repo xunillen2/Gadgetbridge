@@ -60,7 +60,7 @@ public class GetHiChainRequest extends Request {
             this.step = (byte)json.getInt("step");
             this.seed = json.getString("seed").getBytes(StandardCharsets.UTF_8);
             this.randSelf = json.getString("randSelf").getBytes(StandardCharsets.UTF_8);
-            this.randPeer = json.getString("randPeer").getBytes(StandardCharsets.UTF_8);
+            if (json.has("randPeer")) this.randPeer = json.getString("randPeer").getBytes(StandardCharsets.UTF_8);
             this.json = json;
         } catch (JSONException e) {
             e.printStackTrace();
@@ -152,14 +152,9 @@ public class GetHiChainRequest extends Request {
 
     @Override
     protected void processResponse() throws GBException {
-        if (!(receivedPacket instanceof DeviceConfig.HiCHain.Response)) {
-            // TODO: exception
-            return;
-        }
+        if (!(receivedPacket instanceof DeviceConfig.HiCHain.Response)) return;
 
-        if (step == 0x02 && operationCode == 0x02) {
-            step += 0x01;
-        }
+        if (step == 0x02 && operationCode == 0x02) step += 0x01;
         try {
             json = new JSONObject(new String(((DeviceConfig.HiCHain.Response) receivedPacket).json));
             // Use the JSONObject to transmit data
@@ -168,8 +163,8 @@ public class GetHiChainRequest extends Request {
                 .put("operationCode", operationCode)
                 .put("step", step + 1)
                 .put("seed", GB.hexdump(seed))
-                .put("randSelf", GB.hexdump(randSelf))
-                .put("randPeer", GB.hexdump(randPeer));
+                .put("randSelf", GB.hexdump(randSelf));
+            if (randPeer != null) json.put("randPeer", GB.hexdump(randPeer));
         } catch (JSONException e) {
             e.printStackTrace();
         }
