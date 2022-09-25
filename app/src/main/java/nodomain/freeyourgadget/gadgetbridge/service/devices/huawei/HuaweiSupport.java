@@ -197,10 +197,10 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         return builder;
     }
 
-    protected void initializeDeviceStep(Request req) {
+    protected void initializeDeviceStep(Request linkParamsReq) {
         try {
-            LOG.debug("ReturnedValue: " + StringUtils.bytesToHex(req.getValueReturned()));
-            byte authMode = ByteBuffer.wrap(req.getValueReturned()).get(18);
+            LOG.debug("ReturnedValue: " + StringUtils.bytesToHex(linkParamsReq.getValueReturned()));
+            byte authMode = ByteBuffer.wrap(linkParamsReq.getValueReturned()).get(18);
             LOG.debug("authMode: " + authMode);
             RequestCallback finalizeReq = new RequestCallback() {
                 @Override
@@ -227,10 +227,10 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 GetAuthRequest authReq = new GetAuthRequest(this);
                 GetBondParamsRequest bondParamsReq = new GetBondParamsRequest(this);
                 GetBondRequest bondReq = new GetBondRequest(this);
-                authReq.pastRequest(req);
+                authReq.pastRequest(linkParamsReq);
                 authReq.nextRequest(bondParamsReq);
                 bondParamsReq.nextRequest(bondReq);
-                bondReq.pastRequest(req);
+                bondReq.pastRequest(linkParamsReq);
                 responseManager.addHandler(authReq);
                 responseManager.addHandler(bondParamsReq);
                 responseManager.addHandler(bondReq);
