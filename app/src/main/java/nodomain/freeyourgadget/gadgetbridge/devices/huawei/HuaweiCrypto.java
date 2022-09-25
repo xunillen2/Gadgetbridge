@@ -153,4 +153,22 @@ public class HuaweiCrypto {
         byte[] secretKey = createSecretKey(macAddress);
         return CryptoUtils.encryptAES_CBC_Pad(key, secretKey, iv);
     }
+
+    public byte[] decryptPinCode(byte[] message, byte[] iv) {
+        byte[] secretKey;
+        if (authVersion == 1) {
+            secretKey = DIGEST_SECRET_v1;
+        } else if (authVersion == 2) {
+            secretKey= DIGEST_SECRET_v2;
+        } else {
+            secretKey = DIGEST_SECRET_v3;
+        }
+        try {
+            return CryptoUtils.decryptAES_CBC_Pad(message, secretKey, iv);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+
+    }
 }

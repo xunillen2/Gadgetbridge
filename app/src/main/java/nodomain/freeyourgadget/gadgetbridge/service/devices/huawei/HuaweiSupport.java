@@ -97,6 +97,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetB
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetBondRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetDndPriorityRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetLinkParamsRequest;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetPincodeRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetProductInformationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSecurityNegotiationRequest;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.requests.GetSupportedCommandsRequest;
@@ -216,9 +217,14 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             if ( authMode == 0x04 ) {
                 LOG.debug("HiChain mode");
                 GetSecurityNegotiationRequest securityNegoReq = new GetSecurityNegotiationRequest(this, authMode);
+                GetPincodeRequest pincodeReq = new GetPincodeRequest(this);
                 GetHiChainRequest hiChainReq = new GetHiChainRequest(this, needsAuth);
-                securityNegoReq.nextRequest(hiChainReq);
+                pincodeReq.pastRequest(linkParamsReq);
+                hiChainReq.pastRequest(pincodeReq);
+                securityNegoReq.nextRequest(pincodeReq);
+                pincodeReq.nextRequest(hiChainReq);
                 responseManager.addHandler(securityNegoReq);
+                responseManager.addHandler(pincodeReq);
                 responseManager.addHandler(hiChainReq);
                 hiChainReq.setFinalizeReq(finalizeReq);
                 securityNegoReq.perform();
@@ -308,6 +314,15 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             editor.apply();
         }
         return GB.hexStringToByteArray(authKey);
+    }
+
+    public void setSecretKey(byte[] authKey) {
+        SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
+
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+
+        editor.putString("authkey", StringUtils.bytesToHex(authKey));
+        editor.apply();
     }
 
     public byte[] getIV() {
