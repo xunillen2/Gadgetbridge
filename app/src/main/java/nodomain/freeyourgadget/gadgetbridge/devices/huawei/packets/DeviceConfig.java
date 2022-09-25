@@ -799,6 +799,49 @@ public class DeviceConfig {
         }
     }
 
+    public static class PinCode {
+        public static final int id = 0x2C;
+
+        public static class Request extends HuaweiPacket {
+
+            public Request(HuaweiPacket.ParamsProvider paramsProvider) {
+                super(paramsProvider);
+
+                this.serviceId = DeviceConfig.id;
+                this.commandId = id;
+
+                this.tlv = new HuaweiTLV()
+                    .put(0x01);
+                this.complete = true;
+                this.isEncrypted = false;
+            }
+        }
+
+        public static class Response extends HuaweiPacket {
+            public byte[] message;
+            public byte[] iv;
+
+            public Response(HuaweiPacket.ParamsProvider paramsProvider) {
+                super(paramsProvider);
+                this.serviceId = DeviceConfig.id;
+                this.commandId = id;
+                this.isEncrypted = false;
+            }
+
+            @Override
+            public void parseTlv() throws ParseException {
+                if (this.tlv.contains(0x01))
+                    message = this.tlv.getBytes(0x01);
+                else
+                    throw new MissingTagException(0x01);
+                if (this.tlv.contains(0x02))
+                    iv = this.tlv.getBytes(0x02);
+                else
+                    throw new MissingTagException(0x02);
+            }
+        }
+    }
+
     public static class SecurityNegotiationRequest extends HuaweiPacket {
         public static final int id = 0x33;
 
