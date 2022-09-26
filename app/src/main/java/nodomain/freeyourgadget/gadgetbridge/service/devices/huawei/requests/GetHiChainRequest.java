@@ -21,6 +21,7 @@ import nodomain.freeyourgadget.gadgetbridge.service.btle.TransactionBuilder;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.huawei.HuaweiSupport;
 import nodomain.freeyourgadget.gadgetbridge.util.CryptoUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.GB;
+import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig.HiCHain;
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.packets.DeviceConfig.HiChainStep;
@@ -34,7 +35,6 @@ public class GetHiChainRequest extends Request {
     private byte[] randPeer = null;
     private long requestId = 0x00;
     private JSONObject json = null;
-    private byte[] pincode = null;
 
 
     public GetHiChainRequest(HuaweiSupport support, boolean firstConnection) {
@@ -62,7 +62,6 @@ public class GetHiChainRequest extends Request {
             this.seed = json.getString("seed").getBytes(StandardCharsets.UTF_8);
             this.randSelf = json.getString("randSelf").getBytes(StandardCharsets.UTF_8);
             if (json.has("randPeer")) this.randPeer = json.getString("randPeer").getBytes(StandardCharsets.UTF_8);
-            if (json.has("pincode")) this.pincode = json.getString("pincode").getBytes(StandardCharsets.UTF_8);
             this.json = json;
         } catch (JSONException e) {
             e.printStackTrace();
@@ -97,6 +96,9 @@ public class GetHiChainRequest extends Request {
                 byte[] authIdPeer = GB.hexStringToByteArray(payload.getString("peerAuthId")); //or authId == selfAuthId
                 // GeneratePsk
                 if (operationCode == 0x01) {
+                    LOG.debug("pincode returned: " + StringUtils.bytesToHex(pastRequest.getValueReturned()));
+                    byte[] pincode = new  byte[pastRequest.getValueReturned().length];
+                    System.arraycopy(pastRequest.getValueReturned(), 0, pincode, 0, pincode.length);
                     key = CryptoUtils.digest(pincode);
                 } else {
                     byte[] pkgName = HuaweiConstants.PKG_NAME.getBytes(StandardCharsets.UTF_8);
@@ -163,9 +165,6 @@ public class GetHiChainRequest extends Request {
     protected void processResponse() throws GBException {
         if (!(receivedPacket instanceof DeviceConfig.HiCHain.Response)) return;
 
-        if (operationCode == 0x01 && step == 0x02)
-            System.arraycopy(pastRequest.getValueReturned(), 0, pincode, 0, pincode.length);
-
         if (step == 0x02 && operationCode == 0x02) step += 0x01;
         try {
             json = new JSONObject(new String(((DeviceConfig.HiCHain.Response) receivedPacket).json));
@@ -177,7 +176,6 @@ public class GetHiChainRequest extends Request {
                 .put("seed", GB.hexdump(seed))
                 .put("randSelf", GB.hexdump(randSelf));
             if (randPeer != null) json.put("randPeer", GB.hexdump(randPeer));
-            if (pincode != null) json.put("pincode", GB.hexdump(pincode));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -188,5 +186,6 @@ public class GetHiChainRequest extends Request {
             );
         this.support.addInProgressRequest(nextRequest);
         this.nextRequest(nextRequest);
+        nextRequest.pastRequest(this.pastRequest);
     }
 }
