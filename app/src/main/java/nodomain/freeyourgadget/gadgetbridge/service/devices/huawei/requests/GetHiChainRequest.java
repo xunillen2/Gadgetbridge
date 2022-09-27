@@ -118,6 +118,8 @@ public class GetHiChainRequest extends Request {
                 //Calculate token and check peerToken ??
                 byte[] authIdSelf = support.getAndroidId();
                 randPeer = GB.hexStringToByteArray(payload.getString("isoSalt"));
+                LOG.debug("randPeer: " + GB.hexdump(randPeer) + " and randSelf: " + GB.hexdump(randSelf));
+                LOG.debug("authIdPeer: " + GB.hexdump(authIdPeer) + " and authIdSelf: " + GB.hexdump(authIdSelf));
                 byte[] message = ByteBuffer
                     .allocate(randPeer.length + randSelf.length + authIdSelf.length + authIdPeer.length)
                     .put(randSelf)
