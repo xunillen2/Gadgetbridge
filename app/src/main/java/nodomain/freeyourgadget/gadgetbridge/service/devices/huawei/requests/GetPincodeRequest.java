@@ -65,11 +65,9 @@ public class GetPincodeRequest extends Request {
 
         byte[] message = ((DeviceConfig.PinCode.Response) receivedPacket).message;
         byte[] iv = ((DeviceConfig.PinCode.Response) receivedPacket).iv;
-        LOG.debug("Message: " + StringUtils.bytesToHex(message) + ", iv: " + StringUtils.bytesToHex(iv) + " and authVersion: " + StringUtils.bytesToHex((authVersion)));
 
         HuaweiCrypto huaweiCrypto = new HuaweiCrypto(authVersion);
         pincode = huaweiCrypto.decryptPinCode(message, iv);
-        LOG.debug("Pincode: " + StringUtils.bytesToHex(pincode));
     }
 
     @Override
