@@ -71,13 +71,7 @@ public class GetHiChainRequest extends Request {
     @Override
     protected byte[] createRequest() throws RequestCreationException {
         if (requestId == 0x00) {
-            // requestId = new byte[8];
-            // new Random().nextBytes(requestId);
-            SecureRandom random = new SecureRandom();
-            do {
-                requestId = random.nextLong() & ((1L << 44) - 1 );
-            } while (requestId == 0);
-            // requestId = ByteBuffer.allocate(8).putLong(id).array();
+            requestId = System.currentTimeMillis();
         }
 
         LOG.debug("operationCode: " + operationCode + " - step: " + step);
