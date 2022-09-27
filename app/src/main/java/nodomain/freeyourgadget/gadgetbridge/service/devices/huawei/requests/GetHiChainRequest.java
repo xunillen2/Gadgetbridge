@@ -91,7 +91,8 @@ public class GetHiChainRequest extends Request {
                 // GeneratePsk
                 if (operationCode == 0x01) {
                     LOG.debug("pincode returned: " + StringUtils.bytesToHex(pastRequest.getValueReturned()));
-                    byte[] pincode = new  byte[pastRequest.getValueReturned().length];
+                    String pincodeHexStr = StringUtils.bytesToHex(pastRequest.getValueReturned());
+                    byte[] pincode = pincodeHexStr.getBytes(StandardCharsets.UTF_8);
                     System.arraycopy(pastRequest.getValueReturned(), 0, pincode, 0, pincode.length);
                     key = CryptoUtils.digest(pincode);
                 } else {
