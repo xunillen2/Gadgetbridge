@@ -93,7 +93,7 @@ public class GetHiChainRequest extends Request {
                     LOG.debug("pincode returned: " + StringUtils.bytesToHex(pastRequest.getValueReturned()));
                     String pincodeHexStr = StringUtils.bytesToHex(pastRequest.getValueReturned());
                     byte[] pincode = pincodeHexStr.getBytes(StandardCharsets.UTF_8);
-                    System.arraycopy(pastRequest.getValueReturned(), 0, pincode, 0, pincode.length);
+                    // System.arraycopy(pastRequest.getValueReturned(), 0, pincode, 0, pincode.length);
                     key = CryptoUtils.digest(pincode);
                 } else {
                     byte[] pkgName = HuaweiConstants.PKG_NAME.getBytes(StandardCharsets.UTF_8);
