@@ -635,6 +635,7 @@ public class DeviceConfig {
                     this.commandId = HiCHain.id;
                     this.isSliced = true;
                     this.isEncrypted = false;
+                    this.complete = true;
                 }
             }
 

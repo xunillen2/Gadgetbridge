@@ -53,8 +53,19 @@ public class CryptoUtils {
     public static byte[] encryptAES_GCM_NoPad(byte[] data, byte[] key, byte[] iv, byte[] aad) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
-        GCMParameterSpec paramSpec = new GCMParameterSpec(128, iv);
+        GCMParameterSpec paramSpec = new GCMParameterSpec(16 * 8, iv);
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, paramSpec);
+        if (aad != null) {
+            cipher.updateAAD(aad);
+        }
+        return cipher.doFinal(data);
+    }
+
+    public static byte[] decryptAES_GCM_NoPad(byte[] data, byte[] key, byte[] iv, byte[] aad) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, "AES");
+        GCMParameterSpec paramSpec = new GCMParameterSpec(16 * 8, iv);
+        cipher.init(Cipher.DECRYPT_MODE, secretKeySpec, paramSpec);
         if (aad != null) {
             cipher.updateAAD(aad);
         }
@@ -74,10 +85,11 @@ public class CryptoUtils {
     }
 
     // Thanks to https://www.javatips.net/api/keywhiz-master/hkdf/src/main/java/keywhiz/hkdf/Hkdf.java for light code
-    public static byte[] hkdfSha256(byte[] secretKey, byte[] salt, int outputLength) throws InvalidKeyException, NoSuchAlgorithmException { // return 32 byte len session key - outputLength=32 ?
-        byte[] pseudoRandomKey = calcHmacSha256(salt, secretKey); //extract
+    public static byte[] hkdfSha256(byte[] secretKey, byte[] salt, byte[] info, int outputLength) throws InvalidKeyException, NoSuchAlgorithmException { // return 32 byte len session key - outputLength=32 ?
+        //extract start
+        byte[] pseudoRandomKey = calcHmacSha256(salt, secretKey);
         SecretKey pseudoSecretKey = new SecretKeySpec(pseudoRandomKey, "HmacSHA256");
-        byte[] info = new byte[0];
+        //extract end
         int hashLen = 32;
         int n = (outputLength % hashLen == 0) ? outputLength / hashLen : (outputLength / hashLen) + 1;
         byte[] hashRound = new byte[0];
