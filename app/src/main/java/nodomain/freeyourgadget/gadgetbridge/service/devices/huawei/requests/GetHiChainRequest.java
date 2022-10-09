@@ -86,7 +86,7 @@ public class GetHiChainRequest extends Request {
             requestId = System.currentTimeMillis();
         }
 
-        LOG.debug("operationCode: " + operationCode + " - step: " + step);
+        LOG.debug("Request operationCode: " + operationCode + " - step: " + step);
         HiCHain.Request req = new HiCHain.Request(operationCode, requestId, support.getAndroidId(), HuaweiConstants.GROUP_ID );
         try {
             if (step == 0x01) {
@@ -146,6 +146,7 @@ public class GetHiChainRequest extends Request {
 
         //if (step == 0x02 && operationCode == 0x02) step += 0x01;
         String jsonStr = new String(((DeviceConfig.HiCHain.Response) receivedPacket).json);
+        LOG.debug("Response operationCode: " + operationCode + " - step: " + step);
         if (step == 0x04 && jsonStr == "com.huawei.health") {
             //Operation is finished go to next
             operationCode += 0x01;
