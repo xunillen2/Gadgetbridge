@@ -56,7 +56,7 @@ public class GetHiChainRequest extends Request {
     }
 
     public GetHiChainRequest(Request prevReq) {
-        super(prevReq.support, prevReq.builder);
+        super(prevReq.support);
         this.serviceId = DeviceConfig.id;
         this.commandId = DeviceConfig.HiCHain.id;
         GetHiChainRequest hcReq = (GetHiChainRequest)prevReq;
