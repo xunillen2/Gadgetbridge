@@ -39,6 +39,7 @@ public class GetHiChainRequest extends Request {
     private byte[] randPeer = null;
     private long requestId = 0x00;
     private JSONObject json = null;
+    private byte[] sessionKey = null;
     // Attributs used once
     private byte[] seed = null;
     private byte[] challenge = null;
@@ -70,6 +71,7 @@ public class GetHiChainRequest extends Request {
         this.randPeer = hcReq.randPeer;
         this.psk = hcReq.psk;
         this.json = hcReq.json;
+        this.sessionKey = hcReq.sessionKey;
     }
 
     @Override
@@ -106,7 +108,7 @@ public class GetHiChainRequest extends Request {
                     .put(randPeer)
                     .array();
                 byte[] info = "hichain_iso_session_key".getBytes(StandardCharsets.UTF_8);
-                byte[] sessionKey = CryptoUtils.hkdfSha256(psk, salt, info, 32);
+                sessionKey = CryptoUtils.hkdfSha256(psk, salt, info, 32);
                 byte[] nonce = new byte[12];
                 new Random().nextBytes(nonce);
                 challenge = new byte[16];
@@ -193,7 +195,9 @@ public class GetHiChainRequest extends Request {
                     if (operationCode == 0x01) {
                         byte[] nonce = payload.getString("nonce").getBytes(StandardCharsets.UTF_8);
                         byte[] encAuthToken = payload.getString("encAuthToken").getBytes(StandardCharsets.UTF_8);
-                        byte[] authToken = CryptoUtils.decryptAES_GCM_NoPad(encAuthToken, psk, nonce, challenge);
+                        byte[] message = new byte[32];
+                        System.arraycopy(encAuthToken, 0, message, 0, 32);
+                        byte[] authToken = CryptoUtils.decryptAES_GCM_NoPad(message, psk, nonce, challenge);
                         support.setSecretKey(authToken);
                     }
                 }
