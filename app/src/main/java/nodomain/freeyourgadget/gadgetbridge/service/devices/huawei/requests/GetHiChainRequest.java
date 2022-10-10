@@ -183,7 +183,7 @@ public class GetHiChainRequest extends Request {
                     }
                 } else if (step == 0x02) {
                     byte[] returnCodeMac = GB.hexStringToByteArray(payload.getString("returnCodeMac"));
-                    byte[] returnCodeMacCheck = CryptoUtils.calcHmacSha256(psk, new byte[]{4 * 0x00});
+                    byte[] returnCodeMacCheck = CryptoUtils.calcHmacSha256(psk, new byte[]{0x00, 0x00, 0x00, 0x00});
                     if (!Arrays.equals(returnCodeMacCheck, returnCodeMac)) {
                         LOG.debug("returnCodeMacCheck: " + GB.hexdump(returnCodeMacCheck) + " is different than " + GB.hexdump(returnCodeMac));
                         throw new RequestCreationException();
