@@ -629,13 +629,14 @@ public class DeviceConfig {
             }
 
             public class BaseStep extends HuaweiPacket {
-                public BaseStep (HuaweiPacket.ParamsProvider paramsProvider) {
+                public BaseStep (HuaweiPacket.ParamsProvider paramsProvider, int messageId) {
                     super(paramsProvider);
                     this.serviceId = DeviceConfig.id;
                     this.commandId = HiCHain.id;
                     this.isSliced = true;
                     this.isEncrypted = false;
                     this.complete = true;
+                    createJson(messageId);
                 }
             }
 
@@ -647,8 +648,8 @@ public class DeviceConfig {
                     byte[] isoSalt,
                     byte[] seed
                 ) {
-                    super(paramsProvider);
-                    createJson(1); //messageId);
+                    super(paramsProvider, 1);
+                    // createJson(1); //messageId);
                     try {
                         payload
                             .put("isoSalt", StringUtils.bytesToHex(isoSalt))
@@ -681,8 +682,8 @@ public class DeviceConfig {
                     //int messageId,
                     byte[] token
                 ) {
-                    super(paramsProvider);
-                    createJson(2); //messageId);
+                    super(paramsProvider, 2);
+                    // createJson(2); //messageId);
                     try {
                         payload
                             .put("peerAuthId", StringUtils.bytesToHex(selfAuthId))
@@ -704,8 +705,8 @@ public class DeviceConfig {
                     byte[] nonce,
                     byte[] encData
                 ) {
-                    super(paramsProvider);
-                    createJson(3);
+                    super(paramsProvider, 3);
+                    // createJson(3);
                     try {
                         payload
                             .put("nonce", StringUtils.bytesToHex(nonce))
@@ -727,12 +728,12 @@ public class DeviceConfig {
                     byte[] nonce,
                     byte[] encResult
                 ) {
-                    super(paramsProvider);
-                    if (operationCode == 0x01) {
-                        createJson(4); //messageId);
-                    } else {
-                        createJson(3);
-                    }
+                    super(paramsProvider, 4);
+                    // if (operationCode == 0x01) {
+                    //     createJson(4); //messageId);
+                    // } else {
+                    //     createJson(3);
+                    // }
                     try {
                         payload
                             .put("nonce", StringUtils.bytesToHex(nonce)) //generateRandom
