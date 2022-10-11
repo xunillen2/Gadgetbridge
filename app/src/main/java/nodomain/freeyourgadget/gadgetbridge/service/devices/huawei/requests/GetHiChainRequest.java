@@ -120,7 +120,7 @@ public class GetHiChainRequest extends Request {
             } else if (step == 0x04) {
                 byte[] nonce = new byte[12];
                 new Random().nextBytes(nonce);
-                byte[] input = new byte[]{4 * 0x00};
+                byte[] input = new byte[]{0x00, 0x00, 0x00, 0x00};
                 byte[] aad = "hichain_iso_result".getBytes(StandardCharsets.UTF_8);
                 byte[] encResult = CryptoUtils.encryptAES_GCM_NoPad(input, sessionKey, nonce, aad);
                 HiCHain.Request.StepFour stepFour = req.new StepFour(support.paramsProvider, nonce, encResult);
