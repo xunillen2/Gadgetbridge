@@ -763,7 +763,7 @@ public class DeviceConfig {
                     payload
                         .put("version", version);
                     value
-                        .put("authForm", "0")
+                        .put("authForm", 0x00)
                         .put("payload", payload)
                         .put("groupAndModuleVersion", "2.0.1")
                         .put("message", messageId);
