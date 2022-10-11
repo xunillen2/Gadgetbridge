@@ -122,7 +122,7 @@ public class GetHiChainRequest extends Request {
                 new Random().nextBytes(nonce);
                 byte[] input = new byte[]{4 * 0x00};
                 byte[] aad = "hichain_iso_result".getBytes(StandardCharsets.UTF_8);
-                byte[] encResult = CryptoUtils.encryptAES_GCM_NoPad(input, psk, nonce, aad);
+                byte[] encResult = CryptoUtils.encryptAES_GCM_NoPad(input, sessionKey, nonce, aad);
                 HiCHain.Request.StepFour stepFour = req.new StepFour(support.paramsProvider, nonce, encResult);
                 return stepFour.serialize();
 
@@ -153,6 +153,7 @@ public class GetHiChainRequest extends Request {
             try {
                 json = new JSONObject(jsonStr);
                 JSONObject payload = json.getJSONObject("payload");
+                LOG.debug("JSONObject : " + payload.toString());
                 if (step == 0x01) {
                     byte[] key = null;
                     authIdSelf = support.getAndroidId();
@@ -190,11 +191,12 @@ public class GetHiChainRequest extends Request {
                     if (operationCode == 0x02) step += 0x01;
                 } else if (step == 0x03) {
                     if (operationCode == 0x01) {
-                        byte[] nonce = payload.getString("nonce").getBytes(StandardCharsets.UTF_8);
-                        byte[] encAuthToken = payload.getString("encAuthToken").getBytes(StandardCharsets.UTF_8);
-                        byte[] message = new byte[32];
-                        System.arraycopy(encAuthToken, 0, message, 0, 32);
-                        byte[] authToken = CryptoUtils.decryptAES_GCM_NoPad(message, psk, nonce, challenge);
+                        byte[] nonce = GB.hexStringToByteArray(payload.getString("nonce"));
+                        byte[] encAuthToken = GB.hexStringToByteArray(payload.getString("encAuthToken"));
+                        // byte[] message = new byte[32];
+                        // System.arraycopy(encAuthToken, 0, message, 0, 32);
+                        byte[] message = encAuthToken;
+                        byte[] authToken = CryptoUtils.decryptAES_GCM_NoPad(message, sessionKey, nonce, challenge);
                         support.setSecretKey(authToken);
                     }
                 }
