@@ -138,18 +138,18 @@ public class GetHiChainRequest extends Request {
     protected void processResponse() throws GBException {
         if (!(receivedPacket instanceof DeviceConfig.HiCHain.Response)) return;
 
-        //if (step == 0x02 && operationCode == 0x02) step += 0x01;
-        String jsonStr = new String(((DeviceConfig.HiCHain.Response) receivedPacket).json);
         LOG.debug("Response operationCode: " + operationCode + " - step: " + step);
-        if (step == 0x04 && jsonStr == "com.huawei.health") {
+        if (step == 0x04) {
             //Operation is finished go to next
             operationCode += 0x01;
             if (operationCode == 0x02) {
                 GetHiChainRequest nextRequest = new GetHiChainRequest(this.support, false);
+                nextRequest.setFinalizeReq(this.finalizeReq);
                 this.support.addInProgressRequest(nextRequest);
                 this.nextRequest(nextRequest);
             }
         } else {
+            String jsonStr = new String(((DeviceConfig.HiCHain.Response) receivedPacket).json);
             try {
                 json = new JSONObject(jsonStr);
                 JSONObject payload = json.getJSONObject("payload");
@@ -205,6 +205,7 @@ public class GetHiChainRequest extends Request {
             }
             this.step += 0x01;
             GetHiChainRequest nextRequest = new GetHiChainRequest(this);
+            nextRequest.setFinalizeReq(this.finalizeReq);
             this.support.addInProgressRequest(nextRequest);
             this.nextRequest(nextRequest);
             //nextRequest.pastRequest(this.pastRequest);
