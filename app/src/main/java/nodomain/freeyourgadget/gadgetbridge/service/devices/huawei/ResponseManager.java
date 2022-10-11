@@ -84,10 +84,9 @@ public class ResponseManager {
                 // Asynchronous response
                 asynchronousResponse.handleResponse(receivedPacket);
             } else {
-                LOG.debug("Service: " + receivedPacket.serviceId + ", command: " + receivedPacket.commandId + ", handled by: " + handler.getClass() + " - " + handler);
+                LOG.debug("Service: " + receivedPacket.serviceId + ", command: " + receivedPacket.commandId + ", handled by: " + handler.getClass());
 
                 synchronized (handlers) {
-                    LOG.debug("remove handler");
                     handlers.remove(handler);
                 }
 

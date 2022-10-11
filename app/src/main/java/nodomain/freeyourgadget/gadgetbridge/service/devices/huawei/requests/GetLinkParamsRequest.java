@@ -75,7 +75,6 @@ public class GetLinkParamsRequest extends Request {
         value
             .put(serverNonce)
             .put(authMode);
-        LOG.debug("Nonce + authMode: " + StringUtils.bytesToHex(value.array()));
         return value.array();
     }
 }

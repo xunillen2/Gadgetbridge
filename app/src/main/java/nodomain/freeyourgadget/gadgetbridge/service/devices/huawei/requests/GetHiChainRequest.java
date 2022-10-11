@@ -161,7 +161,6 @@ public class GetHiChainRequest extends Request {
                     byte[] peerToken = GB.hexStringToByteArray(payload.getString("token"));
                     // GeneratePsk
                     if (operationCode == 0x01) {
-                        LOG.debug("pincode returned: " + StringUtils.bytesToHex(pastRequest.getValueReturned()));
                         String pincodeHexStr = StringUtils.bytesToHex(pastRequest.getValueReturned());
                         byte[] pincode = pincodeHexStr.getBytes(StandardCharsets.UTF_8);
                         key = CryptoUtils.digest(pincode);
@@ -169,8 +168,6 @@ public class GetHiChainRequest extends Request {
                         key = support.getSecretKey();
                     }
                     psk = CryptoUtils.calcHmacSha256(key, seed);
-                    LOG.debug("randPeer: " + GB.hexdump(randPeer) + " and randSelf: " + GB.hexdump(randSelf));
-                    LOG.debug("authIdPeer: " + GB.hexdump(authIdPeer) + " and authIdSelf: " + GB.hexdump(authIdSelf));
                     byte[] message = ByteBuffer
                         .allocate(randPeer.length + randSelf.length + authIdSelf.length + authIdPeer.length)
                         .put(randPeer)

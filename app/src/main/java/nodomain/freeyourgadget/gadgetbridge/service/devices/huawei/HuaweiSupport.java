@@ -200,9 +200,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     protected void initializeDeviceStep(Request linkParamsReq) {
         try {
-            LOG.debug("ReturnedValue: " + StringUtils.bytesToHex(linkParamsReq.getValueReturned()));
             byte authMode = ByteBuffer.wrap(linkParamsReq.getValueReturned()).get(18);
-            LOG.debug("authMode: " + authMode);
             RequestCallback finalizeReq = new RequestCallback() {
                 @Override
                 public void call() {
