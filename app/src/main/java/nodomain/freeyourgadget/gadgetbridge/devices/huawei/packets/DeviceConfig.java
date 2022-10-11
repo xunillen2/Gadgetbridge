@@ -617,9 +617,9 @@ public class DeviceConfig {
             private long requestId;
             private byte[] selfAuthId;
             private String groupId;
-            private JSONObject version = new JSONObject();
-            private JSONObject payload = new JSONObject();
-            private JSONObject value = new JSONObject();
+            private JSONObject version = null;
+            private JSONObject payload = null;
+            private JSONObject value = null;
 
             public Request (int operationCode, long requestId, byte[] selfAuthId, String groupId) {
                 this.operationCode = operationCode;
@@ -636,6 +636,9 @@ public class DeviceConfig {
                     this.isSliced = true;
                     this.isEncrypted = false;
                     this.complete = true;
+                    version = new JSONObject();
+                    payload = new JSONObject();
+                    value = new JSONObject();
                     createJson(messageId);
                 }
             }
