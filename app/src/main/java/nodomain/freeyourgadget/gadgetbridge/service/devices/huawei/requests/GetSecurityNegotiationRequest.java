@@ -27,7 +27,7 @@ public class GetSecurityNegotiationRequest extends Request {
         try {
             return new DeviceConfig.SecurityNegotiationRequest(
                     support.paramsProvider,
-                    this.authMode,
+                    authMode,
                     support.getAndroidId(),
                     Build.MODEL
                 ).serialize();

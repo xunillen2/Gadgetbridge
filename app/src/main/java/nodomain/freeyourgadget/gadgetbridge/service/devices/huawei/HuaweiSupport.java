@@ -126,6 +126,7 @@ import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiSupport.class);
 
+    protected byte authMode;
     protected int mtu = 65535;
     private boolean needsAuth = false;
     public static String deviceMac; //get it from GB
@@ -141,6 +142,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     private MusicSpec musicSpec = null;
 
     public HuaweiPacket.ParamsProvider paramsProvider = new HuaweiPacket.ParamsProvider() {
+        @Override
+        public byte getAuthMode() {
+            return HuaweiSupport.this.getAuthMode();
+        }
+
         @Override
         public byte[] getSecretKey() {
             return HuaweiSupport.this.getSecretKey();
@@ -200,7 +206,6 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     protected void initializeDeviceStep(Request linkParamsReq) {
         try {
-            byte authMode = ByteBuffer.wrap(linkParamsReq.getValueReturned()).get(18);
             RequestCallback finalizeReq = new RequestCallback() {
                 @Override
                 public void call() {
@@ -375,6 +380,14 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     public byte[] getAndroidId() {
         return androidID.getBytes(StandardCharsets.UTF_8);
+    }
+
+    public void setAuthMode(byte authMode) {
+        this.authMode = authMode;
+    }
+
+    public byte getAuthMode() {
+        return authMode;
     }
 
     // Do not work on some band, have to check

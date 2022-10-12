@@ -63,18 +63,16 @@ public class GetLinkParamsRequest extends Request {
             throw new Exception();
         }
 
+        support.setAuthMode((byte)((LinkParams.Response) receivedPacket).authMode);
         support.setMtu(((LinkParams.Response) receivedPacket).mtu);
 
         this.serverNonce = ((LinkParams.Response) receivedPacket).serverNonce;
-        this.authMode = ((LinkParams.Response) receivedPacket).authMode;
     }
 
     @Override
     public byte[] getValueReturned() {
         ByteBuffer value = ByteBuffer.allocate(19);
-        value
-            .put(serverNonce)
-            .put(authMode);
+        value.put(serverNonce);
         return value.array();
     }
 }
