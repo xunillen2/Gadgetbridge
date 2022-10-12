@@ -192,7 +192,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             linkParamsReq.setFinalizeReq(finalizeReq);
             linkParamsReq.perform();
         } catch (IOException e) {
-            GB.toast(getContext(), "Authenticating Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
+            GB.toast(getContext(), "Initialization of authenticating to Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
         }
         return builder;
@@ -243,7 +243,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 authReq.perform();
             }
         } catch (IOException e) {
-            GB.toast(getContext(), "Authenticating Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
+            GB.toast(getContext(), "Step of authenticating to Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
         }
     }
@@ -293,7 +293,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             builder.add(new SetDeviceStateAction(gbDevice, GBDevice.State.INITIALIZED, getContext()));
             performConnected(builder.getTransaction());
         } catch (IOException e) {
-            GB.toast(getContext(), "Initializing Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
+            GB.toast(getContext(), "Final initialization of Huawei device failed", Toast.LENGTH_SHORT, GB.ERROR, e);
             e.printStackTrace();
         }
     }
