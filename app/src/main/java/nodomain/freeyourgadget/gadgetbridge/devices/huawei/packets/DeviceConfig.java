@@ -447,14 +447,6 @@ public class DeviceConfig {
 
             @Override
             public void parseTlv() throws ParseException {
-                if (this.tlv.contains(0x7C) && this.tlv.getByte(0x7C) == 0x01) {
-                     try {
-                         this.tlv.decrypt(paramsProvider.getSecretKey());
-                     } catch (HuaweiTLV.CryptoException e) {
-                         e.printStackTrace();
-                         throw new CryptoException("Decrypt exception", e);
-                     }
-                }
                 if (this.tlv.contains(0x01))
                     this.level = this.tlv.getByte(0x01);
                 else
