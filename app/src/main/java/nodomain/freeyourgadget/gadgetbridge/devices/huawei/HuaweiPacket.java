@@ -41,6 +41,7 @@ public class HuaweiPacket {
     public interface ParamsProvider {
         byte getAuthMode();
         byte[] getSecretKey();
+        byte[] getSessionKey();
         byte[] getIv();
         int getMtu();
     }
@@ -154,7 +155,7 @@ public class HuaweiPacket {
 
         if (this.tlv.contains(0x7C) && this.tlv.getBoolean(0x7C)) {
             try {
-                this.tlv.decrypt(paramsProvider.getAuthMode(), paramsProvider.getSecretKey());
+                this.tlv.decrypt(paramsProvider);
             } catch (HuaweiCrypto.CryptoException e) {
                 e.printStackTrace();
                 throw new CryptoException("Decrypt exception", e);
@@ -287,7 +288,7 @@ public class HuaweiPacket {
         HuaweiTLV serializableTlv;
         if (this.isEncrypted) {
             try {
-                serializableTlv = this.tlv.encrypt(paramsProvider.getAuthMode(), paramsProvider.getSecretKey(), paramsProvider.getIv());
+                serializableTlv = this.tlv.encrypt(paramsProvider);
             } catch (HuaweiCrypto.CryptoException e) {
                 e.printStackTrace();
                 throw new CryptoException("Encrypt exception", e);

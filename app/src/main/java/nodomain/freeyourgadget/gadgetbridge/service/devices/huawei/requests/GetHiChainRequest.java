@@ -109,6 +109,7 @@ public class GetHiChainRequest extends Request {
                     .array();
                 byte[] info = "hichain_iso_session_key".getBytes(StandardCharsets.UTF_8);
                 sessionKey = CryptoUtils.hkdfSha256(psk, salt, info, 32);
+                support.setSessionKey(sessionKey);
                 if (operationCode == 0x01) {
                     byte[] nonce = new byte[12];
                     new Random().nextBytes(nonce);

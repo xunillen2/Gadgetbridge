@@ -38,6 +38,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto.CryptoException;
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiPacket.ParamsProvider;
 import nodomain.freeyourgadget.gadgetbridge.util.CryptoUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
@@ -308,17 +309,29 @@ public class HuaweiTLV {
         return msg.substring(0, msg.length() - 3);
     }
 
-    public HuaweiTLV encrypt(byte authMode, byte[] key, byte[] iv) throws CryptoException {
+    public HuaweiTLV encrypt(ParamsProvider paramsProvider) throws CryptoException {
         byte[] serializedTLV = serialize();
-        byte[] encryptedTLV = HuaweiCrypto.encrypt(authMode, serializedTLV, key, iv);
+        byte[] key;
+        if (paramsProvider.getAuthMode() == 0x04) {
+            key = paramsProvider.getSessionKey();
+        } else {
+            key = paramsProvider.getSecretKey();
+        }
+        byte[] encryptedTLV = HuaweiCrypto.encrypt(paramsProvider.getAuthMode(), serializedTLV, key, paramsProvider.getIv());
         return new HuaweiTLV()
                 .put(CryptoTags.encryption, (byte) 0x01)
-                .put(CryptoTags.initVector, iv)
+                .put(CryptoTags.initVector, paramsProvider.getIv())
                 .put(CryptoTags.cipherText, encryptedTLV);
     }
 
-    public void decrypt(byte authMode, byte[] key) throws CryptoException {
-        byte[] decryptedTLV = HuaweiCrypto.decrypt(authMode, getBytes(CryptoTags.cipherText), key, getBytes(CryptoTags.initVector));
+    public void decrypt(ParamsProvider paramsProvider) throws CryptoException {
+        byte[] key;
+        if (paramsProvider.getAuthMode() == 0x04) {
+            key = paramsProvider.getSessionKey();
+        } else {
+            key = paramsProvider.getSecretKey();
+        }
+        byte[] decryptedTLV = HuaweiCrypto.decrypt(paramsProvider.getAuthMode(), getBytes(CryptoTags.cipherText), key, getBytes(CryptoTags.initVector));
         this.valueMap = new ArrayList<>();
         parse(decryptedTLV);
     }

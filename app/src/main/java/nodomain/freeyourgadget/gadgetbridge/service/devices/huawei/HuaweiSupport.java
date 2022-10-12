@@ -127,6 +127,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     private static final Logger LOG = LoggerFactory.getLogger(HuaweiSupport.class);
 
     protected byte authMode;
+    protected byte[] sessionKey;
     protected int mtu = 65535;
     private boolean needsAuth = false;
     public static String deviceMac; //get it from GB
@@ -150,6 +151,11 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         @Override
         public byte[] getSecretKey() {
             return HuaweiSupport.this.getSecretKey();
+        }
+
+        @Override
+        public byte[] getSessionKey() {
+            return HuaweiSupport.this.getSessionKey();
         }
 
         @Override
@@ -232,6 +238,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
                 hiChainReq.setFinalizeReq(finalizeReq);
                 securityNegoReq.perform();
             } else {
+                createSecretKey();
                 LOG.debug("Normal mode");
                 GetAuthRequest authReq = new GetAuthRequest(this);
                 GetBondParamsRequest bondParamsReq = new GetBondParamsRequest(this);
@@ -303,7 +310,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         }
     }
 
-    public byte[] getSecretKey() {
+    public void createSecretKey() {
 
         SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
 
@@ -316,6 +323,13 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
             editor.putString("authkey", authKey);
             editor.apply();
         }
+    }
+
+    public byte[] getSecretKey() {
+
+        SharedPreferences sharedPrefs = GBApplication.getDeviceSpecificSharedPrefs(deviceMac);
+
+        String authKey = sharedPrefs.getString("authkey", null);
         return GB.hexStringToByteArray(authKey);
     }
 
@@ -388,6 +402,14 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
 
     public byte getAuthMode() {
         return authMode;
+    }
+
+    public void setSessionKey(byte[] sessionKey) {
+        this.sessionKey = sessionKey;
+    }
+
+    public byte[] getSessionKey() {
+        return sessionKey;
     }
 
     // Do not work on some band, have to check
