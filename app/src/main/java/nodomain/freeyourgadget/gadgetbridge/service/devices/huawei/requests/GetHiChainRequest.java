@@ -109,15 +109,20 @@ public class GetHiChainRequest extends Request {
                     .array();
                 byte[] info = "hichain_iso_session_key".getBytes(StandardCharsets.UTF_8);
                 sessionKey = CryptoUtils.hkdfSha256(psk, salt, info, 32);
-                byte[] nonce = new byte[12];
-                new Random().nextBytes(nonce);
-                challenge = new byte[16];
-                new Random().nextBytes(challenge);
-                byte[] aad = "hichain_iso_exchange".getBytes(StandardCharsets.UTF_8);
-                byte[] encData = CryptoUtils.encryptAES_GCM_NoPad(challenge, sessionKey, nonce, aad); //aesGCMNoPadding encrypt(sessionKey as key, challenge to encrypt, nonce as iv)
-                HiCHain.Request.StepThree stepThree = req.new StepThree(support.paramsProvider, nonce, encData);
-                return stepThree.serialize();
-            } else if (step == 0x04) {
+                if (operationCode == 0x01) {
+                    byte[] nonce = new byte[12];
+                    new Random().nextBytes(nonce);
+                    challenge = new byte[16];
+                    new Random().nextBytes(challenge);
+                    byte[] aad = "hichain_iso_exchange".getBytes(StandardCharsets.UTF_8);
+                    byte[] encData = CryptoUtils.encryptAES_GCM_NoPad(challenge, sessionKey, nonce, aad); //aesGCMNoPadding encrypt(sessionKey as key, challenge to encrypt, nonce as iv)
+                    HiCHain.Request.StepThree stepThree = req.new StepThree(support.paramsProvider, nonce, encData);
+                    return stepThree.serialize();
+                } else {
+                    step += 0x01;
+                }
+            }
+            if (step == 0x04) {
                 byte[] nonce = new byte[12];
                 new Random().nextBytes(nonce);
                 byte[] input = new byte[]{0x00, 0x00, 0x00, 0x00};
@@ -140,13 +145,14 @@ public class GetHiChainRequest extends Request {
 
         LOG.debug("Response operationCode: " + operationCode + " - step: " + step);
         if (step == 0x04) {
-            //Operation is finished go to next
-            operationCode += 0x01;
-            if (operationCode == 0x02) {
+            if (operationCode == 0x01) {
+                LOG.debug("Finished auth operation, go to bind");
                 GetHiChainRequest nextRequest = new GetHiChainRequest(this.support, false);
                 nextRequest.setFinalizeReq(this.finalizeReq);
                 this.support.addInProgressRequest(nextRequest);
                 this.nextRequest(nextRequest);
+            } else {
+                LOG.debug("Finished bind operation");
             }
         } else {
             String jsonStr = new String(((DeviceConfig.HiCHain.Response) receivedPacket).json);
@@ -180,6 +186,8 @@ public class GetHiChainRequest extends Request {
                     if (!Arrays.equals(peerToken, tokenCheck)) {
                         LOG.debug("tokenCheck: " + GB.hexdump(tokenCheck) + " is different than " + GB.hexdump(peerToken));
                         throw new RequestCreationException();
+                    } else {
+                        LOG.debug("Token check passes");
                     }
                 } else if (step == 0x02) {
                     byte[] returnCodeMac = GB.hexStringToByteArray(payload.getString("returnCodeMac"));
@@ -187,8 +195,10 @@ public class GetHiChainRequest extends Request {
                     if (!Arrays.equals(returnCodeMacCheck, returnCodeMac)) {
                         LOG.debug("returnCodeMacCheck: " + GB.hexdump(returnCodeMacCheck) + " is different than " + GB.hexdump(returnCodeMac));
                         throw new RequestCreationException();
+                    } else {
+                        LOG.debug("returnCodeMac check passes");
                     }
-                    if (operationCode == 0x02) step += 0x01;
+                    // if (operationCode == 0x02) step += 0x01;
                 } else if (step == 0x03) {
                     if (operationCode == 0x01) {
                         byte[] nonce = GB.hexStringToByteArray(payload.getString("nonce"));
