@@ -37,6 +37,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import nodomain.freeyourgadget.gadgetbridge.devices.huawei.HuaweiCrypto.CryptoException;
 import nodomain.freeyourgadget.gadgetbridge.util.CryptoUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.StringUtils;
 
@@ -48,8 +49,6 @@ public class HuaweiTLV {
         HuaweiTLV huaweiTLV = (HuaweiTLV) o;
         return Objects.equals(valueMap, huaweiTLV.valueMap);
     }
-
-    public static class CryptoException extends Exception { }
 
     public static class TLV {
         private final byte tag;
@@ -309,29 +308,19 @@ public class HuaweiTLV {
         return msg.substring(0, msg.length() - 3);
     }
 
-    public HuaweiTLV encrypt(byte[] key, byte[] iv) throws CryptoException {
-        try {
-            byte[] serializedTLV = serialize();
-            byte[] encryptedTLV = CryptoUtils.encryptAES_CBC_Pad(serializedTLV, key, iv);
-            return new HuaweiTLV()
-                    .put(CryptoTags.encryption, (byte) 0x01)
-                    .put(CryptoTags.initVector, iv)
-                    .put(CryptoTags.cipherText, encryptedTLV);
-        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
-            e.printStackTrace();
-            throw new CryptoException();
-        }
+    public HuaweiTLV encrypt(byte authMode, byte[] key, byte[] iv) throws CryptoException {
+        byte[] serializedTLV = serialize();
+        byte[] encryptedTLV = HuaweiCrypto.encrypt(authMode, serializedTLV, key, iv);
+        return new HuaweiTLV()
+                .put(CryptoTags.encryption, (byte) 0x01)
+                .put(CryptoTags.initVector, iv)
+                .put(CryptoTags.cipherText, encryptedTLV);
     }
 
-    public void decrypt(byte[] key) throws CryptoException {
-        try {
-            byte[] decryptedTLV = CryptoUtils.decryptAES_CBC_Pad(getBytes(CryptoTags.cipherText), key, getBytes(CryptoTags.initVector));
-            this.valueMap = new ArrayList<>();
-            parse(decryptedTLV);
-        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
-            e.printStackTrace();
-            throw new CryptoException();
-        }
+    public void decrypt(byte authMode, byte[] key) throws CryptoException {
+        byte[] decryptedTLV = HuaweiCrypto.decrypt(authMode, getBytes(CryptoTags.cipherText), key, getBytes(CryptoTags.initVector));
+        this.valueMap = new ArrayList<>();
+        parse(decryptedTLV);
     }
 }
 
