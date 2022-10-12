@@ -109,7 +109,6 @@ public class GetHiChainRequest extends Request {
                     .array();
                 byte[] info = "hichain_iso_session_key".getBytes(StandardCharsets.UTF_8);
                 sessionKey = CryptoUtils.hkdfSha256(psk, salt, info, 32);
-                support.setSessionKey(sessionKey);
                 if (operationCode == 0x01) {
                     byte[] nonce = new byte[12];
                     new Random().nextBytes(nonce);
@@ -145,19 +144,27 @@ public class GetHiChainRequest extends Request {
         if (!(receivedPacket instanceof DeviceConfig.HiCHain.Response)) return;
 
         LOG.debug("Response operationCode: " + operationCode + " - step: " + step);
-        if (step == 0x04) {
-            if (operationCode == 0x01) {
-                LOG.debug("Finished auth operation, go to bind");
-                GetHiChainRequest nextRequest = new GetHiChainRequest(this.support, false);
-                nextRequest.setFinalizeReq(this.finalizeReq);
-                this.support.addInProgressRequest(nextRequest);
-                this.nextRequest(nextRequest);
+        try {
+            if (step == 0x04) {
+                if (operationCode == 0x01) {
+                    LOG.debug("Finished auth operation, go to bind");
+                    GetHiChainRequest nextRequest = new GetHiChainRequest(this.support, false);
+                    nextRequest.setFinalizeReq(this.finalizeReq);
+                    this.support.addInProgressRequest(nextRequest);
+                    this.nextRequest(nextRequest);
+                } else {
+                    LOG.debug("Finished bind operation");
+                    byte[] salt = ByteBuffer
+                        .allocate( randSelf.length + randPeer.length)
+                        .put(randSelf)
+                        .put(randPeer)
+                        .array();
+                    byte[] info = "hichain_return_key".getBytes(StandardCharsets.UTF_8);
+                    byte[] key = CryptoUtils.hkdfSha256(sessionKey, salt, info, 32);
+                    support.setSessionKey(key);
+                }
             } else {
-                LOG.debug("Finished bind operation");
-            }
-        } else {
-            String jsonStr = new String(((DeviceConfig.HiCHain.Response) receivedPacket).json);
-            try {
+                String jsonStr = new String(((DeviceConfig.HiCHain.Response) receivedPacket).json);
                 json = new JSONObject(jsonStr);
                 JSONObject payload = json.getJSONObject("payload");
                 LOG.debug("JSONObject : " + payload.toString());
@@ -199,27 +206,24 @@ public class GetHiChainRequest extends Request {
                     } else {
                         LOG.debug("returnCodeMac check passes");
                     }
-                    // if (operationCode == 0x02) step += 0x01;
                 } else if (step == 0x03) {
                     if (operationCode == 0x01) {
                         byte[] nonce = GB.hexStringToByteArray(payload.getString("nonce"));
                         byte[] encAuthToken = GB.hexStringToByteArray(payload.getString("encAuthToken"));
-                        // byte[] message = new byte[32];
-                        // System.arraycopy(encAuthToken, 0, message, 0, 32);
                         byte[] message = encAuthToken;
                         byte[] authToken = CryptoUtils.decryptAES_GCM_NoPad(message, sessionKey, nonce, challenge);
                         support.setSecretKey(authToken);
                     }
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+                this.step += 0x01;
+                GetHiChainRequest nextRequest = new GetHiChainRequest(this);
+                nextRequest.setFinalizeReq(this.finalizeReq);
+                this.support.addInProgressRequest(nextRequest);
+                this.nextRequest(nextRequest);
+                //nextRequest.pastRequest(this.pastRequest);
             }
-            this.step += 0x01;
-            GetHiChainRequest nextRequest = new GetHiChainRequest(this);
-            nextRequest.setFinalizeReq(this.finalizeReq);
-            this.support.addInProgressRequest(nextRequest);
-            this.nextRequest(nextRequest);
-            //nextRequest.pastRequest(this.pastRequest);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
