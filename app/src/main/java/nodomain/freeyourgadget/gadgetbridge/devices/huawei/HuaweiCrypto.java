@@ -33,6 +33,8 @@ import javax.crypto.NoSuchPaddingException;
 
 public class HuaweiCrypto {
 
+    public static class CryptoException extends Exception { }
+
     public static final byte[] SECRET_KEY_1_v1 = new byte[]{ 0x6F, 0x75, 0x6A, 0x79,
                                                             0x6D, 0x77, 0x71, 0x34,
                                                             0x63, 0x6C, 0x76, 0x39,
@@ -170,5 +172,29 @@ public class HuaweiCrypto {
         }
         return null;
 
+    }
+
+    public static byte[] encrypt(byte authMode, byte[] message, byte[] key, byte[] iv) throws CryptoException {
+        try {
+            if (authMode == 0x04) {
+                return CryptoUtils.encryptAES_GCM_NoPad(message, key, iv, null);
+            } else {
+                return CryptoUtils.encryptAES_CBC_Pad(message, key, iv);
+            }
+        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+            throw new CryptoException();
+        }
+    }
+
+    public static byte[] decrypt(byte authMode, byte[] message, byte[] key, byte[] iv) throws CryptoException {
+        try {
+            if (authMode == 0x04) {
+                return CryptoUtils.decryptAES_GCM_NoPad(message, key, iv, null);
+            } else {
+                return CryptoUtils.decryptAES_CBC_Pad(message, key, iv);
+            }
+        } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
+            throw new CryptoException();
+        }
     }
 }
