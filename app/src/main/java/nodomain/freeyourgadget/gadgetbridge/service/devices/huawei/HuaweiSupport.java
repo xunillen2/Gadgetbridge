@@ -405,6 +405,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     }
 
     public void setSessionKey(byte[] sessionKey) {
+        LOG.debug("setSessionKey: " + GB.hexdump(sessionKey));
         this.sessionKey = sessionKey;
     }
 

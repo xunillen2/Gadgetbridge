@@ -31,7 +31,11 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class HuaweiCrypto {
+    private static final Logger LOG = LoggerFactory.getLogger(HuaweiCrypto.class);
 
     public static class CryptoException extends Exception { }
 
@@ -177,8 +181,10 @@ public class HuaweiCrypto {
     public static byte[] encrypt(byte authMode, byte[] message, byte[] key, byte[] iv) throws CryptoException {
         try {
             if (authMode == 0x04) {
+                LOG.debug("GCM encrypt");
                 return CryptoUtils.encryptAES_GCM_NoPad(message, key, iv, null);
             } else {
+                LOG.debug("CBC encrypt");
                 return CryptoUtils.encryptAES_CBC_Pad(message, key, iv);
             }
         } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
@@ -189,8 +195,10 @@ public class HuaweiCrypto {
     public static byte[] decrypt(byte authMode, byte[] message, byte[] key, byte[] iv) throws CryptoException {
         try {
             if (authMode == 0x04) {
+                LOG.debug("GCM decrypt");
                 return CryptoUtils.decryptAES_GCM_NoPad(message, key, iv, null);
             } else {
+                LOG.debug("CBC decrypt");
                 return CryptoUtils.decryptAES_CBC_Pad(message, key, iv);
             }
         } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {

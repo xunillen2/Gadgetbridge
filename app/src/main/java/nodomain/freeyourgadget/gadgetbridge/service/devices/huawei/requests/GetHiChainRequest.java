@@ -82,6 +82,7 @@ public class GetHiChainRequest extends Request {
 
         LOG.debug("Request operationCode: " + operationCode + " - step: " + step);
         if (req == null) req = new HiCHain.Request(operationCode, requestId, support.getAndroidId(), HuaweiConstants.GROUP_ID );
+        HuaweiPacket packet = null;
         try {
             if (step == 0x01) {
                 seed = new byte[32];
@@ -89,7 +90,8 @@ public class GetHiChainRequest extends Request {
                 randSelf = new byte[16];
                 new Random().nextBytes(randSelf);
                 HiCHain.Request.StepOne stepOne = req.new StepOne(support.paramsProvider, randSelf, seed );
-                return stepOne.serialize();
+                // return stepOne.serialize();
+                packet = stepOne;
             } else if (step == 0x02) {
                 byte[] message = ByteBuffer
                         .allocate(randPeer.length + randSelf.length + authIdSelf.length + authIdPeer.length)
@@ -100,7 +102,8 @@ public class GetHiChainRequest extends Request {
                         .array();
                 byte[] selfToken = CryptoUtils.calcHmacSha256(psk, message);
                 HiCHain.Request.StepTwo stepTwo = req.new StepTwo(support.paramsProvider, selfToken);
-                return stepTwo.serialize();
+                //return stepTwo.serialize();
+                packet = stepTwo;
             } else if (step == 0x03) {
                 byte[] salt = ByteBuffer
                     .allocate( randSelf.length + randPeer.length)
@@ -109,6 +112,7 @@ public class GetHiChainRequest extends Request {
                     .array();
                 byte[] info = "hichain_iso_session_key".getBytes(StandardCharsets.UTF_8);
                 sessionKey = CryptoUtils.hkdfSha256(psk, salt, info, 32);
+                LOG.debug("sessionKey: " + GB.hexdump(sessionKey));
                 if (operationCode == 0x01) {
                     byte[] nonce = new byte[12];
                     new Random().nextBytes(nonce);
@@ -117,7 +121,8 @@ public class GetHiChainRequest extends Request {
                     byte[] aad = "hichain_iso_exchange".getBytes(StandardCharsets.UTF_8);
                     byte[] encData = CryptoUtils.encryptAES_GCM_NoPad(challenge, sessionKey, nonce, aad); //aesGCMNoPadding encrypt(sessionKey as key, challenge to encrypt, nonce as iv)
                     HiCHain.Request.StepThree stepThree = req.new StepThree(support.paramsProvider, nonce, encData);
-                    return stepThree.serialize();
+                    //return stepThree.serialize();
+                    packet = stepThree;
                 } else {
                     step += 0x01;
                 }
@@ -129,14 +134,17 @@ public class GetHiChainRequest extends Request {
                 byte[] aad = "hichain_iso_result".getBytes(StandardCharsets.UTF_8);
                 byte[] encResult = CryptoUtils.encryptAES_GCM_NoPad(input, sessionKey, nonce, aad);
                 HiCHain.Request.StepFour stepFour = req.new StepFour(support.paramsProvider, nonce, encResult);
-                return stepFour.serialize();
+                //return stepFour.serialize();
+                packet = stepFour;
 
             }
+            LOG.debug("JSONObject:" + (new JSONObject(packet.getTlv().getString(1))).getJSONObject("payload").toString());
+            return packet.serialize();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RequestCreationException();
         }
-        return null;
+        //return null;
     }
 
     @Override
@@ -160,7 +168,9 @@ public class GetHiChainRequest extends Request {
                         .put(randPeer)
                         .array();
                     byte[] info = "hichain_return_key".getBytes(StandardCharsets.UTF_8);
+                    LOG.debug("salt: " + GB.hexdump(salt) + " - info: " + GB.hexdump(info) + " - key: " + GB.hexdump(sessionKey));
                     byte[] key = CryptoUtils.hkdfSha256(sessionKey, salt, info, 32);
+                    LOG.debug("Final sessionKey:" + GB.hexdump(key));
                     support.setSessionKey(key);
                 }
             } else {

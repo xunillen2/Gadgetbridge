@@ -317,6 +317,7 @@ public class HuaweiTLV {
         } else {
             key = paramsProvider.getSecretKey();
         }
+        LOG.debug("encrypt authMode: " + paramsProvider.getAuthMode() + " - key: " + StringUtils.bytesToHex(key));
         byte[] encryptedTLV = HuaweiCrypto.encrypt(paramsProvider.getAuthMode(), serializedTLV, key, paramsProvider.getIv());
         return new HuaweiTLV()
                 .put(CryptoTags.encryption, (byte) 0x01)
@@ -331,6 +332,7 @@ public class HuaweiTLV {
         } else {
             key = paramsProvider.getSecretKey();
         }
+        LOG.debug("decrypt authMode: " + paramsProvider.getAuthMode() + " - key: " + StringUtils.bytesToHex(key));
         byte[] decryptedTLV = HuaweiCrypto.decrypt(paramsProvider.getAuthMode(), getBytes(CryptoTags.cipherText), key, getBytes(CryptoTags.initVector));
         this.valueMap = new ArrayList<>();
         parse(decryptedTLV);

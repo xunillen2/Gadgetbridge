@@ -355,4 +355,8 @@ public class HuaweiPacket {
             return finalBuffer.array();
         }
     }
+
+    public HuaweiTLV getTlv() {
+        return this.tlv;
+    }
 }
