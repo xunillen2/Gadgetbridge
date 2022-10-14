@@ -185,7 +185,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
         builder.notify(getCharacteristic(HuaweiConstants.UUID_CHARACTERISTIC_HUAWEI_READ), true);
         deviceMac = gbDevice.getAddress();
         createRandomMacAddress();
-        createAndroidID();
+        if (needsAuth) createAndroidID();
         builder.add(new SetDeviceStateAction(getDevice(), GBDevice.State.AUTHENTICATING, getContext()));
         try {
             final GetLinkParamsRequest linkParamsReq = new GetLinkParamsRequest(this, builder);
@@ -343,9 +343,14 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     }
 
     public byte[] getIV() {
-        ArrayList ivCounter = HuaweiCrypto.initializationVector(this.encryptionCounter);
-        byte[] iv = (byte[])ivCounter.get(0);
-        this.encryptionCounter = (long)ivCounter.get(1) & 0xFFFFFFFFL;
+        byte[] iv = null;
+        if (authMode == 0x04) {
+            iv = HuaweiCrypto.generateNonce();
+        } else {
+            ArrayList ivCounter = HuaweiCrypto.initializationVector(this.encryptionCounter);
+            iv = (byte[])ivCounter.get(0);
+            this.encryptionCounter = (long)ivCounter.get(1) & 0xFFFFFFFFL;
+        }
         return iv;
     }
 
@@ -410,6 +415,7 @@ public class HuaweiSupport extends AbstractBTLEDeviceSupport {
     }
 
     public byte[] getSessionKey() {
+        LOG.debug("getSessionKey: " + GB.hexdump(sessionKey));
         return sessionKey;
     }
 
