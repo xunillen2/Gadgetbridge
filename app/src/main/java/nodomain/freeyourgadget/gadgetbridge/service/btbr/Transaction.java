@@ -15,7 +15,7 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.service.btle;
+package nodomain.freeyourgadget.gadgetbridge.service.btbr;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,26 +24,26 @@ import java.util.List;
 import androidx.annotation.Nullable;
 
 /**
- * Groups a bunch of {@link BtLEAction actions} together, making sure
+ * Groups a bunch of {@link BtBRAction actions} together, making sure
  * that upon failure of one action, all subsequent actions are discarded.
  *
  * @author TREND
  */
 public class Transaction extends AbstractTransaction {
-    private final List<BtLEAction> mActions = new ArrayList<>(4);
+    private final List<BtBRAction> mActions = new ArrayList<>(4);
     private
     @Nullable
-    GattCallback gattCallback;
+    SocketCallback socketCallback;
 
     public Transaction(String taskName) {
         super(taskName);
     }
 
-    public void add(BtLEAction action) {
+    public void add(BtBRAction action) {
         mActions.add(action);
     }
 
-    public List<BtLEAction> getActions() {
+    public List<BtBRAction> getActions() {
         return Collections.unmodifiableList(mActions);
     }
 
@@ -51,8 +51,8 @@ public class Transaction extends AbstractTransaction {
         return mActions.isEmpty();
     }
 
-    public void setCallback(@Nullable GattCallback callback) {
-        gattCallback = callback;
+    public void setCallback(@Nullable SocketCallback callback) {
+        socketCallback = callback;
     }
 
     /**
@@ -60,8 +60,8 @@ public class Transaction extends AbstractTransaction {
      */
     public
     @Nullable
-    GattCallback getGattCallback() {
-        return gattCallback;
+    SocketCallback getSocketCallback() {
+        return socketCallback;
     }
 
     @Override

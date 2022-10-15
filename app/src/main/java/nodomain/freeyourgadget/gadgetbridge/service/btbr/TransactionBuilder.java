@@ -1,5 +1,4 @@
-/*  Copyright (C) 2015-2021 Andreas Shimokawa, Carsten Pfeiffer, Daniel
-    Dakhno, Daniele Gobbetti
+/*  Copyright (C) 2022 Damien Gaignon
 
     This file is part of Gadgetbridge.
 
@@ -15,9 +14,8 @@
 
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>. */
-package nodomain.freeyourgadget.gadgetbridge.service.btle;
+package nodomain.freeyourgadget.gadgetbridge.service.btbr;
 
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.Build;
 
 import org.slf4j.Logger;
@@ -26,11 +24,8 @@ import org.slf4j.LoggerFactory;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.NotifyAction;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.ReadAction;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.RequestMtuAction;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.WaitAction;
-import nodomain.freeyourgadget.gadgetbridge.service.btle.actions.WriteAction;
+import nodomain.freeyourgadget.gadgetbridge.service.btbr.actions.WaitAction;
+import nodomain.freeyourgadget.gadgetbridge.service.btbr.actions.WriteAction;
 
 public class TransactionBuilder {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionBuilder.class);
@@ -42,16 +37,7 @@ public class TransactionBuilder {
         mTransaction = new Transaction(taskName);
     }
 
-    public TransactionBuilder read(BluetoothGattCharacteristic characteristic) {
-        if (characteristic == null) {
-            LOG.warn("Unable to read characteristic: null");
-            return this;
-        }
-        ReadAction action = new ReadAction(characteristic);
-        return add(action);
-    }
-
-    public TransactionBuilder write(BluetoothGattCharacteristic characteristic, byte[] data) {
+    public TransactionBuilder write(BluetoothSocketCharacteristic characteristic, byte[] data) {
         if (characteristic == null) {
             LOG.warn("Unable to write characteristic: null");
             return this;
@@ -60,24 +46,6 @@ public class TransactionBuilder {
         return add(action);
     }
 
-    public TransactionBuilder requestMtu(int mtu){
-        return add(
-                new RequestMtuAction(mtu)
-        );
-    }
-
-    public TransactionBuilder notify(BluetoothGattCharacteristic characteristic, boolean enable) {
-        if (characteristic == null) {
-            LOG.warn("Unable to notify characteristic: null");
-            return this;
-        }
-        NotifyAction action = createNotifyAction(characteristic, enable);
-        return add(action);
-    }
-
-    protected NotifyAction createNotifyAction(BluetoothGattCharacteristic characteristic, boolean enable) {
-        return new NotifyAction(characteristic, enable);
-    }
 
     /**
      * Causes the queue to sleep for the specified time.
@@ -90,25 +58,25 @@ public class TransactionBuilder {
         return add(action);
     }
 
-    public TransactionBuilder add(BtLEAction action) {
+    public TransactionBuilder add(BtBRAction action) {
         mTransaction.add(action);
         return this;
     }
 
     /**
-     * Sets a GattCallback instance that will be called when the transaction is executed,
-     * resulting in GattCallback events.
+     * Sets a SocketCallback instance that will be called when the transaction is executed,
+     * resulting in SocketCallback events.
      *
      * @param callback the callback to set, may be null
      */
-    public void setCallback(@Nullable GattCallback callback) {
+    public void setCallback(@Nullable SocketCallback callback) {
         mTransaction.setCallback(callback);
     }
 
     public
     @Nullable
-    GattCallback getGattCallback() {
-        return mTransaction.getGattCallback();
+    SocketCallback getSocketCallback() {
+        return mTransaction.getSocketCallback();
     }
 
     /**
@@ -116,7 +84,7 @@ public class TransactionBuilder {
      *
      * @param queue
      */
-    public void queue(BtLEQueue queue) {
+    public void queue(BtBRQueue queue) {
         if (mQueued) {
             throw new IllegalStateException("This builder had already been queued. You must not reuse it.");
         }
