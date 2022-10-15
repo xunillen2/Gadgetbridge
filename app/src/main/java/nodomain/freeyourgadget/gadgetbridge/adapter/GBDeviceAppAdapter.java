@@ -80,7 +80,18 @@ public class GBDeviceAppAdapter extends RecyclerView.Adapter<GBDeviceAppAdapter.
     public void onBindViewHolder(final AppViewHolder holder, int position) {
         final GBDeviceApp deviceApp = appList.get(position);
 
-        holder.mDeviceAppVersionAuthorLabel.setText(GBApplication.getContext().getString(R.string.appversion_by_creator, deviceApp.getVersion(), deviceApp.getCreator()));
+        String appVersionAuthor;
+        if ((deviceApp.getCreator().equals("")) || (deviceApp.getCreator().equals("(unknown)"))) {
+            appVersionAuthor = deviceApp.getVersion();
+        } else {
+            appVersionAuthor = GBApplication.getContext().getString(R.string.appversion_by_creator, deviceApp.getVersion(), deviceApp.getCreator());
+        }
+        holder.mDeviceAppVersionAuthorLabel.setText(appVersionAuthor);
+        if (deviceApp.isUpToDate()) {
+            holder.mDeviceAppOutdated.setVisibility(View.GONE);
+        } else {
+            holder.mDeviceAppOutdated.setVisibility(View.VISIBLE);
+        }
         // FIXME: replace with small icons
         String appNameLabelText = deviceApp.getName();
         holder.mDeviceAppNameLabel.setText(appNameLabelText);
@@ -142,6 +153,7 @@ public class GBDeviceAppAdapter extends RecyclerView.Adapter<GBDeviceAppAdapter.
     public class AppViewHolder extends RecyclerView.ViewHolder {
         final TextView mDeviceAppVersionAuthorLabel;
         final TextView mDeviceAppNameLabel;
+        final TextView mDeviceAppOutdated;
         final ImageView mDeviceImageView;
         final ImageView mDragHandle;
         final ImageView mPreviewImage;
@@ -150,6 +162,7 @@ public class GBDeviceAppAdapter extends RecyclerView.Adapter<GBDeviceAppAdapter.
             super(itemView);
             mDeviceAppVersionAuthorLabel = (TextView) itemView.findViewById(R.id.item_details);
             mDeviceAppNameLabel = (TextView) itemView.findViewById(R.id.item_name);
+            mDeviceAppOutdated = (TextView) itemView.findViewById(R.id.item_watchapp_outdated);
             mDeviceImageView = (ImageView) itemView.findViewById(R.id.item_image);
             mDragHandle = (ImageView) itemView.findViewById(R.id.drag_handle);
             mPreviewImage = (ImageView) itemView.findViewById(R.id.item_preview_image);

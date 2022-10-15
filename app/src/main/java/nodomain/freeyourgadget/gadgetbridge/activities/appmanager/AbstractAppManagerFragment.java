@@ -18,6 +18,7 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.appmanager;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -55,6 +57,7 @@ import nodomain.freeyourgadget.gadgetbridge.R;
 import nodomain.freeyourgadget.gadgetbridge.activities.ExternalPebbleJSActivity;
 import nodomain.freeyourgadget.gadgetbridge.adapter.GBDeviceAppAdapter;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
+import nodomain.freeyourgadget.gadgetbridge.devices.qhybrid.QHybridConstants;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceApp;
 import nodomain.freeyourgadget.gadgetbridge.model.DeviceService;
@@ -64,12 +67,14 @@ import nodomain.freeyourgadget.gadgetbridge.util.DeviceHelper;
 import nodomain.freeyourgadget.gadgetbridge.util.FileUtils;
 import nodomain.freeyourgadget.gadgetbridge.util.GridAutoFitLayoutManager;
 import nodomain.freeyourgadget.gadgetbridge.util.PebbleUtils;
+import nodomain.freeyourgadget.gadgetbridge.util.Version;
 
 
 public abstract class AbstractAppManagerFragment extends Fragment {
     public static final String ACTION_REFRESH_APPLIST
             = "nodomain.freeyourgadget.gadgetbridge.appmanager.action.refresh_applist";
     private static final Logger LOG = LoggerFactory.getLogger(AbstractAppManagerFragment.class);
+    private static final int CHILD_ACTIVITY_WATCHFACE_EDITOR = 0;
 
     private ItemTouchHelper appManagementTouchHelper;
 
@@ -122,12 +127,23 @@ public abstract class AbstractAppManagerFragment extends Fragment {
         for (int i = 0; i < appCount; i++) {
             String appName = intent.getStringExtra("app_name" + i);
             String appCreator = intent.getStringExtra("app_creator" + i);
+            String appVersion = intent.getStringExtra("app_version" + i);
             UUID uuid = UUID.fromString(intent.getStringExtra("app_uuid" + i));
             GBDeviceApp.Type appType = GBDeviceApp.Type.values()[intent.getIntExtra("app_type" + i, 0)];
             Bitmap previewImage = getAppPreviewImage(uuid.toString());
 
-            GBDeviceApp app = new GBDeviceApp(uuid, appName, appCreator, "", appType, previewImage);
+            GBDeviceApp app = new GBDeviceApp(uuid, appName, appCreator, appVersion, appType, previewImage);
             app.setOnDevice(true);
+            if ((mGBDevice.getType() == DeviceType.FOSSILQHYBRID) && (app.getType() == GBDeviceApp.Type.WATCHFACE) && (!QHybridConstants.HYBRIDHR_WATCHFACE_VERSION.equals(appVersion))) {
+                app.setUpToDate(false);
+            }
+            try {
+                if ((app.getType() == GBDeviceApp.Type.APP_GENERIC) && ((new Version(app.getVersion())).smallerThan(new Version(QHybridConstants.KNOWN_WAPP_VERSIONS.get(app.getName()))))) {
+                    app.setUpToDate(false);
+                }
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Couldn't read app version", e);
+            }
             if (filterApp(app)) {
                 appList.add(app);
             }
@@ -200,7 +216,20 @@ public abstract class AbstractAppManagerFragment extends Fragment {
                     try {
                         String jsonstring = FileUtils.getStringFromFile(jsonFile);
                         JSONObject json = new JSONObject(jsonstring);
-                        cachedAppList.add(new GBDeviceApp(json, configFile.exists(), getAppPreviewImage(baseName)));
+                        GBDeviceApp app = new GBDeviceApp(json, configFile.exists(), getAppPreviewImage(baseName));
+                        if (mGBDevice.getType() == DeviceType.FOSSILQHYBRID) {
+                            if ((app.getType() == GBDeviceApp.Type.WATCHFACE) && (!QHybridConstants.HYBRIDHR_WATCHFACE_VERSION.equals(app.getVersion()))) {
+                                app.setUpToDate(false);
+                            }
+                            try {
+                                if ((app.getType() == GBDeviceApp.Type.APP_GENERIC) && ((new Version(app.getVersion())).smallerThan(new Version(QHybridConstants.KNOWN_WAPP_VERSIONS.get(app.getName()))))) {
+                                    app.setUpToDate(false);
+                                }
+                            } catch (IllegalArgumentException e) {
+                                LOG.warn("Couldn't read app version", e);
+                            }
+                        }
+                        cachedAppList.add(app);
                     } catch (Exception e) {
                         LOG.info("could not read json file for " + baseName);
                         if (mGBDevice.getType() == DeviceType.PEBBLE) {
@@ -275,12 +304,24 @@ public abstract class AbstractAppManagerFragment extends Fragment {
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(mReceiver, filter);
 
         if (mCoordinator.supportsAppListFetching()) {
-            GBApplication.deviceService().onAppInfoReq();
+            GBApplication.deviceService(mGBDevice).onAppInfoReq();
             if (isCacheManager()) {
                 refreshList();
             }
         } else {
             refreshList();
+        }
+
+        try {
+            File appCacheDir = mCoordinator.getAppCacheDir();
+            File appTempDir = new File(appCacheDir, "temp_sharing");
+            if (appTempDir.isDirectory()) {
+                for (File child : appTempDir.listFiles())
+                    child.delete();
+                appTempDir.delete();
+            }
+        } catch (IOException e) {
+            LOG.warn("Could not delete temporary app cache directory", e);
         }
     }
 
@@ -334,6 +375,13 @@ public abstract class AbstractAppManagerFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        if (requestCode == CHILD_ACTIVITY_WATCHFACE_EDITOR) {
+            refreshList();
+        }
+    }
+
     protected void sendOrderToDevice(String concatFilename) {
         ArrayList<UUID> uuids = new ArrayList<>();
         for (GBDeviceApp gbDeviceApp : mGBDeviceAppAdapter.getAppList()) {
@@ -343,7 +391,7 @@ public abstract class AbstractAppManagerFragment extends Fragment {
             ArrayList<UUID> concatUuids = AppManagerActivity.getUuidsFromFile(concatFilename);
             uuids.addAll(concatUuids);
         }
-        GBApplication.deviceService().onAppReorder(uuids.toArray(new UUID[uuids.size()]));
+        GBApplication.deviceService(mGBDevice).onAppReorder(uuids.toArray(new UUID[uuids.size()]));
     }
 
     public void onItemClick(View view, GBDeviceApp deviceApp) {
@@ -351,7 +399,7 @@ public abstract class AbstractAppManagerFragment extends Fragment {
             openPopupMenu(view, deviceApp);
         } else {
             UUID uuid = deviceApp.getUUID();
-            GBApplication.deviceService().onAppStart(uuid, true);
+            GBApplication.deviceService(mGBDevice).onAppStart(uuid, true);
         }
     }
 
@@ -364,6 +412,7 @@ public abstract class AbstractAppManagerFragment extends Fragment {
         if (!selectedApp.isInCache()) {
             menu.removeItem(R.id.appmanager_app_edit);
             menu.removeItem(R.id.appmanager_app_reinstall);
+            menu.removeItem(R.id.appmanager_app_share);
             menu.removeItem(R.id.appmanager_app_delete_cache);
         }
         if (!PebbleProtocol.UUID_PEBBLE_HEALTH.equals(selectedApp.getUUID())) {
@@ -392,8 +441,8 @@ public abstract class AbstractAppManagerFragment extends Fragment {
                 pm.getPackageInfo("ru.gelin.android.weather.notification", PackageManager.GET_ACTIVITIES);
                 menu.removeItem(R.id.appmanager_weather_install_provider);
             } catch (PackageManager.NameNotFoundException e) {
-                menu.removeItem(R.id.appmanager_weather_activate);
-                menu.removeItem(R.id.appmanager_weather_deactivate);
+                //menu.removeItem(R.id.appmanager_weather_activate);
+                //menu.removeItem(R.id.appmanager_weather_deactivate);
             }
         }
 
@@ -437,7 +486,7 @@ public abstract class AbstractAppManagerFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.appmanager_app_delete_cache:
                 String baseName = selectedApp.getUUID().toString();
-                String[] suffixToDelete = new String[]{mCoordinator.getAppFileExtension(), ".json", "_config.js", "_preset.json", ".png"};
+                String[] suffixToDelete = new String[]{mCoordinator.getAppFileExtension(), ".json", "_config.js", "_preset.json", ".png", "_preview.png", "_bg.png"};
                 for (String suffix : suffixToDelete) {
                     File fileToDelete = new File(appCacheDir,baseName + suffix);
                     if (!fileToDelete.delete()) {
@@ -457,31 +506,51 @@ public abstract class AbstractAppManagerFragment extends Fragment {
                     refreshIntent = new Intent(AbstractAppManagerFragment.ACTION_REFRESH_APPLIST);
                     LocalBroadcastManager.getInstance(getContext()).sendBroadcast(refreshIntent);
                 }
-                GBApplication.deviceService().onAppDelete(selectedApp.getUUID());
+                GBApplication.deviceService(mGBDevice).onAppDelete(selectedApp.getUUID());
                 return true;
             case R.id.appmanager_app_reinstall:
                 File cachePath = new File(appCacheDir, selectedApp.getUUID() + mCoordinator.getAppFileExtension());
-                GBApplication.deviceService().onInstallApp(Uri.fromFile(cachePath));
+                GBApplication.deviceService(mGBDevice).onInstallApp(Uri.fromFile(cachePath));
+                return true;
+            case R.id.appmanager_app_share:
+                File origFilePath = new File(appCacheDir, selectedApp.getUUID() + mCoordinator.getAppFileExtension());
+                File appTempDir = new File(appCacheDir, "temp_sharing");
+                File sharedAppFile = new File(appTempDir, selectedApp.getName() + mCoordinator.getAppFileExtension());
+                try {
+                    appTempDir.mkdirs();
+                    FileUtils.copyFile(origFilePath, sharedAppFile);
+                } catch (IOException e) {
+                    return true;
+                }
+                Uri contentUri = FileProvider.getUriForFile(getContext(),getContext().getApplicationContext().getPackageName() + ".screenshot_provider", sharedAppFile);
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                shareIntent.setType("*/*");
+                try {
+                    startActivity(Intent.createChooser(shareIntent, null));
+                } catch (ActivityNotFoundException e) {
+                    LOG.warn("Sharing watchface failed", e);
+                }
                 return true;
             case R.id.appmanager_health_activate:
-                GBApplication.deviceService().onInstallApp(Uri.parse("fake://health"));
+                GBApplication.deviceService(mGBDevice).onInstallApp(Uri.parse("fake://health"));
                 return true;
             case R.id.appmanager_hrm_activate:
-                GBApplication.deviceService().onInstallApp(Uri.parse("fake://hrm"));
+                GBApplication.deviceService(mGBDevice).onInstallApp(Uri.parse("fake://hrm"));
                 return true;
             case R.id.appmanager_weather_activate:
-                GBApplication.deviceService().onInstallApp(Uri.parse("fake://weather"));
+                GBApplication.deviceService(mGBDevice).onInstallApp(Uri.parse("fake://weather"));
                 return true;
             case R.id.appmanager_health_deactivate:
             case R.id.appmanager_hrm_deactivate:
             case R.id.appmanager_weather_deactivate:
-                GBApplication.deviceService().onAppDelete(selectedApp.getUUID());
+                GBApplication.deviceService(mGBDevice).onAppDelete(selectedApp.getUUID());
                 return true;
             case R.id.appmanager_weather_install_provider:
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://f-droid.org/app/ru.gelin.android.weather.notification")));
                 return true;
             case R.id.appmanager_app_configure:
-                GBApplication.deviceService().onAppStart(selectedApp.getUUID(), true);
+                GBApplication.deviceService(mGBDevice).onAppStart(selectedApp.getUUID(), true);
 
                 Intent startIntent = new Intent(getContext().getApplicationContext(), ExternalPebbleJSActivity.class);
                 startIntent.putExtra(DeviceService.EXTRA_APP_UUID, selectedApp.getUUID());
@@ -499,7 +568,7 @@ public abstract class AbstractAppManagerFragment extends Fragment {
                 Intent editWatchfaceIntent = new Intent(getContext(), watchfaceDesignerActivity);
                 editWatchfaceIntent.putExtra(GBDevice.EXTRA_DEVICE, mGBDevice);
                 editWatchfaceIntent.putExtra(GBDevice.EXTRA_UUID, selectedApp.getUUID().toString());
-                getContext().startActivity(editWatchfaceIntent);
+                startActivityForResult(editWatchfaceIntent, CHILD_ACTIVITY_WATCHFACE_EDITOR);
                 return true;
             default:
                 return super.onContextItemSelected(item);

@@ -60,6 +60,7 @@ public class GBDaoGenerator {
 
         addMakibesHR3ActivitySample(schema, user, device);
         addMiBandActivitySample(schema, user, device);
+        addHuamiExtendedActivitySample(schema, user, device);
         addPebbleHealthActivitySample(schema, user, device);
         addPebbleHealthActivityKindOverlay(schema, user, device);
         addPebbleMisfitActivitySample(schema, user, device);
@@ -186,8 +187,9 @@ public class GBDaoGenerator {
         device.addStringProperty("manufacturer").notNull();
         device.addStringProperty("identifier").notNull().unique().javaDocGetterAndSetter("The fixed identifier, i.e. MAC address of the device.");
         device.addIntProperty("type").notNull().javaDocGetterAndSetter("The DeviceType key, i.e. the GBDevice's type.");
-        device.addStringProperty("model").javaDocGetterAndSetter("An optional model, further specifying the kind of device-");
+        device.addStringProperty("model").javaDocGetterAndSetter("An optional model, further specifying the kind of device.");
         device.addStringProperty("alias");
+        device.addStringProperty("parentFolder").javaDocGetterAndSetter("Folder name containing this device.");
         Property deviceId = deviceAttributes.addLongProperty("deviceId").notNull().getProperty();
         // sorted by the from-date, newest first
         Property deviceAttributesSortProperty = getPropertyByName(deviceAttributes, VALID_FROM_UTC);
@@ -224,6 +226,20 @@ public class GBDaoGenerator {
         activitySample.addIntProperty(SAMPLE_STEPS).notNull().codeBeforeGetterAndSetter(OVERRIDE);
         activitySample.addIntProperty(SAMPLE_RAW_KIND).notNull().codeBeforeGetterAndSetter(OVERRIDE);
         addHeartRateProperties(activitySample);
+        return activitySample;
+    }
+
+    private static Entity addHuamiExtendedActivitySample(Schema schema, Entity user, Entity device) {
+        Entity activitySample = addEntity(schema, "HuamiExtendedActivitySample");
+        addCommonActivitySampleProperties("MiBandActivitySample", activitySample, user, device);
+        activitySample.addIntProperty(SAMPLE_RAW_INTENSITY).notNull().codeBeforeGetterAndSetter(OVERRIDE);
+        activitySample.addIntProperty(SAMPLE_STEPS).notNull().codeBeforeGetterAndSetter(OVERRIDE);
+        activitySample.addIntProperty(SAMPLE_RAW_KIND).notNull().codeBeforeGetterAndSetter(OVERRIDE);
+        addHeartRateProperties(activitySample);
+        activitySample.addIntProperty("unknown1");
+        activitySample.addIntProperty("sleep");
+        activitySample.addIntProperty("deepSleep");
+        activitySample.addIntProperty("remSleep");
         return activitySample;
     }
 
@@ -627,6 +643,7 @@ public class GBDaoGenerator {
         summary.addIntProperty("baseAltitude").javaDocGetterAndSetter("Temporary, bip-specific");
 
         summary.addStringProperty("gpxTrack").codeBeforeGetter(OVERRIDE);
+        summary.addStringProperty("rawDetailsPath");
 
         Property deviceId = summary.addLongProperty("deviceId").notNull().codeBeforeGetter(OVERRIDE).getProperty();
         summary.addToOne(device, deviceId);
